@@ -245,10 +245,10 @@
           <div class="absolute -right-1 -top-2 w-6 h-6 rounded-full bg-purple-700 border-2 border-black flex items-center justify-center text-xs shadow" title="10:00 - Final B.A.D. 5,000 HP Boss Airship!">👾</div>
         </div>
         <!-- Top-Center Relocated Pop Streak Pill (Zero Player Occlusion!) -->
-        <div id="hero-streak-hud" class="hidden items-center gap-2 mt-1.5 px-3 py-0.5 rounded-full bg-gradient-to-r from-fuchsia-600 via-red-500 to-amber-500 border-2 border-black shadow-lg">
-          <span id="streak-text" class="font-btd-sm text-xs text-yellow-200 tracking-wider tabular-nums min-w-[115px] text-center">POP STREAK x5!</span>
-          <span class="text-white/40 text-[10px]">•</span>
-          <span id="streak-money-bonus" class="font-btd-sm text-[10px] text-lime-200 tabular-nums">+$5 BONUS</span>
+        <div id="hero-streak-hud" class="hidden items-center justify-center gap-2 mt-1.5 px-3 py-0.5 rounded-full bg-gradient-to-r from-fuchsia-600 via-red-500 to-amber-500 border-2 border-black shadow-lg w-[290px] min-w-[290px] max-w-[290px] overflow-hidden shrink-0">
+          <span id="streak-text" class="font-btd-sm text-xs text-yellow-200 tracking-wider tabular-nums w-[130px] min-w-[130px] max-w-[130px] text-center shrink-0">POP STREAK x5!</span>
+          <span class="text-white/40 text-[10px] shrink-0">•</span>
+          <span id="streak-money-bonus" class="font-btd-sm text-[10px] text-lime-200 tabular-nums w-[110px] min-w-[110px] max-w-[110px] text-center shrink-0">+$5 BONUS</span>
         </div>
       </div>
 
@@ -286,8 +286,8 @@
           </div>
         </div>
 
-        <button id="btn-hud-shop" class="btd-panel w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-lg sm:text-xl text-amber-200 hover:text-white active:scale-95 transition cursor-pointer" title="Monkey Knowledge Permanent Shop">
-          🏪
+        <button id="btn-hud-build" class="btd-panel w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-lg sm:text-xl text-yellow-300 hover:text-white active:scale-95 transition cursor-pointer" title="Inspect My Build & Squad Upgrades">
+          📜
         </button>
 
         <button id="btn-settings-toggle" class="btd-panel w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-lg sm:text-xl text-amber-200 hover:text-white active:scale-95 transition cursor-pointer" title="Pause / Settings & Dev Menu (ESC or P)">
@@ -389,6 +389,10 @@
           <span class="text-white/30">•</span>
           <span>🏆 LIFETIME POPS: <strong id="start-lifetime-pops" class="text-cyan-300">0</strong></span>
         </div>
+        <button id="btn-start-audio" class="px-3 py-0.5 rounded-full bg-stone-900/90 border-2 border-amber-400/80 hover:bg-stone-800 flex items-center gap-1.5 text-xs font-extrabold text-yellow-300 cursor-pointer transition" title="Toggle Title Screen Music">
+          <span id="start-audio-icon">🔊</span>
+          <span id="start-audio-label">MUSIC: ON</span>
+        </button>
       </div>
       <h1 class="font-btd text-2xl sm:text-4xl text-yellow-300 text-center leading-none mb-1">CHOOSE YOUR MONKEY HERO & STAGE</h1>
       <p class="text-amber-100 text-[11px] sm:text-xs font-bold text-center max-w-3xl mb-3">
@@ -504,10 +508,13 @@
       </div>
 
       <div class="flex flex-wrap items-center justify-center gap-3 w-full">
-        <button id="btn-open-shop-start" class="w-full sm:w-64 py-3 rounded-2xl btd-btn-gold font-btd text-xl text-white tracking-wider cursor-pointer">
+        <button id="btn-settings-start" class="w-full sm:w-48 py-3 rounded-2xl btd-panel font-btd text-xl text-amber-200 hover:text-white tracking-wider cursor-pointer flex items-center justify-center gap-2 border-3 border-black active:scale-95 transition">
+          ⚙️ SETTINGS
+        </button>
+        <button id="btn-open-shop-start" class="w-full sm:w-56 py-3 rounded-2xl btd-btn-gold font-btd text-xl text-white tracking-wider cursor-pointer active:scale-95 transition">
           🏪 MONKEY SHOP
         </button>
-        <button id="btn-start-run" class="w-full sm:w-80 py-3 rounded-2xl btd-btn-green font-btd text-2xl text-white tracking-wider cursor-pointer">
+        <button id="btn-start-run" class="w-full sm:w-72 py-3 rounded-2xl btd-btn-green font-btd text-2xl text-white tracking-wider cursor-pointer active:scale-95 transition">
           START ROAD TRIP!
         </button>
       </div>
@@ -515,7 +522,7 @@
   </div>
 
   <!-- Permanent Monkey Knowledge Shop Modal -->
-  <div id="shop-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4 overflow-y-auto">
+  <div id="shop-modal" class="fixed inset-0 z-[60] bg-black/80 backdrop-blur-md hidden items-center justify-center p-4 overflow-y-auto">
     <div class="btd-panel rounded-3xl p-5 sm:p-6 max-w-2xl w-full flex flex-col items-center border-4 border-black my-auto">
       <div class="flex items-center justify-between w-full mb-2">
         <h2 class="font-btd text-2xl sm:text-3xl text-yellow-300">🏪 MONKEY KNOWLEDGE SHOP</h2>
@@ -536,7 +543,7 @@
   </div>
 
   <!-- FPS, Controls, Audio & Developer Cheat Settings Modal -->
-  <div id="settings-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+  <div id="settings-modal" class="fixed inset-0 z-[70] bg-black/75 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
     <div class="btd-panel rounded-3xl p-4 sm:p-6 max-w-lg w-full flex flex-col items-center border-4 border-black my-auto">
       <h2 class="font-btd text-2xl sm:text-3xl text-yellow-300 mb-0.5">⚙️ PAUSE & SETTINGS</h2>
       <p id="detected-hz-label" class="text-[11px] font-bold text-cyan-300 mb-2.5">Detected Monitor Refresh Rate: 60 Hz</p>
@@ -558,6 +565,17 @@
             UNLIMITED MAX FPS
           </button>
         </div>
+      </div>
+
+      <!-- UI Icon Style (3D Detailed Badges vs Classic Emojis) -->
+      <div class="w-full flex items-center justify-between p-2.5 rounded-2xl bg-stone-900/90 border border-white/10 mb-2.5">
+        <div class="flex flex-col text-left">
+          <span class="font-btd-sm text-xs text-yellow-300">UI ICON STYLE</span>
+          <span class="text-[10px] text-stone-300">Choose between rich 3D vector badges or classic emojis</span>
+        </div>
+        <button id="btn-toggle-icon-style" class="py-1 px-3.5 rounded-xl btd-btn-gold font-btd-sm text-xs text-white cursor-pointer active:scale-95 transition">
+          3D BADGES
+        </button>
       </div>
 
       <!-- High-DPI Retina Resolution Scale & Control Options -->
@@ -623,8 +641,8 @@
       </div>
 
       <div class="w-full flex gap-2">
-        <button id="btn-open-shop-settings" class="flex-1 py-2.5 rounded-2xl btd-btn-gold font-btd text-sm sm:text-base text-white cursor-pointer">
-          🏪 SHOP
+        <button id="btn-settings-my-build" class="flex-1 py-2.5 rounded-2xl btd-btn-blue font-btd text-sm sm:text-base text-white cursor-pointer active:scale-95 transition">
+          📜 MY BUILD
         </button>
         <button id="btn-change-hero" class="flex-1 py-2.5 rounded-2xl btd-btn-gold font-btd text-sm sm:text-base text-white cursor-pointer">
           HEROES
@@ -636,15 +654,81 @@
     </div>
   </div>
 
-  <div id="levelup-modal" class="fixed inset-0 z-40 bg-black/75 backdrop-blur-md hidden items-center justify-center p-4">
-    <div class="w-full max-w-3xl flex flex-col items-center animate-[fadeIn_0.2s_ease-out]">
-      <div class="px-6 py-1.5 rounded-full bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-500 border-[3px] border-black shadow-lg mb-2">
-        <span class="font-btd text-sm sm:text-base text-white tracking-wider">🔵 BLOP POWER UP! CHOOSE UPGRADE 🔵</span>
+  
+  <!-- MY BUILD & SQUAD INSPECTION MODAL -->
+  <div id="my-build-modal" class="fixed inset-0 z-[75] bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="w-full max-w-2xl btd-panel rounded-3xl p-5 flex flex-col max-h-[90vh] overflow-y-auto border-4 border-black animate-[fadeIn_0.2s_ease-out]">
+      <div class="flex items-center justify-between pb-3 border-b-2 border-white/10 mb-4">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">📜</span>
+          <h2 class="font-btd text-xl sm:text-2xl text-yellow-300">CURRENT RUN BUILD & SQUAD</h2>
+        </div>
+        <button id="btn-close-my-build" class="w-8 h-8 rounded-full bg-stone-800 text-stone-300 hover:text-white font-btd text-sm flex items-center justify-center cursor-pointer">✕</button>
       </div>
-      <h2 id="levelup-subtitle" class="font-btd text-2xl sm:text-4xl text-white text-center mb-4">UPGRADE YOUR MONKEY TEAM</h2>
 
-      <!-- 3 Upgrade Cards Container -->
-      <div id="upgrade-cards-container" class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 w-full"></div>
+      <!-- Hero Summary Card -->
+      <div id="my-build-hero-card" class="w-full p-4 rounded-2xl bg-stone-900/90 border-2 border-amber-400/50 flex flex-col sm:flex-row items-center gap-4 mb-4">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Squad Companions (Max 3) -->
+      <h3 class="font-btd text-sm text-cyan-300 mb-2 flex items-center gap-1.5">
+        <span>🛡️ ACTIVE SQUAD COMPANIONS</span>
+        <span id="my-build-squad-count" class="text-xs text-stone-400 font-bold">(0/3 Slots)</span>
+      </h3>
+      <div id="my-build-squad-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-4">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Run Stat Attributes -->
+      <h3 class="font-btd text-sm text-lime-300 mb-2">⚡ ACTIVE RUN ATTRIBUTES</h3>
+      <div id="my-build-stats-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4 text-xs font-bold text-stone-200">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <button id="btn-resume-from-build" class="w-full py-2.5 rounded-xl btd-btn-green font-btd text-sm text-white tracking-wider cursor-pointer">
+        RESUME GAME
+      </button>
+    </div>
+  </div>
+
+  <!-- Bloons Blitz Authentic Upgrade Screen Modal -->
+  <div id="levelup-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 sm:p-5 select-none overflow-y-auto">
+    <div class="w-full max-w-4xl flex flex-col items-center animate-[fadeIn_0.25s_ease-out] my-auto">
+      
+      <!-- Top Pill: Current Team -->
+      <div class="px-5 py-1.5 rounded-full bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 border-[3.5px] border-[#2a1306] shadow-[0_6px_0_#1c0c04] mb-2.5 flex items-center gap-2">
+        <span class="font-btd text-xs sm:text-sm text-[#2a1306] tracking-wider uppercase font-black">CURRENT TEAM</span>
+        <div id="levelup-team-preview" class="flex items-center gap-1.5">
+          <!-- Active hero + active squad companions mini portraits -->
+        </div>
+      </div>
+
+      <!-- Action Banner: Choose an Upgrade! with Sparkly Stars -->
+      <div class="relative mb-6 flex items-center justify-center">
+        <div class="absolute -left-6 -top-2 text-yellow-300 text-2xl animate-bounce">⭐</div>
+        <div class="absolute -right-6 -bottom-1 text-cyan-300 text-xl animate-pulse">✨</div>
+        <div class="px-8 py-2.5 rounded-full bg-gradient-to-r from-lime-400 via-emerald-400 to-green-500 border-[4px] border-white shadow-[0_8px_0_#14532d,0_12px_24px_rgba(0,0,0,0.6)]">
+          <h2 class="font-btd text-2xl sm:text-4xl text-white tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+            Choose an Upgrade!
+          </h2>
+        </div>
+      </div>
+
+      <!-- 3 Bloons Blitz Vertical Upgrade Cards Container -->
+      <div id="upgrade-cards-container" class="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6 w-full mb-4"></div>
+
+      <!-- Bottom Hint & Blop Counter -->
+      <div class="flex flex-col items-center gap-1.5">
+        <p class="font-btd text-sm sm:text-base text-amber-200 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] tracking-wide">
+          Select an upgrade for your team
+        </p>
+        <div class="px-4 py-1 rounded-full bg-black/60 border-2 border-amber-400/40 flex items-center gap-2 text-xs font-btd text-white">
+          <span class="text-rose-400 text-sm">💎</span>
+          <span id="levelup-blop-count" class="text-yellow-300">0</span>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -720,13 +804,19 @@
       console.error("Unhandled Promise Rejection:", e.reason);
     });
 
+    let gameState = null;
+    let activeMOABs = [];
+    let cameraOffset = new THREE.Vector3(0, 24, 18.5);
+    let camSmoothX = 0;
+    let camSmoothZ = 0;
+
     class ProceduralSoundEngine {
       constructor() {
         this.ctx = null;
         this.masterFilter = null;
         this.muted = false;
         this.sfxVolume = 0.85;
-        this.bgmVolume = 0.45;
+        this.bgmVolume = 0.50;
         this.lastPopTime = 0;
         this.lastClankTime = 0;
         this.lastChimeTime = 0;
@@ -775,14 +865,248 @@
         }
       }
 
+      playKick(now, vol = 1.0) {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.frequency.setValueAtTime(145, now);
+        osc.frequency.exponentialRampToValueAtTime(34, now + 0.095);
+        gain.gain.setValueAtTime(0.40 * this.bgmVolume * vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.095);
+        osc.connect(gain);
+        gain.connect(this.outNode());
+        osc.start(now);
+        osc.stop(now + 0.10);
+      }
+
+      playSnare(now, vol = 1.0) {
+        if (!this.ctx || !this.noiseBuffer) return;
+        const src = this.ctx.createBufferSource();
+        src.buffer = this.noiseBuffer;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(1500, now);
+        filter.Q.setValueAtTime(1.5, now);
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.24 * this.bgmVolume * vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.085);
+        src.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.outNode());
+        src.start(now);
+        src.stop(now + 0.095);
+      }
+
+      playHiHat(now, vol = 1.0) {
+        if (!this.ctx || !this.noiseBuffer) return;
+        const src = this.ctx.createBufferSource();
+        src.buffer = this.noiseBuffer;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'highpass';
+        filter.frequency.setValueAtTime(6800, now);
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.09 * this.bgmVolume * vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+        src.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.outNode());
+        src.start(now);
+        src.stop(now + 0.04);
+      }
+
+      playConga(now, isHigh = false, vol = 1.0) {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const filter = this.ctx.createBiquadFilter();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        const startFreq = isHigh ? 390 : 210;
+        const endFreq = isHigh ? 220 : 125;
+        osc.frequency.setValueAtTime(startFreq, now);
+        osc.frequency.exponentialRampToValueAtTime(endFreq, now + 0.08);
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(isHigh ? 680 : 380, now);
+        filter.Q.setValueAtTime(2.2, now);
+        gain.gain.setValueAtTime(0.25 * this.bgmVolume * vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.095);
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.outNode());
+        osc.start(now);
+        osc.stop(now + 0.10);
+      }
+
+      playMarimba(freq, now, duration = 0.16, vol = 1.0) {
+        if (!this.ctx) return;
+        const osc1 = this.ctx.createOscillator();
+        const osc2 = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc1.type = 'sine';
+        osc2.type = 'sine';
+        osc1.frequency.setValueAtTime(freq, now);
+        osc2.frequency.setValueAtTime(freq * 3.85, now);
+        gain.gain.setValueAtTime(0.18 * this.bgmVolume * vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(this.outNode());
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + duration + 0.02);
+        osc2.stop(now + duration + 0.02);
+      }
+
+      playBassNote(freq, now, duration = 0.18, vol = 1.0) {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(750, now);
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now);
+        osc.frequency.exponentialRampToValueAtTime(freq * 0.95, now + duration);
+        gain.gain.setValueAtTime(0.26 * this.bgmVolume * vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.outNode());
+        osc.start(now);
+        osc.stop(now + duration + 0.02);
+      }
+
+      playBossSawBass(freq, now, duration = 0.12, vol = 1.0) {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const filter = this.ctx.createBiquadFilter();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(freq, now);
+        filter.type = 'lowpass';
+        filter.Q.setValueAtTime(4.2, now);
+        filter.frequency.setValueAtTime(1600, now);
+        filter.frequency.exponentialRampToValueAtTime(340, now + duration);
+        gain.gain.setValueAtTime(0.28 * this.bgmVolume * vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.outNode());
+        osc.start(now);
+        osc.stop(now + duration + 0.02);
+      }
+
+      playBrassNote(freq, now, duration = 0.22, vol = 1.0) {
+        if (!this.ctx) return;
+        const osc1 = this.ctx.createOscillator();
+        const osc2 = this.ctx.createOscillator();
+        const filter = this.ctx.createBiquadFilter();
+        const gain = this.ctx.createGain();
+
+        osc1.type = 'sawtooth';
+        osc2.type = 'sawtooth';
+        osc1.frequency.setValueAtTime(freq, now);
+        osc2.frequency.setValueAtTime(freq * 1.006, now);
+
+        filter.type = 'lowpass';
+        filter.Q.setValueAtTime(2.4, now);
+        filter.frequency.setValueAtTime(500, now);
+        filter.frequency.exponentialRampToValueAtTime(2800, now + 0.05);
+        filter.frequency.exponentialRampToValueAtTime(950, now + duration);
+
+        gain.gain.setValueAtTime(0.12 * this.bgmVolume * vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+        osc1.connect(filter);
+        osc2.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.outNode());
+
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + duration + 0.02);
+        osc2.stop(now + duration + 0.02);
+      }
+
+      playSkaChord(freqs, now, duration = 0.07, vol = 1.0) {
+        if (!this.ctx) return;
+        freqs.forEach(f => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(f, now);
+          gain.gain.setValueAtTime(0.045 * this.bgmVolume * vol, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+          osc.connect(gain);
+          gain.connect(this.outNode());
+          osc.start(now);
+          osc.stop(now + duration + 0.01);
+        });
+      }
+
+      playSniperShot() {
+        if (this.muted || this.sfxVolume <= 0.01) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+
+        // 1. High supersonic crack (filtered noise burst)
+        if (this.noiseBuffer) {
+          const src = this.ctx.createBufferSource();
+          src.buffer = this.noiseBuffer;
+          const filt = this.ctx.createBiquadFilter();
+          filt.type = 'bandpass';
+          filt.frequency.setValueAtTime(3200, now);
+          filt.Q.setValueAtTime(3.2, now);
+          const gain = this.ctx.createGain();
+          gain.gain.setValueAtTime(0.42 * this.sfxVolume, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+          src.connect(filt);
+          filt.connect(gain);
+          gain.connect(this.outNode());
+          src.start(now);
+          src.stop(now + 0.085);
+        }
+
+        // 2. High-power rifle boom punch
+        const osc = this.ctx.createOscillator();
+        const oGain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(560, now);
+        osc.frequency.exponentialRampToValueAtTime(42, now + 0.16);
+        oGain.gain.setValueAtTime(0.32 * this.sfxVolume, now);
+        oGain.gain.exponentialRampToValueAtTime(0.001, now + 0.17);
+        osc.connect(oGain);
+        oGain.connect(this.outNode());
+        osc.start(now);
+        osc.stop(now + 0.18);
+      }
+
       startProceduralBGM() {
         if (this.bgmTimer) return;
-        const melodies = {
-          title:  [261.63, 329.63, 392.00, 523.25, 440.00, 392.00, 329.63, 293.66],
-          meadow: [261.63, 293.66, 329.63, 392.00, 329.63, 392.00, 440.00, 392.00],
-          frozen: [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880.00, 783.99],
-          castle: [146.83, 146.83, 174.61, 164.81, 130.81, 146.83, 220.00, 174.61]
+
+        // Tim Haywood BTD Leitmotif progressions & bouncy Latin grooves
+        const BASS_ROOTS = {
+          title:  [65.41, 65.41, 82.41, 98.00, 73.42, 73.42, 87.31, 98.00], // C -> E -> G -> D bouncy walk
+          meadow: [65.41, 73.42, 82.41, 98.00, 110.00, 98.00, 82.41, 73.42], // C -> G walk
+          frozen: [55.00, 55.00, 65.41, 73.42, 55.00, 55.00, 82.41, 73.42], // A minor
+          castle: [73.42, 73.42, 58.27, 73.42, 65.41, 65.41, 55.00, 58.27]  // D minor
         };
+
+        const MELODIES = {
+          title:  [261.63, 329.63, 392.00, 523.25, 440.00, 392.00, 329.63, 392.00, 261.63, 293.66, 329.63, 440.00, 392.00, 329.63, 293.66, 261.63],
+          meadow: [261.63, 293.66, 329.63, 0, 392.00, 0, 440.00, 392.00, 329.63, 293.66, 329.63, 392.00, 440.00, 0, 523.25, 0],
+          frozen: [523.25, 0, 659.25, 0, 783.99, 659.25, 587.33, 0, 698.46, 0, 880.00, 783.99, 659.25, 0, 523.25, 0],
+          castle: [146.83, 146.83, 174.61, 0, 164.81, 130.81, 146.83, 0, 220.00, 174.61, 196.00, 164.81, 146.83, 130.81, 146.83, 0]
+        };
+
+        const SKA_CHORDS = {
+          title:  [261.63, 329.63, 392.00], // C major
+          meadow: [261.63, 329.63, 392.00], // C major
+          frozen: [220.00, 261.63, 329.63], // A minor
+          castle: [146.83, 174.61, 220.00]  // D minor
+        };
+
+        const MARIMBA_ARPS = [523.25, 659.25, 783.99, 1046.50, 783.99, 659.25];
 
         this.bgmTimer = setInterval(() => {
           if (this.muted || !this.ctx || this.bgmVolume <= 0.01) return;
@@ -791,34 +1115,75 @@
           const isPaused = typeof gameState !== 'undefined' && gameState.paused && !gameState.inStartMenu;
           this.setPausedMuffle(isPaused);
 
-          const modeKey = (typeof gameState !== 'undefined' && gameState.inStartMenu)
-            ? 'title'
-            : ((typeof gameState !== 'undefined' && gameState.stageId) || 'meadow');
-          const notes = melodies[modeKey] || melodies.meadow;
-          const now = this.ctx.currentTime;
-          const freq = notes[this.bgmStep % notes.length];
-          this.bgmStep++;
+          const isTitle = (typeof gameState !== 'undefined' && gameState.inStartMenu);
+          const hasBoss = (typeof activeMOABs !== 'undefined' && activeMOABs.length > 0);
+          const modeKey = isTitle ? 'title' : ((typeof gameState !== 'undefined' && gameState.stageId) || 'meadow');
 
-          const osc = this.ctx.createOscillator();
-          const gain = this.ctx.createGain();
-          if (modeKey === 'frozen') {
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(freq, now);
-          } else if (modeKey === 'castle') {
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(freq, now);
-          } else {
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(freq * 0.5, now);
+          const step = this.bgmStep % 16;
+          this.bgmStep++;
+          const now = this.ctx.currentTime;
+
+          // 1. HIGH-OCTANE BOSS MODE
+          if (hasBoss && !isTitle) {
+            // 4-on-the-floor kick
+            if (step % 4 === 0) this.playKick(now, 1.15);
+            if (step % 4 === 2) this.playSnare(now, 0.95);
+            this.playHiHat(now, step % 2 === 0 ? 0.75 : 0.45);
+            // Heavy driving saw bass
+            const bossFreq = (step % 8 < 4) ? 55.00 : 73.42; // A -> D saw drive
+            this.playBossSawBass(bossFreq, now, 0.12, 1.0);
+            return;
           }
 
-          gain.gain.setValueAtTime(0.036 * this.bgmVolume, now);
-          gain.gain.exponentialRampToValueAtTime(0.0008, now + 0.23);
-          osc.connect(gain);
-          gain.connect(this.outNode());
-          osc.start(now);
-          osc.stop(now + 0.25);
-        }, 260);
+          // 2. STANDARD / TITLE BTD6 LATIN TROPICAL GROOVE
+          // Kick on 0, 8
+          if (step === 0 || step === 8) {
+            this.playKick(now, step === 0 ? 1.0 : 0.85);
+          }
+          // Snare on 4, 12
+          if (step === 4 || step === 12) {
+            this.playSnare(now, 1.0);
+          }
+          // Shakers / Hats on continuous 16ths
+          this.playHiHat(now, step % 2 === 0 ? 0.75 : 0.35);
+
+          // Authentic Latin Congas (Open on 2, 7, 10, 14)
+          if (step === 2 || step === 10) {
+            this.playConga(now, true, 0.9);
+          } else if (step === 7 || step === 14) {
+            this.playConga(now, false, 0.85);
+          }
+
+          // Walking Slap Bass Track
+          if (step % 2 === 0) {
+            const bassRoots = BASS_ROOTS[modeKey] || BASS_ROOTS.title;
+            const bIdx = Math.floor(step / 2) % bassRoots.length;
+            this.playBassNote(bassRoots[bIdx], now, 0.16, 1.0);
+          }
+
+          // Off-beat Ska Chords on steps 2, 6, 10, 14
+          if (step === 2 || step === 6 || step === 10 || step === 14) {
+            const chords = SKA_CHORDS[modeKey] || SKA_CHORDS.title;
+            this.playSkaChord(chords, now, 0.065, 0.85);
+          }
+
+          // Tropical Marimba Arpeggio Flourishes
+          if (isTitle && (step % 2 === 1)) {
+            const mFreq = MARIMBA_ARPS[step % MARIMBA_ARPS.length];
+            this.playMarimba(mFreq, now, 0.14, 0.75);
+          }
+
+          // Lead Brass Stabs
+          const melody = MELODIES[modeKey] || MELODIES.title;
+          const leadFreq = melody[step];
+          if (leadFreq > 0) {
+            if (modeKey === 'frozen') {
+              this.playChimeNote(leadFreq, now, 0.24, 1.0);
+            } else {
+              this.playBrassNote(leadFreq, now, 0.20, 0.95);
+            }
+          }
+        }, 135);
       }
 
       toggleMute() {
@@ -1533,6 +1898,461 @@
       return pool;
     }
 
+
+
+    
+        // ========================================================================
+    // RICH 3D OUTLINED BADGES REGISTRY (BLOONS BLITZ & BTD6 ART STYLE)
+    // Multi-stop directional lighting, specular glints, bold comic cartoon outlines
+    // ========================================================================
+    const SVG_BADGES = {
+      // --- HEROES ---
+      quincy: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+        <defs>
+          <radialGradient id="q-head" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#a16207"/><stop offset="70%" stop-color="#713f12"/><stop offset="100%" stop-color="#451a03"/></radialGradient>
+          <linearGradient id="q-gog" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fb923c"/><stop offset="50%" stop-color="#ea580c"/><stop offset="100%" stop-color="#9a3412"/></linearGradient>
+          <linearGradient id="q-lens" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#38bdf8"/><stop offset="60%" stop-color="#0284c7"/><stop offset="100%" stop-color="#0369a1"/></linearGradient>
+          <linearGradient id="q-bow" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fef08a"/><stop offset="50%" stop-color="#eab308"/><stop offset="100%" stop-color="#854d0e"/></linearGradient>
+        </defs>
+        <!-- Monkey Head with bold outline -->
+        <circle cx="32" cy="34" r="22" fill="url(#q-head)" stroke="#1c0d05" stroke-width="4"/>
+        <!-- Ears -->
+        <circle cx="12" cy="32" r="8" fill="url(#q-head)" stroke="#1c0d05" stroke-width="3.5"/>
+        <circle cx="12" cy="32" r="4.5" fill="#fbcfe8" stroke="#1c0d05" stroke-width="2"/>
+        <circle cx="52" cy="32" r="8" fill="url(#q-head)" stroke="#1c0d05" stroke-width="3.5"/>
+        <circle cx="52" cy="32" r="4.5" fill="#fbcfe8" stroke="#1c0d05" stroke-width="2"/>
+        <!-- Snout & Smile -->
+        <ellipse cx="32" cy="42" rx="12" ry="9" fill="#fde047" stroke="#1c0d05" stroke-width="3"/>
+        <circle cx="32" cy="39" r="2.5" fill="#451a03"/>
+        <path d="M26 44C28 47 36 47 38 44" stroke="#1c0d05" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- Eyes -->
+        <ellipse cx="25" cy="31" rx="4" ry="5.5" fill="#fff" stroke="#1c0d05" stroke-width="2.5"/>
+        <circle cx="26" cy="32" r="2.5" fill="#1c0d05"/>
+        <circle cx="27" cy="30" r="1" fill="#fff"/>
+        <ellipse cx="39" cy="31" rx="4" ry="5.5" fill="#fff" stroke="#1c0d05" stroke-width="2.5"/>
+        <circle cx="38" cy="32" r="2.5" fill="#1c0d05"/>
+        <circle cx="37" cy="30" r="1" fill="#fff"/>
+        <!-- Quincy High-Tech Goggles -->
+        <rect x="18" y="15" width="28" height="11" rx="5.5" fill="url(#q-gog)" stroke="#1c0d05" stroke-width="3.5"/>
+        <rect x="20" y="17" width="10" height="7" rx="3.5" fill="url(#q-lens)" stroke="#1c0d05" stroke-width="2"/>
+        <rect x="34" y="17" width="10" height="7" rx="3.5" fill="url(#q-lens)" stroke="#1c0d05" stroke-width="2"/>
+        <path d="M22 18L26 22M36 18L40 22" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" stroke-linecap="round"/>
+        <!-- Golden Bow Accent -->
+        <path d="M8 52C8 52 14 36 28 36" stroke="url(#q-bow)" stroke-width="4.5" stroke-linecap="round" filter="drop-shadow(0 2px 2px #000)"/>
+      </svg>`,
+
+      gwendolin: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+        <defs>
+          <radialGradient id="gw-head" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#b45309"/><stop offset="70%" stop-color="#78350f"/><stop offset="100%" stop-color="#451a03"/></radialGradient>
+          <linearGradient id="gw-flame" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#dc2626"/><stop offset="50%" stop-color="#ea580c"/><stop offset="100%" stop-color="#facc15"/></linearGradient>
+          <linearGradient id="gw-band" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#b91c1c"/><stop offset="50%" stop-color="#ef4444"/><stop offset="100%" stop-color="#7f1d1d"/></linearGradient>
+        </defs>
+        <circle cx="32" cy="35" r="21" fill="url(#gw-head)" stroke="#1c0d05" stroke-width="4"/>
+        <circle cx="12" cy="33" r="7.5" fill="url(#gw-head)" stroke="#1c0d05" stroke-width="3.5"/>
+        <circle cx="52" cy="33" r="7.5" fill="url(#gw-head)" stroke="#1c0d05" stroke-width="3.5"/>
+        <ellipse cx="32" cy="43" rx="11" ry="8" fill="#fed7aa" stroke="#1c0d05" stroke-width="3"/>
+        <path d="M27 45C29 48 35 48 37 45" stroke="#1c0d05" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- Red Fiery Bandana -->
+        <path d="M13 25C20 19 44 19 51 25L49 17C40 12 24 12 15 17Z" fill="url(#gw-band)" stroke="#1c0d05" stroke-width="3.5"/>
+        <!-- 3D Fireball Emblem -->
+        <path d="M32 6C32 6 42 16 42 25C42 30.5 37.5 35 32 35C26.5 35 22 30.5 22 25C22 17 32 6 32 6Z" fill="url(#gw-flame)" stroke="#1c0d05" stroke-width="3"/>
+        <path d="M32 16C32 16 37 21 37 26C37 28.8 34.8 31 32 31C29.2 31 27 28.8 27 26C27 22 32 16 32 16Z" fill="#fef08a"/>
+      </svg>`,
+
+      sauda: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+        <defs>
+          <radialGradient id="sa-head" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#9a3412"/><stop offset="70%" stop-color="#7c2d12"/><stop offset="100%" stop-color="#451a03"/></radialGradient>
+          <linearGradient id="sa-blade" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f8fafc"/><stop offset="40%" stop-color="#cbd5e1"/><stop offset="100%" stop-color="#64748b"/></linearGradient>
+          <linearGradient id="sa-glow" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fb7185"/><stop offset="100%" stop-color="#e11d48"/></linearGradient>
+        </defs>
+        <circle cx="32" cy="34" r="21" fill="url(#sa-head)" stroke="#1c0d05" stroke-width="4"/>
+        <circle cx="12" cy="32" r="7.5" fill="url(#sa-head)" stroke="#1c0d05" stroke-width="3.5"/>
+        <circle cx="52" cy="32" r="7.5" fill="url(#sa-head)" stroke="#1c0d05" stroke-width="3.5"/>
+        <ellipse cx="32" cy="42" rx="11" ry="8" fill="#fed7aa" stroke="#1c0d05" stroke-width="3"/>
+        <!-- Samurai Topknot & Headband -->
+        <circle cx="32" cy="11" r="6" fill="#1e1b4b" stroke="#1c0d05" stroke-width="3"/>
+        <rect x="14" y="20" width="36" height="7" rx="3.5" fill="#881337" stroke="#1c0d05" stroke-width="3"/>
+        <!-- Twin Crossed Katana Blades with Crimson Edge Glow -->
+        <path d="M10 12L54 54M54 12L10 54" stroke="url(#sa-blade)" stroke-width="5" stroke-linecap="round"/>
+        <path d="M10 12L54 54M54 12L10 54" stroke="url(#sa-glow)" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M12 10L16 14M52 10L48 14" stroke="#facc15" stroke-width="4" stroke-linecap="round"/>
+      </svg>`,
+
+      obyn: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+        <defs>
+          <radialGradient id="ob-head" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#115e59"/><stop offset="70%" stop-color="#0f766e"/><stop offset="100%" stop-color="#042f2e"/></radialGradient>
+          <linearGradient id="ob-leaf" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#86efac"/><stop offset="60%" stop-color="#22c55e"/><stop offset="100%" stop-color="#15803d"/></linearGradient>
+        </defs>
+        <circle cx="32" cy="34" r="21" fill="url(#ob-head)" stroke="#1c0d05" stroke-width="4"/>
+        <!-- Spirit Druid Antlers / Leaves -->
+        <path d="M18 16C12 8 8 14 14 20M46 16C52 8 56 14 50 20" stroke="url(#ob-leaf)" stroke-width="4" stroke-linecap="round"/>
+        <path d="M22 14L32 6L42 14" stroke="#854d0e" stroke-width="4" stroke-linecap="round"/>
+        <!-- Glowing Cyan Spirit Eyes -->
+        <ellipse cx="25" cy="32" rx="4" ry="5.5" fill="#22d3ee" stroke="#1c0d05" stroke-width="2.5"/>
+        <circle cx="26" cy="31" r="1.5" fill="#fff"/>
+        <ellipse cx="39" cy="32" rx="4" ry="5.5" fill="#22d3ee" stroke="#1c0d05" stroke-width="2.5"/>
+        <circle cx="38" cy="31" r="1.5" fill="#fff"/>
+        <!-- Wooden Spirit Totem Symbol -->
+        <circle cx="32" cy="44" r="6" fill="#a16207" stroke="#1c0d05" stroke-width="2.5"/>
+        <path d="M32 40V48M28 44H36" stroke="#22c55e" stroke-width="2" stroke-linecap="round"/>
+      </svg>`,
+
+      benjamin: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+        <defs>
+          <radialGradient id="bn-head" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#9a3412"/><stop offset="70%" stop-color="#713f12"/><stop offset="100%" stop-color="#451a03"/></radialGradient>
+          <linearGradient id="bn-lap" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#e2e8f0"/><stop offset="60%" stop-color="#94a3b8"/><stop offset="100%" stop-color="#475569"/></linearGradient>
+          <linearGradient id="bn-screen" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0284c7"/><stop offset="100%" stop-color="#0f172a"/></linearGradient>
+        </defs>
+        <circle cx="32" cy="28" r="19" fill="url(#bn-head)" stroke="#1c0d05" stroke-width="4"/>
+        <!-- Cyber Visor Glasses -->
+        <rect x="18" y="22" width="28" height="9" rx="4.5" fill="#06b6d4" stroke="#1c0d05" stroke-width="3"/>
+        <path d="M21 26H43" stroke="#a5f3fc" stroke-width="1.5" stroke-dasharray="2 2"/>
+        <!-- Neon Headphones -->
+        <path d="M13 28C13 18 51 18 51 28" stroke="#38bdf8" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="13" cy="28" r="5" fill="#0284c7" stroke="#1c0d05" stroke-width="2.5"/>
+        <circle cx="51" cy="28" r="5" fill="#0284c7" stroke="#1c0d05" stroke-width="2.5"/>
+        <!-- Open 3D Cyber Laptop with Matrix Glow -->
+        <path d="M16 38L22 56H42L48 38Z" fill="url(#bn-screen)" stroke="#1c0d05" stroke-width="3"/>
+        <rect x="20" y="40" width="24" height="12" fill="#020617"/>
+        <path d="M23 43H35M23 46H41M23 49H31" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round"/>
+        <!-- Laptop Base with Illuminated Trackpad -->
+        <path d="M12 56H52L46 62H18Z" fill="url(#bn-lap)" stroke="#1c0d05" stroke-width="3"/>
+      </svg>`,
+
+      supermonkey: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+        <defs>
+          <radialGradient id="sm-head" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#1d4ed8"/><stop offset="70%" stop-color="#1e40af"/><stop offset="100%" stop-color="#172554"/></radialGradient>
+          <linearGradient id="sm-cape" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ef4444"/><stop offset="70%" stop-color="#dc2626"/><stop offset="100%" stop-color="#991b1b"/></linearGradient>
+          <linearGradient id="sm-mask" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fef08a"/><stop offset="60%" stop-color="#facc15"/><stop offset="100%" stop-color="#ca8a04"/></linearGradient>
+        </defs>
+        <!-- Fluttering Red Hero Cape -->
+        <path d="M12 36C6 52 14 62 24 58M52 36C58 52 50 62 40 58" fill="url(#sm-cape)" stroke="#1c0d05" stroke-width="3.5"/>
+        <!-- Blue Hero Masked Head -->
+        <circle cx="32" cy="30" r="20" fill="url(#sm-head)" stroke="#1c0d05" stroke-width="4"/>
+        <circle cx="12" cy="28" r="7" fill="url(#sm-head)" stroke="#1c0d05" stroke-width="3.5"/>
+        <circle cx="52" cy="28" r="7" fill="url(#sm-head)" stroke="#1c0d05" stroke-width="3.5"/>
+        <!-- Glowing Red Eye Lasers -->
+        <ellipse cx="25" cy="28" rx="4.5" ry="3" fill="#ef4444" stroke="#1c0d05" stroke-width="2"/>
+        <circle cx="25" cy="28" r="1.5" fill="#fef08a"/>
+        <ellipse cx="39" cy="28" rx="4.5" ry="3" fill="#ef4444" stroke="#1c0d05" stroke-width="2"/>
+        <circle cx="39" cy="28" r="1.5" fill="#fef08a"/>
+        <!-- Golden Sun Symbol on Forehead -->
+        <circle cx="32" cy="18" r="5" fill="url(#sm-mask)" stroke="#1c0d05" stroke-width="2"/>
+        <path d="M32 10V14M32 22V26M24 18H28M36 18H40" stroke="#facc15" stroke-width="2" stroke-linecap="round"/>
+        <!-- Heroic Smile -->
+        <path d="M26 38C28 42 36 42 38 38" stroke="#1c0d05" stroke-width="3" stroke-linecap="round"/>
+      </svg>`,
+
+      // --- TOWERS & SQUAD COMPANIONS ---
+      dart: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+        <defs>
+          <radialGradient id="dt-head" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#a16207"/><stop offset="70%" stop-color="#713f12"/><stop offset="100%" stop-color="#451a03"/></radialGradient>
+          <linearGradient id="dt-feather" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f87171"/><stop offset="60%" stop-color="#dc2626"/><stop offset="100%" stop-color="#991b1b"/></linearGradient>
+        </defs>
+        <circle cx="32" cy="34" r="21" fill="url(#dt-head)" stroke="#1c0d05" stroke-width="4"/>
+        <circle cx="12" cy="32" r="7.5" fill="url(#dt-head)" stroke="#1c0d05" stroke-width="3.5"/>
+        <circle cx="52" cy="32" r="7.5" fill="url(#dt-head)" stroke="#1c0d05" stroke-width="3.5"/>
+        <ellipse cx="32" cy="42" rx="11" ry="8" fill="#fde047" stroke="#1c0d05" stroke-width="3"/>
+        <!-- 3D Red-Feathered Steel Dart -->
+        <path d="M12 52L44 20" stroke="#94a3b8" stroke-width="5" stroke-linecap="round"/>
+        <path d="M44 20L54 10L42 22Z" fill="#e2e8f0" stroke="#1c0d05" stroke-width="2.5"/>
+        <path d="M8 56L16 48L12 52L6 50Z" fill="url(#dt-feather)" stroke="#1c0d05" stroke-width="2.5"/>
+      </svg>`,
+
+      tack: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+        <defs>
+          <radialGradient id="tk-body" cx="40%" cy="35%" r="65%"><stop offset="0%" stop-color="#fb7185"/><stop offset="60%" stop-color="#e11d48"/><stop offset="100%" stop-color="#881337"/></radialGradient>
+          <linearGradient id="tk-rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fecdd3"/><stop offset="100%" stop-color="#be123c"/></linearGradient>
+        </defs>
+        <!-- 8 Barrel Nozzles -->
+        <rect x="29" y="4" width="6" height="10" rx="2" fill="#334155" stroke="#1c0d05" stroke-width="2.5"/>
+        <rect x="29" y="50" width="6" height="10" rx="2" fill="#334155" stroke="#1c0d05" stroke-width="2.5"/>
+        <rect x="4" y="29" width="10" height="6" rx="2" fill="#334155" stroke="#1c0d05" stroke-width="2.5"/>
+        <rect x="50" y="29" width="10" height="6" rx="2" fill="#334155" stroke="#1c0d05" stroke-width="2.5"/>
+        <rect x="11" y="11" width="8" height="8" rx="2" transform="rotate(45 15 15)" fill="#334155" stroke="#1c0d05" stroke-width="2.5"/>
+        <rect x="45" y="11" width="8" height="8" rx="2" transform="rotate(45 49 15)" fill="#334155" stroke="#1c0d05" stroke-width="2.5"/>
+        <rect x="11" y="45" width="8" height="8" rx="2" transform="rotate(45 15 49)" fill="#334155" stroke="#1c0d05" stroke-width="2.5"/>
+        <rect x="45" y="45" width="8" height="8" rx="2" transform="rotate(45 49 49)" fill="#334155" stroke="#1c0d05" stroke-width="2.5"/>
+        <!-- Octagonal Pink Metallic Turret Body -->
+        <circle cx="32" cy="32" r="22" fill="url(#tk-body)" stroke="#1c0d05" stroke-width="4"/>
+        <circle cx="32" cy="32" r="16" fill="url(#tk-rim)" stroke="#1c0d05" stroke-width="3"/>
+        <circle cx="32" cy="32" r="8" fill="#eab308" stroke="#1c0d05" stroke-width="2.5"/>
+        <circle cx="30" cy="30" r="2.5" fill="#fff"/>
+      </svg>`,
+
+      bomb: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+        <defs>
+          <radialGradient id="bm-body" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#475569"/><stop offset="60%" stop-color="#1e293b"/><stop offset="100%" stop-color="#020617"/></radialGradient>
+        </defs>
+        <!-- Swivel Base -->
+        <ellipse cx="32" cy="54" rx="20" ry="6" fill="#334155" stroke="#1c0d05" stroke-width="3.5"/>
+        <!-- Heavy Steel Cannon Body -->
+        <circle cx="32" cy="34" r="20" fill="url(#bm-body)" stroke="#1c0d05" stroke-width="4"/>
+        <!-- Cannon Muzzle Flare -->
+        <ellipse cx="44" cy="22" rx="7" ry="11" transform="rotate(35 44 22)" fill="#020617" stroke="#facc15" stroke-width="3"/>
+        <!-- Lit Spark Fuse -->
+        <path d="M22 18C18 12 26 8 22 2" stroke="#d97706" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="22" cy="2" r="3" fill="#ef4444"/>
+        <path d="M22 0L24 4M20 2L24 2" stroke="#fef08a" stroke-width="2"/>
+      </svg>`,
+
+      boomerang: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+        <defs>
+          <radialGradient id="bo-head" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#a16207"/><stop offset="70%" stop-color="#713f12"/><stop offset="100%" stop-color="#451a03"/></radialGradient>
+          <linearGradient id="bo-wood" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fef08a"/><stop offset="50%" stop-color="#eab308"/><stop offset="100%" stop-color="#a16207"/></linearGradient>
+        </defs>
+        <circle cx="32" cy="34" r="21" fill="url(#bo-head)" stroke="#1c0d05" stroke-width="4"/>
+        <!-- Red Martial Arts Headband -->
+        <rect x="13" y="21" width="38" height="6.5" rx="3" fill="#dc2626" stroke="#1c0d05" stroke-width="3"/>
+        <ellipse cx="32" cy="42" rx="11" ry="8" fill="#fde047" stroke="#1c0d05" stroke-width="3"/>
+        <!-- Curved 3D Wooden Boomerang -->
+        <path d="M14 16C26 8 48 18 50 36C44 26 30 20 14 16Z" fill="url(#bo-wood)" stroke="#1c0d05" stroke-width="3.5" filter="drop-shadow(0 3px 2px rgba(0,0,0,0.5))"/>
+        <path d="M28 17L32 20M36 21L40 25" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>`,
+
+      ninja: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+        <defs>
+          <radialGradient id="nj-head" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#312e81"/><stop offset="70%" stop-color="#1e1b4b"/><stop offset="100%" stop-color="#020617"/></radialGradient>
+        </defs>
+        <!-- Dark Shinobi Cowl -->
+        <circle cx="32" cy="34" r="21" fill="url(#nj-head)" stroke="#1c0d05" stroke-width="4"/>
+        <!-- Mask Eye Opening -->
+        <ellipse cx="32" cy="30" rx="13" ry="5.5" fill="#fde047" stroke="#1c0d05" stroke-width="2.5"/>
+        <circle cx="27" cy="30" r="2.5" fill="#1c0d05"/>
+        <circle cx="37" cy="30" r="2.5" fill="#1c0d05"/>
+        <!-- 4-Point Steel Shuriken -->
+        <path d="M32 10L36 26L52 30L36 34L32 50L28 34L12 30L28 26Z" fill="#e2e8f0" stroke="#1c0d05" stroke-width="3" filter="drop-shadow(0 2px 3px rgba(0,0,0,0.6))"/>
+        <circle cx="32" cy="30" r="3.5" fill="#e11d48" stroke="#1c0d05" stroke-width="2"/>
+      </svg>`,
+
+      wizard: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+        <defs>
+          <linearGradient id="wz-hat" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#9333ea"/><stop offset="60%" stop-color="#6b21a8"/><stop offset="100%" stop-color="#3b0764"/></linearGradient>
+          <radialGradient id="wz-orb" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#f0abfc"/><stop offset="60%" stop-color="#c084fc"/><stop offset="100%" stop-color="#7e22ce"/></radialGradient>
+        </defs>
+        <!-- Wizard Monkey Face -->
+        <circle cx="32" cy="38" r="18" fill="#78350f" stroke="#1c0d05" stroke-width="4"/>
+        <ellipse cx="32" cy="44" rx="9" ry="6" fill="#fed7aa" stroke="#1c0d05" stroke-width="2.5"/>
+        <!-- Round Wizard Glasses -->
+        <circle cx="26" cy="36" r="4.5" fill="none" stroke="#facc15" stroke-width="2.5"/>
+        <circle cx="38" cy="36" r="4.5" fill="none" stroke="#facc15" stroke-width="2.5"/>
+        <path d="M30.5 36H33.5" stroke="#facc15" stroke-width="2.5"/>
+        <!-- Tall Wizard Hat with Gold Star -->
+        <path d="M12 28L32 4L52 28Z" fill="url(#wz-hat)" stroke="#1c0d05" stroke-width="3.5"/>
+        <ellipse cx="32" cy="28" rx="22" ry="5" fill="#581c87" stroke="#1c0d05" stroke-width="3"/>
+        <path d="M32 10L33.5 14H37.5L34 16.5L35.5 20.5L32 18L28.5 20.5L30 16.5L26.5 14H30.5Z" fill="#facc15"/>
+        <!-- Glowing Purple Magic Spell Sphere -->
+        <circle cx="48" cy="48" r="9" fill="url(#wz-orb)" stroke="#f5d0fe" stroke-width="2" filter="drop-shadow(0 0 6px #c084fc)"/>
+      </svg>`,
+
+      ice: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+        <defs>
+          <linearGradient id="ic-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#e0f2fe"/><stop offset="50%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#0284c7"/></linearGradient>
+        </defs>
+        <!-- Faceted Ice Golem Head -->
+        <path d="M32 8L50 20L44 48L32 58L20 48L14 20Z" fill="url(#ic-grad)" stroke="#1c0d05" stroke-width="4"/>
+        <path d="M32 8V58M14 20L32 34L50 20M20 48L32 34L44 48" stroke="#bae6fd" stroke-width="2"/>
+        <!-- Glowing Frost Eyes -->
+        <circle cx="26" cy="30" r="3" fill="#fff" filter="drop-shadow(0 0 4px #38bdf8)"/>
+        <circle cx="38" cy="30" r="3" fill="#fff" filter="drop-shadow(0 0 4px #38bdf8)"/>
+      </svg>`,
+
+      sniper: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+        <defs>
+          <radialGradient id="sn-head" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#a16207"/><stop offset="70%" stop-color="#713f12"/><stop offset="100%" stop-color="#451a03"/></radialGradient>
+          <linearGradient id="sn-hat" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#4d7c0f"/><stop offset="50%" stop-color="#65a30d"/><stop offset="100%" stop-color="#365314"/></linearGradient>
+        </defs>
+        <circle cx="32" cy="36" r="20" fill="url(#sn-head)" stroke="#1c0d05" stroke-width="4"/>
+        <!-- Camo Ghillie Hat -->
+        <path d="M14 28C14 18 50 18 50 28Z" fill="url(#sn-hat)" stroke="#1c0d05" stroke-width="3.5"/>
+        <ellipse cx="32" cy="28" rx="20" ry="4" fill="#3f6212" stroke="#1c0d05" stroke-width="3"/>
+        <!-- Sniper Rifle Barrel & Target Reticle -->
+        <path d="M24 44L56 54" stroke="#334155" stroke-width="6" stroke-linecap="round"/>
+        <circle cx="46" cy="24" r="11" stroke="#ef4444" stroke-width="3"/>
+        <path d="M46 10V38M32 24H60" stroke="#ef4444" stroke-width="2"/>
+        <circle cx="46" cy="24" r="2.5" fill="#ef4444"/>
+      </svg>`,
+
+      mortar: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+        <defs>
+          <linearGradient id="mr-tube" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#64748b"/><stop offset="60%" stop-color="#334155"/><stop offset="100%" stop-color="#0f172a"/></linearGradient>
+        </defs>
+        <!-- Reinforced Baseplate -->
+        <ellipse cx="32" cy="54" rx="22" ry="7" fill="#1e293b" stroke="#1c0d05" stroke-width="4"/>
+        <!-- Heavy Artillery Launch Tube angled up -->
+        <rect x="22" y="10" width="16" height="36" rx="4" transform="rotate(25 30 28)" fill="url(#mr-tube)" stroke="#1c0d05" stroke-width="4"/>
+        <ellipse cx="39" cy="14" rx="9" ry="4.5" transform="rotate(25 39 14)" fill="#020617" stroke="#eab308" stroke-width="3"/>
+        <!-- Support Bipod Legs -->
+        <path d="M20 46L26 32M44 46L36 32" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+      </svg>`,
+
+      // --- 3D UPGRADE & WEAPON EMBLEMS ---
+      storm_of_arrows: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+        <defs>
+          <linearGradient id="soa-arr" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#ea580c"/><stop offset="50%" stop-color="#facc15"/><stop offset="100%" stop-color="#fff"/></linearGradient>
+        </defs>
+        <!-- 5 Golden Flame Arrows Soaring Upward -->
+        <path d="M14 54L20 22M20 22L15 28M20 22L25 28" stroke="url(#soa-arr)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M23 54L28 14M28 14L23 20M28 14L33 20" stroke="url(#soa-arr)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M32 50L32 8M32 8L27 15M32 8L37 15" stroke="url(#soa-arr)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M41 54L36 14M36 14L31 20M36 14L41 20" stroke="url(#soa-arr)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M50 54L44 22M44 22L39 28M44 22L49 28" stroke="url(#soa-arr)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>`,
+
+      the_zone: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+        <!-- Golden Diamond Plaque with Glowing Avatar Silhouette -->
+        <rect x="32" y="6" width="38" height="38" rx="6" transform="rotate(45 32 6)" fill="#ca8a04" stroke="#1c0d05" stroke-width="4"/>
+        <rect x="32" y="9" width="34" height="34" rx="4" transform="rotate(45 32 9)" fill="#eab308"/>
+        <!-- Radial Speed Ray Bursts -->
+        <path d="M32 8V16M32 48V56M8 32H16M48 32H56M16 16L22 22M42 42L48 48M48 16L42 22M16 48L22 42" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+        <!-- Center Monkey Silhouette -->
+        <circle cx="32" cy="28" r="7" fill="#1c0d05"/>
+        <path d="M23 44C23 37 41 37 41 44Z" fill="#1c0d05"/>
+      </svg>`,
+
+      blade_shooter: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+        <defs>
+          <linearGradient id="bs-blade" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f8fafc"/><stop offset="50%" stop-color="#94a3b8"/><stop offset="100%" stop-color="#475569"/></linearGradient>
+        </defs>
+        <!-- Dual Spinning Serrated Steel Sawblades -->
+        <circle cx="26" cy="26" r="16" fill="url(#bs-blade)" stroke="#1c0d05" stroke-width="3.5"/>
+        <circle cx="26" cy="26" r="5" fill="#1e293b" stroke="#1c0d05" stroke-width="2"/>
+        <circle cx="42" cy="40" r="14" fill="url(#bs-blade)" stroke="#1c0d05" stroke-width="3"/>
+        <circle cx="42" cy="40" r="4" fill="#1e293b" stroke="#1c0d05" stroke-width="2"/>
+        <!-- Curved Cyan Wind Motion Trails -->
+        <path d="M12 18C18 8 36 8 46 16M22 50C34 58 50 54 56 42" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round"/>
+      </svg>`,
+
+      icicle_impale: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+        <!-- Giant Multifaceted Crystal Blue Ice Javelin -->
+        <path d="M32 4L42 24L36 58L32 60L28 58L22 24Z" fill="#38bdf8" stroke="#1c0d05" stroke-width="4"/>
+        <path d="M32 4L32 60M22 24L32 32L42 24" stroke="#e0f2fe" stroke-width="2.5"/>
+        <!-- Glowing Frost Rings -->
+        <circle cx="32" cy="20" r="14" stroke="#bae6fd" stroke-width="2" stroke-dasharray="3 3"/>
+      </svg>`,
+
+      sun_avatar: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+        <!-- Radiant Golden Sun Mask with Fiery Corona Rays -->
+        <circle cx="32" cy="32" r="16" fill="#facc15" stroke="#1c0d05" stroke-width="4"/>
+        <circle cx="32" cy="32" r="10" fill="#f59e0b" stroke="#1c0d05" stroke-width="2.5"/>
+        <!-- 8 Solar Flares -->
+        <path d="M32 6L35 14L32 12L29 14Z M32 58L35 50L32 52L29 50Z M6 32L14 35L12 32L14 29Z M58 32L50 35L52 32L50 29Z" fill="#eab308" stroke="#1c0d05" stroke-width="2"/>
+        <!-- Glowing Eyes -->
+        <ellipse cx="28" cy="31" rx="2.5" ry="3.5" fill="#1c0d05"/>
+        <ellipse cx="36" cy="31" rx="2.5" ry="3.5" fill="#1c0d05"/>
+      </svg>`,
+
+      // --- GUI & CONTROL 3D BADGES ---
+      gear: `<svg class="w-full h-full" viewBox="0 0 48 48" fill="none">
+        <defs>
+          <linearGradient id="ui-gear" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fef08a"/><stop offset="50%" stop-color="#eab308"/><stop offset="100%" stop-color="#a16207"/></linearGradient>
+        </defs>
+        <circle cx="24" cy="24" r="16" fill="url(#ui-gear)" stroke="#1c0d05" stroke-width="3"/>
+        <circle cx="24" cy="24" r="7" fill="#1c0d05"/>
+        <!-- 6 Bevel Teeth -->
+        <rect x="21" y="4" width="6" height="8" rx="2" fill="url(#ui-gear)" stroke="#1c0d05" stroke-width="2.5"/>
+        <rect x="21" y="36" width="6" height="8" rx="2" fill="url(#ui-gear)" stroke="#1c0d05" stroke-width="2.5"/>
+        <rect x="4" y="21" width="8" height="6" rx="2" fill="url(#ui-gear)" stroke="#1c0d05" stroke-width="2.5"/>
+        <rect x="36" y="21" width="8" height="6" rx="2" fill="url(#ui-gear)" stroke="#1c0d05" stroke-width="2.5"/>
+      </svg>`,
+
+      sound_on: `<svg class="w-full h-full" viewBox="0 0 48 48" fill="none">
+        <defs>
+          <linearGradient id="ui-snd" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fde047"/><stop offset="60%" stop-color="#ca8a04"/><stop offset="100%" stop-color="#713f12"/></linearGradient>
+        </defs>
+        <!-- Brass Horn Speaker -->
+        <path d="M12 18H18L28 10V38L18 30H12Z" fill="url(#ui-snd)" stroke="#1c0d05" stroke-width="3" stroke-linejoin="round"/>
+        <!-- Sound Waves -->
+        <path d="M33 16C37 20 37 28 33 32M39 12C45 18 45 30 39 36" stroke="#facc15" stroke-width="3" stroke-linecap="round"/>
+      </svg>`,
+
+      sound_off: `<svg class="w-full h-full" viewBox="0 0 48 48" fill="none">
+        <path d="M12 18H18L28 10V38L18 30H12Z" fill="#94a3b8" stroke="#1c0d05" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M32 20L42 28M42 20L32 28" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round"/>
+      </svg>`,
+
+      music: `<svg class="w-full h-full" viewBox="0 0 48 48" fill="none">
+        <!-- 3D Beamed Eighth Notes -->
+        <path d="M18 32V14L34 10V28" stroke="#1c0d05" stroke-width="4.5" stroke-linecap="round"/>
+        <path d="M18 14L34 10" stroke="#facc15" stroke-width="4.5" stroke-linecap="round"/>
+        <circle cx="14" cy="34" r="6" fill="#facc15" stroke="#1c0d05" stroke-width="3"/>
+        <circle cx="30" cy="30" r="6" fill="#facc15" stroke="#1c0d05" stroke-width="3"/>
+      </svg>`,
+
+      scroll: `<svg class="w-full h-full" viewBox="0 0 48 48" fill="none">
+        <defs>
+          <linearGradient id="ui-scr" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fef3c7"/><stop offset="60%" stop-color="#fde68a"/><stop offset="100%" stop-color="#d97706"/></linearGradient>
+        </defs>
+        <!-- Ancient Rolled Parchment Scroll -->
+        <path d="M10 12C10 8 16 8 16 12V36C16 40 10 40 10 36Z" fill="#b45309" stroke="#1c0d05" stroke-width="2.5"/>
+        <rect x="14" y="10" width="22" height="28" rx="3" fill="url(#ui-scr)" stroke="#1c0d05" stroke-width="3"/>
+        <path d="M34 12C34 8 40 8 40 12V36C40 40 34 40 34 36Z" fill="#b45309" stroke="#1c0d05" stroke-width="2.5"/>
+        <circle cx="25" cy="24" r="5" fill="#dc2626" stroke="#1c0d05" stroke-width="2"/>
+      </svg>`,
+
+      shop: `<svg class="w-full h-full" viewBox="0 0 48 48" fill="none">
+        <!-- Wooden Shop Awning -->
+        <path d="M8 20L12 8H36L40 20Z" fill="#ef4444" stroke="#1c0d05" stroke-width="3"/>
+        <path d="M14 8L16 20M22 8L22 20M28 8L28 20M34 8L32 20" stroke="#facc15" stroke-width="3"/>
+        <rect x="12" y="20" width="24" height="20" fill="#78350f" stroke="#1c0d05" stroke-width="3"/>
+        <rect x="16" y="26" width="16" height="14" fill="#fde047" stroke="#1c0d05" stroke-width="2"/>
+      </svg>`,
+
+      coin: `<svg class="w-full h-full" viewBox="0 0 48 48" fill="none">
+        <defs>
+          <radialGradient id="ui-cn" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#fef08a"/><stop offset="60%" stop-color="#eab308"/><stop offset="100%" stop-color="#854d0e"/></radialGradient>
+        </defs>
+        <circle cx="24" cy="24" r="20" fill="url(#ui-cn)" stroke="#1c0d05" stroke-width="3.5"/>
+        <circle cx="24" cy="24" r="14" stroke="#854d0e" stroke-width="2" stroke-dasharray="2 2"/>
+        <path d="M24 14V34M18 20C18 16 30 16 30 22C30 28 18 26 18 32" stroke="#1c0d05" stroke-width="3" stroke-linecap="round"/>
+      </svg>`,
+
+      trophy: `<svg class="w-full h-full" viewBox="0 0 48 48" fill="none">
+        <!-- 3D Golden Victory Cup -->
+        <path d="M14 10H34V24C34 30 24 32 24 32C24 32 14 30 14 24Z" fill="#facc15" stroke="#1c0d05" stroke-width="3"/>
+        <path d="M14 14H8C8 22 14 24 14 24M34 14H40C40 22 34 24 34 24" stroke="#ca8a04" stroke-width="3" stroke-linecap="round"/>
+        <path d="M24 32V38M16 38H32" stroke="#1c0d05" stroke-width="3.5" stroke-linecap="round"/>
+      </svg>`,
+
+      bloon: `<svg class="w-full h-full" viewBox="0 0 48 48" fill="none">
+        <defs>
+          <radialGradient id="ui-bl" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#f87171"/><stop offset="60%" stop-color="#dc2626"/><stop offset="100%" stop-color="#7f1d1d"/></radialGradient>
+        </defs>
+        <!-- Perfectly Rounded BTD Bloon Dome -->
+        <ellipse cx="24" cy="20" rx="16" ry="17" fill="url(#ui-bl)" stroke="#1c0d05" stroke-width="3"/>
+        <path d="M12 24C16 34 20 38 24 40C28 38 32 34 36 24" fill="url(#ui-bl)" stroke="#1c0d05" stroke-width="2.5"/>
+        <ellipse cx="24" cy="42" rx="4" ry="2" fill="#dc2626" stroke="#1c0d05" stroke-width="2"/>
+        <circle cx="18" cy="14" r="3" fill="#fff" opacity="0.65"/>
+      </svg>`,
+
+      recommended_hand: `<svg class="w-full h-full" viewBox="0 0 48 48" fill="none">
+        <!-- Cartoon Monkey Hand Pointing Upward -->
+        <path d="M24 6V26M24 26C20 26 16 28 16 34V42H32V34C32 28 28 26 24 26Z" fill="#a16207" stroke="#1c0d05" stroke-width="3.5"/>
+        <rect x="21" y="6" width="6" height="24" rx="3" fill="#ca8a04" stroke="#1c0d05" stroke-width="2.5"/>
+      </svg>`
+    };
+
+    function renderBadgeIcon(key, fallbackEmoji) {
+      if (gameState && gameState.iconStyle === '3d') {
+        const lowerKey = String(key).toLowerCase();
+        for (const [k, svg] of Object.entries(SVG_BADGES)) {
+          if (lowerKey.includes(k)) return svg;
+        }
+        // General category matching
+        if (lowerKey.includes('speed') || lowerKey.includes('rate')) return SVG_BADGES.blade_shooter;
+        if (lowerKey.includes('damage') || lowerKey.includes('overdrive')) return SVG_BADGES.the_zone;
+        if (lowerKey.includes('arrow') || lowerKey.includes('pierce')) return SVG_BADGES.storm_of_arrows;
+        if (lowerKey.includes('ice') || lowerKey.includes('freeze')) return SVG_BADGES.icicle_impale;
+        if (lowerKey.includes('sun') || lowerKey.includes('plasma')) return SVG_BADGES.sun_avatar;
+        if (lowerKey.includes('cash') || lowerKey.includes('money')) return SVG_BADGES.coin;
+        if (lowerKey.includes('shop')) return SVG_BADGES.shop;
+        if (lowerKey.includes('build')) return SVG_BADGES.scroll;
+        if (lowerKey.includes('setting')) return SVG_BADGES.gear;
+        return SVG_BADGES.trophy;
+      }
+      return fallbackEmoji || '⭐';
+    }
+
     class ProceduralAssetForge {
       static createMonkeyHero(heroId = 'quincy') {
         const root = new THREE.Group();
@@ -1749,7 +2569,44 @@
             ring.position.set(side * 0.635, 0.02, 0.04);
             headGroup.add(ring);
           });
+
+          // 3D Illuminated Cyber Laptop attached in front
+          const laptopGroup = new THREE.Group();
+          laptopGroup.position.set(0, 0.68, 0.46);
+          laptopGroup.rotation.x = 0.22;
+
+          // Laptop base / keyboard chassis
+          const chassis = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.032, 0.44), darkMetalMat);
+          laptopGroup.add(chassis);
+
+          // Keyboard keys grid
+          const keys = new THREE.Mesh(new THREE.BoxGeometry(0.50, 0.015, 0.26), new THREE.MeshBasicMaterial({ color: 0x0284c7 }));
+          keys.position.set(0, 0.02, 0.05);
+          laptopGroup.add(keys);
+
+          // Glowing holographic display screen
+          const screenHinge = new THREE.Group();
+          screenHinge.position.set(0, 0.02, -0.21);
+          screenHinge.rotation.x = -1.15; // angled up towards Benjamin's face
+          const screenLid = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.42, 0.025), darkMetalMat);
+          screenLid.position.set(0, 0.20, 0);
+          screenHinge.add(screenLid);
+          const screenGlow = new THREE.Mesh(new THREE.PlaneGeometry(0.52, 0.36), new THREE.MeshBasicMaterial({ color: 0x22d3ee }));
+          screenGlow.position.set(0, 0.20, 0.015);
+          screenHinge.add(screenGlow);
+          laptopGroup.add(screenHinge);
+          flightPose.add(laptopGroup);
         }
+
+        let bowArc = null;
+        let quiverArrows = null;
+        let eyepiece = null;
+        const tanks = [];
+        let flameTip = null;
+        const swords = [];
+        let laserGoggles = null;
+        let plasmaHorns = null;
+        let sunMask = null;
 
         // 2. TORSO, BELT, CHEST CREST & BACKPACK GEAR
         const torsoMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.29, 0.72, 16), suitMat);
@@ -1762,12 +2619,65 @@
           quiver.position.set(0.18, 0.88, -0.34);
           quiver.rotation.z = -0.35;
           flightPose.add(quiver);
+
+          quiverArrows = new THREE.Group();
+          const arrowMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.3 });
+          for (let a = 0; a < 3; a++) {
+            const arr = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.32, 6), arrowMat);
+            arr.position.set(0.14 + (a - 1) * 0.045, 1.12, -0.34);
+            arr.rotation.z = -0.35 + (a - 1) * 0.08;
+            quiverArrows.add(arr);
+          }
+          flightPose.add(quiverArrows);
+
+          eyepiece = new THREE.Mesh(
+            new THREE.RingGeometry(0.08, 0.14, 14),
+            new THREE.MeshBasicMaterial({ color: 0x06b6d4, side: THREE.DoubleSide })
+          );
+          eyepiece.position.set(-0.18, 0.14, 0.53);
+          eyepiece.visible = false;
+          headGroup.add(eyepiece);
         } else if (heroId === 'gwendolin') {
           [-0.16, 0.16].forEach(xOff => {
-            const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.56, 14), accentMat);
+            const tankMat = new THREE.MeshStandardMaterial({ color: accentColors.gwendolin, roughness: 0.38 });
+            const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.56, 14), tankMat);
             tank.position.set(xOff, 0.84, -0.34);
             flightPose.add(tank);
+            tanks.push(tank);
           });
+        } else if (heroId === 'supermonkey') {
+          const laserMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+          laserGoggles = new THREE.Group();
+          [-1, 1].forEach(s => {
+            const lens = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.11, 0.08), laserMat);
+            lens.position.set(s * 0.18, 0.14, 0.53);
+            laserGoggles.add(lens);
+          });
+          laserGoggles.visible = false;
+          headGroup.add(laserGoggles);
+
+          const plasmaMat = new THREE.MeshBasicMaterial({ color: 0xa855f7 });
+          plasmaHorns = new THREE.Group();
+          [-1, 1].forEach(s => {
+            const horn = new THREE.Mesh(new THREE.ConeGeometry(0.075, 0.32, 6), plasmaMat);
+            horn.position.set(s * 0.28, 0.52, 0.20);
+            horn.rotation.z = -s * 0.45;
+            plasmaHorns.add(horn);
+          });
+          plasmaHorns.visible = false;
+          headGroup.add(plasmaHorns);
+
+          sunMask = new THREE.Group();
+          const sunCrownMat = new THREE.MeshStandardMaterial({ color: 0xffd700, roughness: 0.2, metalness: 0.8 });
+          for (let r = 0; r < 8; r++) {
+            const a = (r / 8) * Math.PI * 2;
+            const ray = new THREE.Mesh(new THREE.ConeGeometry(0.10, 0.34, 4), sunCrownMat);
+            ray.position.set(Math.cos(a) * 0.62, 0.15 + Math.sin(a) * 0.62, 0.42);
+            ray.rotation.z = a - Math.PI / 2;
+            sunMask.add(ray);
+          }
+          sunMask.visible = false;
+          headGroup.add(sunMask);
         }
 
         const trunksMesh = new THREE.Mesh(new THREE.SphereGeometry(0.31, 16, 12), accentMat);
@@ -1815,7 +2725,7 @@
         leftArmGroup.add(leftFist);
 
         if (heroId === 'quincy') {
-          const bowArc = new THREE.Mesh(
+          bowArc = new THREE.Mesh(
             new THREE.TorusGeometry(0.42, 0.04, 8, 18, Math.PI * 1.15),
             woodMat
           );
@@ -1845,14 +2755,24 @@
           const nozzle = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.11, 0.45, 12), darkMetalMat);
           nozzle.position.set(0, -0.68, 0.06);
           rightArmGroup.add(nozzle);
+
+          flameTip = new THREE.Mesh(
+            new THREE.ConeGeometry(0.12, 0.28, 6),
+            new THREE.MeshBasicMaterial({ color: 0xff4500, transparent: true, opacity: 0.85 })
+          );
+          flameTip.position.set(0, -0.96, 0.06);
+          flameTip.rotation.x = Math.PI;
+          flameTip.visible = false;
+          rightArmGroup.add(flameTip);
         } else if (heroId === 'sauda') {
           const bladeMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.85, roughness: 0.15 });
           const swordR = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.72, 0.12), bladeMat);
           swordR.position.set(0, -0.78, 0.12);
           rightArmGroup.add(swordR);
-          const swordL = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.72, 0.12), bladeMat);
+          const swordL = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.72, 0.12), bladeMat.clone());
           swordL.position.set(0, -0.78, 0.12);
           leftArmGroup.add(swordL);
+          swords.push(swordR, swordL);
         }
 
         // 4. LEGS & BOOTS
@@ -1909,7 +2829,7 @@
         const capeMesh = new THREE.Mesh(capeGeo, capeMat);
         capeMesh.position.set(0, 0.62, -0.32);
         capeMesh.rotation.x = 0.42;
-        capeMesh.visible = heroId === 'supermonkey' || heroId === 'obyn' || heroId === 'quincy';
+        capeMesh.visible = heroId === 'supermonkey';
         flightPose.add(capeMesh);
 
         const tailCurvePoints = [];
@@ -1933,7 +2853,16 @@
           leftArmGroup,
           leftLeg,
           rightLeg,
-          headGroup
+          headGroup,
+          bowArc,
+          quiverArrows,
+          eyepiece,
+          tanks,
+          flameTip,
+          swords,
+          laserGoggles,
+          plasmaHorns,
+          sunMask
         };
 
         return root;
@@ -1941,30 +2870,43 @@
 
       static createBloonGeometry() {
         const points = [];
-        const steps = 28;
-        points.push(new THREE.Vector2(0.0, -1.05));
-        for (let i = 0; i <= steps; i++) {
-          const t = i / steps;
-          let y = -1.04 + t * 2.04;
-          let r = 0;
-          if (t < 0.055) {
-            const kt = t / 0.055;
-            r = 0.04 + Math.sin(kt * Math.PI * 0.85) * 0.135;
-          } else if (t < 0.095) {
-            const nt = (t - 0.055) / 0.04;
-            r = 0.135 - Math.sin(nt * Math.PI) * 0.075;
-          } else {
-            const bt = (t - 0.095) / 0.905;
-            const theta = bt * Math.PI;
-            const pearProfile = bt < 0.52
-              ? Math.pow(Math.sin(theta), 0.78) * (0.86 + 0.24 * bt)
-              : Math.pow(Math.sin(theta), 0.66) * (0.98 + 0.08 * Math.sin((bt - 0.5) * Math.PI));
-            r = Math.max(0.0, 0.78 * pearProfile);
-          }
+        // 1. Knot base: closes at central axis, flares out to knot rim, cinches at neck
+        points.push(new THREE.Vector2(0.0, -1.08));
+        points.push(new THREE.Vector2(0.14, -1.04)); // knot flare lip
+        points.push(new THREE.Vector2(0.16, -0.99)); // knot widest rim
+        points.push(new THREE.Vector2(0.08, -0.93)); // knot constriction / cinch neck
+        points.push(new THREE.Vector2(0.10, -0.86)); // balloon bottom body start
+
+        // 2. Lower body: smooth easing curve up to equator
+        const stepsLower = 28;
+        const yNeck = -0.86;
+        const yEq = 0.22;
+        const rNeck = 0.10;
+        const rMax = 0.88;
+        for (let i = 1; i < stepsLower; i++) {
+          const u = i / stepsLower;
+          const ease = Math.sin(u * Math.PI * 0.5);
+          const r = rNeck + (rMax - rNeck) * Math.pow(ease, 1.25);
+          const y = yNeck + (yEq - yNeck) * u;
           points.push(new THREE.Vector2(r, y));
         }
-        points.push(new THREE.Vector2(0.0, 1.0));
-        const geo = new THREE.LatheGeometry(points, 24);
+
+        // 3. Equator point: perfectly vertical tangent (dr/dy = 0)
+        points.push(new THREE.Vector2(rMax, yEq));
+
+        // 4. Upper dome: pure true elliptical arc from equator to apex
+        // At theta = 0: r = rMax, y = yEq (vertical tangent)
+        // At theta = pi/2: r = 0, y = yEq + hTop (perfectly horizontal tangent dy/dr = 0, ZERO cone apex!)
+        const stepsTop = 28;
+        const hTop = 0.82; // top apex at y = 0.22 + 0.82 = 1.04
+        for (let i = 1; i <= stepsTop; i++) {
+          const theta = (i / stepsTop) * (Math.PI * 0.5);
+          const r = rMax * Math.cos(theta);
+          const y = yEq + hTop * Math.sin(theta);
+          points.push(new THREE.Vector2(Math.max(0.0, r), y));
+        }
+
+        const geo = new THREE.LatheGeometry(points, 32);
         geo.computeVertexNormals();
         return geo;
       }
@@ -1992,7 +2934,6 @@
         }
         shape.closePath();
         const geo = new THREE.ShapeGeometry(shape);
-        geo.rotateX(-Math.PI / 2);
         return geo;
       }
 
@@ -2339,7 +3280,7 @@
         }
         shape.closePath();
         const geo = new THREE.ShapeGeometry(shape);
-        geo.rotateX(-Math.PI / 2);
+        geo.rotateX(Math.PI / 2);
         return geo;
       }
     }
@@ -2631,7 +3572,8 @@
     bloonInstancedMesh.frustumCulled = false;
     scene.add(bloonInstancedMesh);
 
-    const bloonGlintGeo = new THREE.SphereGeometry(0.18, 10, 8);
+    // Bloon glint mesh removed in Build 8 to prevent inner hull clipping/phasing
+    const bloonGlintGeo = new THREE.BufferGeometry();
     bloonGlintGeo.scale(0.82, 1.45, 0.40);
     const bloonGlintMat = new THREE.MeshBasicMaterial({
       color: 0xffffff,
@@ -2641,7 +3583,7 @@
     const bloonGlintInstancedMesh = new THREE.InstancedMesh(bloonGlintGeo, bloonGlintMat, MAX_BLOONS);
     bloonGlintInstancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     bloonGlintInstancedMesh.frustumCulled = false;
-    scene.add(bloonGlintInstancedMesh);
+    // scene.add(bloonGlintInstancedMesh);
 
     const camoBadgeGeo = new THREE.DodecahedronGeometry(0.46, 0);
     camoBadgeGeo.scale(1.15, 0.65, 0.55);
@@ -2684,7 +3626,7 @@
       dummyObj.scale.set(0.001, 0.001, 0.001);
       dummyObj.updateMatrix();
       bloonInstancedMesh.setMatrixAt(i, dummyObj.matrix);
-      bloonGlintInstancedMesh.setMatrixAt(i, dummyObj.matrix);
+      // bloonGlintInstancedMesh.setMatrixAt(i, dummyObj.matrix);
       camoInstancedMesh.setMatrixAt(i, dummyObj.matrix);
       regrowInstancedMesh.setMatrixAt(i, dummyObj.matrix);
       fortifiedInstancedMesh.setMatrixAt(i, dummyObj.matrix);
@@ -3017,6 +3959,7 @@
       heroMesh.position.copy(oldPos);
       heroMesh.rotation.y = oldRot;
       scene.add(heroMesh);
+      updateHeroVisuals();
     }
 
     const squadMeshes = {
@@ -3035,7 +3978,7 @@
       scene.add(m);
     });
 
-    const activeMOABs = [];
+    activeMOABs.length = 0;
 
     const SHOP_UPGRADE_DEFS = [
       { key: 'hp',     name: 'Reinforced Hearts', icon: '❤️', desc: '+10 Base Max HP per rank',      baseCost: 75,  maxRank: 10 },
@@ -3086,6 +4029,39 @@
       syncMoneyLabels();
     }
 
+    
+    const HERO_UNLOCK_PRICES = {
+      quincy: 0,
+      gwendolin: 0,
+      sauda: 1500,
+      obyn: 2500,
+      benjamin: 4000,
+      supermonkey: 7500
+    };
+
+    function refreshHeroCardsUI() {
+      if (!persistentStats.unlockedHeroes) persistentStats.unlockedHeroes = ['quincy', 'gwendolin'];
+      document.querySelectorAll('.hero-card').forEach(card => {
+        const hid = card.getAttribute('data-hero');
+        const isUnlocked = persistentStats.unlockedHeroes.includes(hid);
+        const price = HERO_UNLOCK_PRICES[hid] || 0;
+
+        let badgeOverlay = card.querySelector('.hero-lock-overlay');
+        if (!isUnlocked) {
+          card.classList.add('opacity-75', 'border-stone-700');
+          if (!badgeOverlay) {
+            badgeOverlay = document.createElement('div');
+            badgeOverlay.className = 'hero-lock-overlay mt-1 w-full py-1 rounded-lg bg-amber-600/90 border border-amber-300 text-center font-btd text-[10px] text-white tabular-nums';
+            card.appendChild(badgeOverlay);
+          }
+          badgeOverlay.textContent = `🔒 UNLOCK • ${price}`;
+        } else {
+          card.classList.remove('opacity-75', 'border-stone-700');
+          if (badgeOverlay) badgeOverlay.remove();
+        }
+      });
+    }
+
     function renderMonkeyShop() {
       syncMoneyLabels();
       const grid = document.getElementById('shop-items-grid');
@@ -3094,14 +4070,15 @@
       SHOP_UPGRADE_DEFS.forEach(def => {
         const rank = persistentStats.upgrades[def.key] || 0;
         const isMax = rank >= def.maxRank;
-        const cost = Math.round(def.baseCost * Math.pow(1.35, rank));
+        const SHOP_COST_CURVE = [100, 250, 500, 1000, 2000, 3500, 6000, 10000, 16000, 25000];
+        const cost = SHOP_COST_CURVE[rank] || 25000;
         const canAfford = persistentStats.monkeyMoney >= cost && !isMax;
 
         const card = document.createElement('div');
         card.className = 'btd-panel rounded-2xl p-3.5 flex flex-col justify-between border-2 border-black';
         card.innerHTML = `
           <div class="flex items-center gap-3 mb-2">
-            <div class="w-12 h-12 rounded-xl bg-black/45 border border-amber-400/40 flex items-center justify-center text-2xl shrink-0">${def.icon}</div>
+            <div class="w-12 h-12 rounded-xl bg-black/45 border border-amber-400/40 flex items-center justify-center text-2xl shrink-0 overflow-hidden">${renderBadgeIcon(def.key, def.icon)}</div>
             <div class="flex flex-col text-left">
               <div class="flex items-center gap-2">
                 <span class="font-btd text-base text-yellow-300">${def.name}</span>
@@ -3128,11 +4105,19 @@
       });
     }
 
-    const gameState = {
+    gameState = {
       paused: true,
       inStartMenu: true,
       gameOver: false,
       freeplayMode: false,
+      iconStyle: window.localStorage.getItem("bloons_icon_style") || "3d",
+      awardedStreakMilestones: new Set(),
+      heroWalkPhase: 0,
+      heroAttackAnimTimer: 0,
+      iconStyle: window.localStorage.getItem("bloons_icon_style") || "3d",
+      awardedStreakMilestones: new Set(),
+      heroWalkPhase: 0,
+      heroAttackAnimTimer: 0,
       victoryPromptShown: false,
       godMode: false,
       dartlingAimMode: 'cursor',
@@ -3332,6 +4317,32 @@
       setBlopVisualTier(slot, tierFromXP(xpAmount, initTier));
     }
 
+    
+    // Visual Tracers for Sniper & Benjamin
+    const _bulletTracers = [];
+    function spawnSniperBulletTracer(x1, y1, z1, x2, y2, z2) {
+      const geo = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(x1, y1, z1),
+        new THREE.Vector3(x2, y2, z2)
+      ]);
+      const mat = new THREE.LineBasicMaterial({ color: 0xfacc15, linewidth: 2 });
+      const line = new THREE.Line(geo, mat);
+      scene.add(line);
+      _bulletTracers.push({ line, life: 0.08, maxLife: 0.08 });
+    }
+
+    const _matrixBeams = [];
+    function spawnMatrixHackBeam(x1, y1, z1, x2, y2, z2) {
+      const geo = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(x1, y1, z1),
+        new THREE.Vector3(x2, y2, z2)
+      ]);
+      const mat = new THREE.LineBasicMaterial({ color: 0x22d3ee, linewidth: 3 });
+      const line = new THREE.Line(geo, mat);
+      scene.add(line);
+      _matrixBeams.push({ line, life: 0.12, maxLife: 0.12 });
+    }
+
     function spawnComicPop(x, y, z, _unusedColor = 0xffffff, maxScale = 1.05) {
       const idx = popCursor;
       popCursor = (popCursor + 1) % MAX_POP_VFX;
@@ -3499,15 +4510,22 @@
         gameState.pops++;
         persistentStats.lifetimePops++;
         gameState.popStreakCount++;
-        gameState.popStreakTimer = 1.8;
+        gameState.popStreakTimer = 1.2;
 
-        if (gameState.popStreakCount > 0 && gameState.popStreakCount % 25 === 0) {
-          const stageMult = (STAGE_CONFIGS[gameState.stageId] || STAGE_CONFIGS.meadow).moneyMult;
-          const bonusMM = Math.round(Math.min(30, 5 + Math.floor(gameState.popStreakCount / 25) * 5) * stageMult);
-          persistentStats.monkeyMoney += bonusMM;
-          savePersistentStats();
-          const bonusEl = document.getElementById('streak-money-bonus');
-          if (bonusEl) bonusEl.textContent = `+$${bonusMM} BONUS (${stageMult}x)`;
+        const STREAK_MILESTONES = [50, 100, 250, 500, 1000];
+        const STREAK_REWARDS = { 50: 5, 100: 10, 250: 20, 500: 35, 1000: 50 };
+        for (const m of STREAK_MILESTONES) {
+          if (gameState.popStreakCount >= m && !gameState.awardedStreakMilestones.has(m)) {
+            gameState.awardedStreakMilestones.add(m);
+            const stageMult = (STAGE_CONFIGS[gameState.stageId] || STAGE_CONFIGS.meadow).moneyMult;
+            const bonusMM = Math.round((STREAK_REWARDS[m] || 10) * stageMult);
+            persistentStats.monkeyMoney += bonusMM;
+            savePersistentStats();
+            const bonusEl = document.getElementById('streak-money-bonus');
+            if (bonusEl) bonusEl.textContent = `+${bonusMM} STREAK`;
+            spawnFloatingText(bx, 1.8, bz, `+${bonusMM} STREAK!`, 'crit');
+            break;
+          }
         }
 
         soundFX.playPop(isCrit, def.id, gameState.popStreakCount);
@@ -3557,7 +4575,7 @@
           dummyObj.scale.set(0.001, 0.001, 0.001);
           dummyObj.updateMatrix();
           bloonInstancedMesh.setMatrixAt(idx, dummyObj.matrix);
-          bloonGlintInstancedMesh.setMatrixAt(idx, dummyObj.matrix);
+          // bloonGlintInstancedMesh.setMatrixAt(idx, dummyObj.matrix);
           camoInstancedMesh.setMatrixAt(idx, dummyObj.matrix);
           regrowInstancedMesh.setMatrixAt(idx, dummyObj.matrix);
           fortifiedInstancedMesh.setMatrixAt(idx, dummyObj.matrix);
@@ -3728,8 +4746,11 @@
         persistentStats.lifetimePops += 25;
 
         const stageMult = (STAGE_CONFIGS[gameState.stageId] || STAGE_CONFIGS.meadow).moneyMult;
-        persistentStats.monkeyMoney += Math.round(cfg.moneyReward * stageMult);
+        const bossRewards = { MOAB: 25, BFB: 50, ZOMG: 100, DDT: 75, BAD: 250 };
+        const bossMM = Math.round((bossRewards[bKey] || cfg.moneyReward) * stageMult);
+        persistentStats.monkeyMoney += bossMM;
         savePersistentStats();
+        spawnFloatingText(mx, 2.6, mz, `+${bossMM} AIRSHIP POP!`, 'crit');
 
         soundFX.playExplosion(1.5);
         triggerScreenShake(0.14, 0.10, 0);
@@ -3792,22 +4813,71 @@
       if (lbl) lbl.textContent = `Detected Screen Refresh Rate: ${detectedMonitorHz} Hz • Target Cap: ${targetFPS > 1000 ? 'UNLIMITED' : targetFPS + ' FPS'}`;
     }
 
+        function handleEscapeKey() {
+      // 1. If Victory modal is open: do nothing
+      const victoryModal = document.getElementById('victory-modal');
+      if (victoryModal && !victoryModal.classList.contains('hidden')) return;
+
+      // 2. If GameOver modal is open: do nothing
+      const gameoverModal = document.getElementById('gameover-modal');
+      if (gameoverModal && !gameoverModal.classList.contains('hidden')) return;
+
+      // 3. If Settings modal is open: close it
+      const settingsModal = document.getElementById('settings-modal');
+      if (settingsModal && !settingsModal.classList.contains('hidden')) {
+        togglePauseSettingsModal();
+        return;
+      }
+
+      // 4. If My Build modal is open: close it
+      const myBuildModal = document.getElementById('my-build-modal');
+      if (myBuildModal && !myBuildModal.classList.contains('hidden')) {
+        myBuildModal.classList.add('hidden');
+        myBuildModal.classList.remove('flex');
+        const lvlModal = document.getElementById('levelup-modal');
+        if (!gameState.inStartMenu && lvlModal && lvlModal.classList.contains('hidden')) {
+          gameState.paused = false;
+        }
+        return;
+      }
+
+      // 5. If Shop modal is open: close it
+      const shopModal = document.getElementById('shop-modal');
+      if (shopModal && !shopModal.classList.contains('hidden')) {
+        shopModal.classList.add('hidden');
+        shopModal.classList.remove('flex');
+        const lvlModal = document.getElementById('levelup-modal');
+        if (!gameState.inStartMenu && lvlModal && lvlModal.classList.contains('hidden')) {
+          gameState.paused = false;
+        }
+        return;
+      }
+
+      // 6. If playing the game (not in start menu) and no modal is open (and not in levelup): open Pause/Settings!
+      const lvlModal = document.getElementById('levelup-modal');
+      if (!gameState.inStartMenu && !gameState.gameOver && (!lvlModal || lvlModal.classList.contains('hidden'))) {
+        togglePauseSettingsModal();
+      }
+    }
+
     function togglePauseSettingsModal() {
-      if (gameState.inStartMenu || gameState.gameOver) return;
+      if (gameState && gameState.gameOver) return;
       const settingsModal = document.getElementById('settings-modal');
       const isHidden = settingsModal.classList.contains('hidden');
       if (isHidden) {
         soundFX.init();
-        gameState.paused = true;
+        if (!gameState.inStartMenu) gameState.paused = true;
         recalculateTargetFPS();
         settingsModal.classList.remove('hidden');
         settingsModal.classList.add('flex');
+        const closeBtn = document.getElementById('btn-close-settings');
+        if (closeBtn) closeBtn.textContent = gameState.inStartMenu ? 'CLOSE SETTINGS' : 'RESUME';
       } else {
         settingsModal.classList.add('hidden');
         settingsModal.classList.remove('flex');
         const lvlModal = document.getElementById('levelup-modal');
         const shopModal = document.getElementById('shop-modal');
-        if (lvlModal.classList.contains('hidden') && shopModal.classList.contains('hidden')) {
+        if (!gameState.inStartMenu && lvlModal.classList.contains('hidden') && shopModal.classList.contains('hidden')) {
           gameState.paused = false;
         }
       }
@@ -3820,7 +4890,7 @@
         triggerHeroSkill();
       } else if (e.code === 'Escape' || e.code === 'KeyP') {
         e.preventDefault();
-        togglePauseSettingsModal();
+        handleEscapeKey();
       }
     });
 
@@ -3902,9 +4972,30 @@
     document.querySelectorAll('.hero-card').forEach(card => {
       card.addEventListener('click', () => {
         soundFX.init();
+        const hid = card.getAttribute('data-hero') || 'quincy';
+        if (!persistentStats.unlockedHeroes) persistentStats.unlockedHeroes = ['quincy', 'gwendolin'];
+        const isUnlocked = persistentStats.unlockedHeroes.includes(hid);
+        const price = HERO_UNLOCK_PRICES[hid] || 0;
+
+        if (!isUnlocked) {
+          if (persistentStats.monkeyMoney >= price) {
+            persistentStats.monkeyMoney -= price;
+            persistentStats.unlockedHeroes.push(hid);
+            savePersistentStats();
+            soundFX.playLevelUpFanfare();
+            refreshHeroCardsUI();
+            syncMoneyLabels();
+            spawnFloatingText(0, 1.8, 0, `UNLOCKED ${hid.toUpperCase()}!`, 'crit');
+          } else {
+            soundFX.playCeramicOrLead(true);
+            alert(`NEED ${price} MONKEY MONEY TO UNLOCK ${hid.toUpperCase()}! You currently have ${persistentStats.monkeyMoney}.`);
+            return;
+          }
+        }
+
         document.querySelectorAll('.hero-card').forEach(c => c.classList.remove('selected'));
         card.classList.add('selected');
-        selectedHeroId = card.getAttribute('data-hero') || 'quincy';
+        selectedHeroId = hid;
         rebuildHeroMesh(selectedHeroId);
         soundFX.playBlopOrbChime(1);
       });
@@ -3941,6 +5032,120 @@
 
     const settingsModal = document.getElementById('settings-modal');
     document.getElementById('btn-settings-toggle').addEventListener('click', togglePauseSettingsModal);
+    const startSettingsBtn = document.getElementById('btn-settings-start');
+    if (startSettingsBtn) startSettingsBtn.addEventListener('click', togglePauseSettingsModal);
+
+    const startAudioBtn = document.getElementById('btn-start-audio');
+    if (startAudioBtn) {
+      startAudioBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        soundFX.init();
+        const isMuted = soundFX.toggleMute();
+        startAudioBtn.querySelector('#start-audio-icon').textContent = isMuted ? '🔇' : '🔊';
+        startAudioBtn.querySelector('#start-audio-label').textContent = isMuted ? 'MUSIC: OFF' : 'MUSIC: ON';
+        const hudAudio = document.getElementById('btn-audio-toggle');
+        if (hudAudio) hudAudio.textContent = isMuted ? '🔇' : '🔊';
+      });
+    }
+
+    const unlockAudioOnGesture = () => {
+      soundFX.init();
+      if (soundFX.ctx && soundFX.ctx.state === 'suspended') {
+        soundFX.ctx.resume();
+      }
+      window.removeEventListener('click', unlockAudioOnGesture);
+      window.removeEventListener('keydown', unlockAudioOnGesture);
+      window.removeEventListener('touchstart', unlockAudioOnGesture);
+    };
+    window.addEventListener('click', unlockAudioOnGesture);
+    window.addEventListener('keydown', unlockAudioOnGesture);
+    window.addEventListener('touchstart', unlockAudioOnGesture);
+
+    
+    const iconToggleBtn = document.getElementById('btn-toggle-icon-style');
+    if (iconToggleBtn) {
+      iconToggleBtn.addEventListener('click', () => {
+        soundFX.init();
+        gameState.iconStyle = gameState.iconStyle === '3d' ? 'emoji' : '3d';
+        window.localStorage.setItem('bloons_icon_style', gameState.iconStyle);
+        iconToggleBtn.textContent = gameState.iconStyle === '3d' ? '3D BADGES' : 'CLASSIC EMOJIS';
+        refreshAllUIIcons();
+      });
+    }
+
+        function refreshAllUIIcons() {
+      // 1. Hero selection cards on Title screen
+      document.querySelectorAll('.hero-card').forEach(card => {
+        const hid = card.getAttribute('data-hero');
+        const iconContainer = card.querySelector('div.text-2xl') || card.querySelector('div.w-11');
+        if (iconContainer && hid) {
+          iconContainer.innerHTML = renderBadgeIcon(hid, '👑');
+        }
+      });
+
+      // 2. Map selection cards on Title screen
+      document.querySelectorAll('.map-card').forEach(card => {
+        const mid = card.getAttribute('data-map');
+        const iconContainer = card.querySelector('div.w-11');
+        if (iconContainer && mid) {
+          iconContainer.innerHTML = renderBadgeIcon(mid, '🗺️');
+        }
+      });
+
+      // 3. HUD Icons
+      const hudBuild = document.getElementById('btn-hud-build');
+      if (hudBuild) hudBuild.innerHTML = renderBadgeIcon('build', '📜');
+
+      const hudSettings = document.getElementById('btn-settings-toggle');
+      if (hudSettings) hudSettings.innerHTML = renderBadgeIcon('setting', '⚙️');
+
+      const hudAudio = document.getElementById('btn-audio-toggle');
+      if (hudAudio) hudAudio.innerHTML = renderBadgeIcon(soundFX && soundFX.isMuted ? 'sound_off' : 'sound_on', '🔊');
+
+      const startAudioIcon = document.getElementById('start-audio-icon');
+      if (startAudioIcon) {
+        startAudioIcon.innerHTML = renderBadgeIcon(soundFX && soundFX.isMuted ? 'sound_off' : 'sound_on', '🔊');
+      }
+
+      // 4. Settings Modal Buttons & Badges
+      const myBuildBtn = document.getElementById('btn-settings-my-build');
+      if (myBuildBtn) {
+        myBuildBtn.innerHTML = gameState.iconStyle === '3d'
+          ? `<span class="w-5 h-5 inline-block mr-1.5 align-middle">${SVG_BADGES.scroll}</span> MY BUILD`
+          : '📜 MY BUILD';
+      }
+
+      const shopBtn = document.getElementById('btn-open-shop-start');
+      if (shopBtn) {
+        shopBtn.innerHTML = gameState.iconStyle === '3d'
+          ? `<span class="w-5 h-5 inline-block mr-1.5 align-middle">${SVG_BADGES.shop}</span> MONKEY SHOP`
+          : '🏪 MONKEY SHOP';
+      }
+
+      const startSettings = document.getElementById('btn-settings-start');
+      if (startSettings) {
+        startSettings.innerHTML = gameState.iconStyle === '3d'
+          ? `<span class="w-5 h-5 inline-block mr-1.5 align-middle">${SVG_BADGES.gear}</span> SETTINGS`
+          : '⚙️ SETTINGS';
+      }
+    }
+
+    const hudBuildBtn = document.getElementById('btn-hud-build');
+    if (hudBuildBtn) hudBuildBtn.addEventListener('click', openMyBuildModal);
+
+    const settingsBuildBtn = document.getElementById('btn-settings-my-build');
+    if (settingsBuildBtn) settingsBuildBtn.addEventListener('click', () => {
+      document.getElementById('settings-modal').classList.add('hidden');
+      document.getElementById('settings-modal').classList.remove('flex');
+      openMyBuildModal();
+    });
+
+    const closeBuildBtn = document.getElementById('btn-close-my-build');
+    if (closeBuildBtn) closeBuildBtn.addEventListener('click', closeMyBuildModal);
+
+    const resumeFromBuildBtn = document.getElementById('btn-resume-from-build');
+    if (resumeFromBuildBtn) resumeFromBuildBtn.addEventListener('click', closeMyBuildModal);
+
     document.getElementById('btn-close-settings').addEventListener('click', () => {
       settingsModal.classList.add('hidden');
       settingsModal.classList.remove('flex');
@@ -3998,8 +5203,6 @@
       shopModal.classList.add('flex');
     };
     document.getElementById('btn-open-shop-start').addEventListener('click', openMonkeyShop);
-    document.getElementById('btn-open-shop-settings').addEventListener('click', openMonkeyShop);
-    document.getElementById('btn-hud-shop').addEventListener('click', openMonkeyShop);
     document.getElementById('btn-close-shop').addEventListener('click', () => {
       shopModal.classList.add('hidden');
       shopModal.classList.remove('flex');
@@ -4103,50 +5306,368 @@
       resetGame();
     });
 
-    function openLevelUpModal() {
+    
+    // "MY BUILD" Modal Controller
+    function openMyBuildModal() {
+      if (gameState.inStartMenu || gameState.gameOver) return;
+      soundFX.init();
+      gameState.paused = true;
+      const modal = document.getElementById('my-build-modal');
+      const heroCard = document.getElementById('my-build-hero-card');
+      const squadGrid = document.getElementById('my-build-squad-grid');
+      const statsGrid = document.getElementById('my-build-stats-grid');
+      const h = gameState.hero;
+      const cfg = HERO_CONFIGS[h.id] || HERO_CONFIGS.quincy;
+
+      // 1. Hero Card
+      heroCard.innerHTML = `
+        <div class="w-16 h-16 rounded-2xl bg-black/50 border-2 border-amber-400/60 flex items-center justify-center text-4xl shrink-0">
+          ${renderBadgeIcon(h.id, cfg.skillIcon)}
+        </div>
+        <div class="flex-1 flex flex-col text-left">
+          <div class="flex items-center gap-2">
+            <h3 class="font-btd text-xl text-yellow-300">${cfg.name}</h3>
+            <span class="px-2 py-0.5 rounded-full bg-purple-600/80 border border-black text-[10px] font-black text-white">LVL ${gameState.heroLevel}</span>
+          </div>
+          <span class="text-xs font-bold text-amber-200 mb-1.5">${cfg.title}</span>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-stone-300">
+            <div>❤️ HP: <strong class="text-emerald-400">${Math.round(h.hp)}/${h.maxHp}</strong></div>
+            <div>⚔️ DMG: <strong class="text-amber-300">${h.damage.toFixed(1)}</strong></div>
+            <div>🏹 RATE: <strong class="text-cyan-300">${h.fireRate.toFixed(2)}/s</strong></div>
+            <div>🎯 PIERCE: <strong class="text-indigo-300">${h.pierce}</strong></div>
+          </div>
+          <div class="mt-2 text-[10px] text-stone-400">
+            Tiers: Volley T${h.volleyTier} • Elemental T${h.weaponTier} • Special T${h.explosiveTier} • Optics T${h.opticsTier} (${h.canSeeCamo ? '👁️ CAMO DETECT' : 'NO CAMO'})
+          </div>
+        </div>
+      `;
+
+      // 2. Squad Companions
+      squadGrid.innerHTML = '';
+      const recruited = gameState.recruitedOrder;
+      document.getElementById('my-build-squad-count').textContent = `(${recruited.length}/3 Slots)`;
+      if (recruited.length === 0) {
+        squadGrid.innerHTML = '<div class="col-span-3 text-center py-4 text-xs font-bold text-stone-400">No companions recruited yet! Level up to recruit up to 3 squad members.</div>';
+      } else {
+        recruited.forEach(key => {
+          const comp = COMPANION_CATALOG.find(c => c.key === key);
+          const lvl = gameState.squad[key].level;
+          const card = document.createElement('div');
+          card.className = 'p-3 rounded-2xl bg-stone-900 border border-cyan-400/40 flex flex-col items-center text-center';
+          card.innerHTML = `
+            <div class="w-12 h-12 rounded-xl bg-black/40 border border-white/20 flex items-center justify-center text-2xl mb-1.5">
+              ${renderBadgeIcon(key, comp ? comp.icon : '🐵')}
+            </div>
+            <h4 class="font-btd text-xs text-yellow-300">${comp ? comp.shortName : key.toUpperCase()}</h4>
+            <span class="px-2 py-0.5 rounded-full bg-cyan-600/80 text-[9px] font-black text-white mb-1">TIER ${lvl}</span>
+            <span class="text-[10px] text-stone-300 font-bold">${comp ? comp.titles[Math.min(lvl, comp.titles.length - 1)] : ''}</span>
+          `;
+          squadGrid.appendChild(card);
+        });
+      }
+
+      // 3. Stats Grid
+      statsGrid.innerHTML = `
+        <div class="p-2 rounded-xl bg-stone-900 border border-white/10">🧲 MAGNET: <span class="text-yellow-300">${h.magnetRadius.toFixed(1)}m</span></div>
+        <div class="p-2 rounded-xl bg-stone-900 border border-white/10">🎲 CRIT: <span class="text-amber-400">${Math.round(h.critChance * 100)}%</span></div>
+        <div class="p-2 rounded-xl bg-stone-900 border border-white/10">💨 SPEED: <span class="text-cyan-300">${h.moveSpeed.toFixed(1)}</span></div>
+        <div class="p-2 rounded-xl bg-stone-900 border border-white/10">🎈 WAVE: <span class="text-lime-300">${gameState.wave}</span></div>
+      `;
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeMyBuildModal() {
+      const modal = document.getElementById('my-build-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      const lvlModal = document.getElementById('levelup-modal');
+      const settingsModal = document.getElementById('settings-modal');
+      if (!gameState.inStartMenu && !gameState.gameOver && lvlModal.classList.contains('hidden') && settingsModal.classList.contains('hidden')) {
+        gameState.paused = false;
+      }
+    }
+
+        function openLevelUpModal() {
       gameState.paused = true;
       soundFX.playLevelUpFanfare();
       const modal = document.getElementById('levelup-modal');
       const container = document.getElementById('upgrade-cards-container');
+      const teamPreview = document.getElementById('levelup-team-preview');
+      const blopCountEl = document.getElementById('levelup-blop-count');
+      
       container.innerHTML = '';
+      if (teamPreview) {
+        teamPreview.innerHTML = '';
+        // Add Hero mini badge
+        const hBadge = document.createElement('div');
+        hBadge.className = 'w-7 h-7 rounded-full bg-amber-400 border-2 border-[#1c0d05] overflow-hidden p-0.5 flex items-center justify-center';
+        hBadge.innerHTML = renderBadgeIcon(gameState.hero.id, '👑');
+        teamPreview.appendChild(hBadge);
 
-      const available = getAvailableUpgradeCards(gameState);
-      const shuffled = available.sort(() => Math.random() - 0.5).slice(0, 3);
-
-      if (shuffled.length === 0) {
-        gameState.hero.damage += 0.5;
-        gameState.paused = false;
-        return;
+        // Add active squad companion badges
+        Object.keys(gameState.squad).forEach(k => {
+          if (gameState.squad[k].level > 0) {
+            const sBadge = document.createElement('div');
+            sBadge.className = 'w-7 h-7 rounded-full bg-sky-400 border-2 border-[#1c0d05] overflow-hidden p-0.5 flex items-center justify-center';
+            sBadge.innerHTML = renderBadgeIcon(k, '🐵');
+            teamPreview.appendChild(sBadge);
+          }
+        });
       }
 
-      shuffled.forEach(upg => {
+      if (blopCountEl) {
+        blopCountEl.textContent = gameState.hero.blopsCollected || 0;
+      }
+
+      let available = getAvailableUpgradeCards(gameState);
+      if (available.length === 0) {
+        available = [
+          {
+            id: 'mastery_overdrive',
+            category: 'hero',
+            path: 'HERO OVERDRIVE',
+            tier: 5,
+            icon: '⚡',
+            name: 'Overdrive Tuning',
+            desc: '+10% Hero Attack Speed, +0.5 Layer Damage, and +5% Crit Chance!',
+            apply: (st) => { st.hero.fireRate *= 1.10; st.hero.damage += 0.5; st.hero.critChance = Math.min(0.9, st.hero.critChance + 0.05); }
+          },
+          {
+            id: 'mastery_squad',
+            category: 'companion',
+            path: 'SQUAD HARMONY',
+            tier: 4,
+            icon: '🐵',
+            name: 'Squad Synergy Aura',
+            desc: '+15% Damage and +10% Attack Speed across all 3 active Squad Companions!',
+            apply: (st) => {
+              Object.keys(st.squad).forEach(k => {
+                if (st.squad[k].level > 0) st.squad[k].level += 0.2;
+              });
+            }
+          },
+          {
+            id: 'mastery_blop',
+            category: 'passive',
+            path: 'BLOP SYNTHESIS',
+            tier: 3,
+            icon: '🧲',
+            name: 'Magnetic Resonance',
+            desc: '+2.0m Blop Magnet Radius and Blops grant +25% bonus XP value!',
+            apply: (st) => { st.hero.magnetRadius += 2.0; }
+          }
+        ];
+      }
+
+      const heroCards = available.filter(c => c.id.startsWith('hero_'));
+      const picked = [];
+      if (heroCards.length > 0) {
+        const hIdx = Math.floor(Math.random() * heroCards.length);
+        picked.push(heroCards[hIdx]);
+      }
+      const remainingPool = available.filter(c => !picked.includes(c)).sort(() => Math.random() - 0.5);
+      while (picked.length < 3 && remainingPool.length > 0) {
+        picked.push(remainingPool.pop());
+      }
+      const shuffled = picked.sort(() => Math.random() - 0.5);
+
+      // Identify recommended card (priority: hero upgrade, or recruit, or first)
+      const recCard = shuffled.find(c => c.id.startsWith('hero_')) || shuffled[0];
+
+      shuffled.forEach((upg, idx) => {
+        const isHero = upg.id.startsWith('hero_') || upg.category === 'hero';
+        const isRecruit = upg.id.startsWith('recruit_');
+        const isRecommended = upg === recCard;
+
+        // Card Theme Palettes matching Bloons Blitz
+        const cardBg = isHero
+          ? 'bg-gradient-to-b from-[#ffb300] via-[#f57c00] to-[#d84315]'
+          : 'bg-gradient-to-b from-[#29b6f6] via-[#0288d1] to-[#01579b]';
+
+        const ribbonBg = isHero
+          ? 'bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 text-[#451a03]'
+          : 'bg-gradient-to-r from-sky-300 via-cyan-100 to-sky-400 text-[#0c4a6e]';
+
+        // 5-dot tier indicator
+        const currentTier = upg.tier || (isRecruit ? 1 : 2);
+        let tierDots = '';
+        for (let d = 1; d <= 5; d++) {
+          tierDots += `<span class="w-2.5 h-2.5 rounded-full ${d <= currentTier ? 'bg-black shadow-[0_1px_2px_rgba(255,255,255,0.6)]' : 'bg-black/30'} inline-block mx-0.5"></span>`;
+        }
+
         const card = document.createElement('div');
-        card.className = 'upgrade-card btd-panel rounded-3xl p-4 flex flex-col items-center text-center cursor-pointer border-4 border-black';
+        card.className = `relative flex flex-col items-center rounded-[32px] border-[5px] border-[#2a1306] ${cardBg} shadow-[0_14px_28px_rgba(0,0,0,0.7)] p-4 pt-9 cursor-pointer transition-all duration-200 hover:-translate-y-2 hover:scale-[1.03] active:scale-98 select-none`;
+        card.style.backgroundImage = 'repeating-linear-gradient(45deg, rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 12px, transparent 12px, transparent 24px)';
+
         card.innerHTML = `
-          <div class="px-3 py-0.5 rounded-full bg-gradient-to-r ${upg.badgeColor} border-2 border-black text-[10px] font-black text-white tracking-wider mb-2">
-            ${upg.path}
+          <!-- Overlapping Shield Badge at Top -->
+          <div class="absolute -top-7 w-14 h-14 rounded-2xl bg-gradient-to-b from-amber-200 to-amber-500 border-[3.5px] border-[#2a1306] shadow-lg flex items-center justify-center p-1.5 z-20">
+            ${renderBadgeIcon(upg.id || upg.name, upg.icon)}
           </div>
-          <div class="w-14 h-14 rounded-2xl bg-black/45 border-2 border-amber-400/50 flex items-center justify-center text-3xl mb-2">
-            ${upg.icon}
+
+          <!-- Character Ribbon Name -->
+          <div class="px-4 py-1 rounded-full ${ribbonBg} border-[2.5px] border-[#2a1306] font-btd text-xs sm:text-sm tracking-wider uppercase shadow-md mb-2">
+            ${isHero ? gameState.hero.name : (upg.path || 'SQUAD RECRUIT')}
           </div>
-          <h3 class="font-btd text-lg sm:text-xl text-yellow-300 leading-tight mb-1">${upg.name}</h3>
-          <p class="text-xs font-bold text-amber-100/90 flex-1 mb-4">${upg.desc}</p>
-          <button class="w-full py-2.5 rounded-xl btd-btn-green font-btd text-sm text-white tracking-wider">
-            SELECT UPGRADE
-          </button>
+
+          <!-- 5-Dot Tier Progress Indicator -->
+          <div class="flex items-center justify-center mb-3">
+            ${tierDots}
+          </div>
+
+          <!-- Center 3D Model / Emblem Frame -->
+          <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-black/40 border-[3.5px] border-white/60 shadow-[inset_0_4px_8px_rgba(0,0,0,0.6)] flex items-center justify-center p-2 mb-3">
+            ${renderBadgeIcon(upg.id || upg.name, upg.icon)}
+          </div>
+
+          <!-- Title -->
+          <h3 class="font-btd text-xl sm:text-2xl text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] leading-tight text-center mb-1.5">
+            ${upg.name}
+          </h3>
+
+          <!-- Description -->
+          <p class="text-xs sm:text-sm font-bold text-amber-100/95 leading-snug text-center flex-1 mb-4">
+            ${upg.desc}
+          </p>
+
+          <!-- Bottom Action Row: (i) Info Button & Select Action -->
+          <div class="w-full flex items-center justify-center gap-2">
+            <button class="w-9 h-9 rounded-full bg-gradient-to-b from-sky-400 to-blue-600 border-[2.5px] border-white shadow-md flex items-center justify-center text-white font-btd text-sm font-black">
+              i
+            </button>
+          </div>
+
+          <!-- Recommended Hand Pointer Indicator -->
+          ${isRecommended ? `
+            <div class="absolute -bottom-8 flex flex-col items-center animate-bounce z-30">
+              <div class="w-7 h-7 mb-0.5">
+                ${SVG_BADGES.recommended_hand}
+              </div>
+              <div class="px-3 py-0.5 rounded-full bg-amber-400 border-2 border-[#1c0d05] text-[11px] font-btd text-[#1c0d05] uppercase tracking-wider font-black shadow-md">
+                Recommended!
+              </div>
+            </div>
+          ` : ''}
         `;
+
         card.addEventListener('click', () => {
           upg.apply(gameState);
+          updateHeroVisuals();
+          updateCompanionVisuals();
           modal.classList.add('hidden');
           modal.classList.remove('flex');
           gameState.paused = false;
           updateHUD();
         });
+
         container.appendChild(card);
       });
 
       modal.classList.remove('hidden');
       modal.classList.add('flex');
+    }
+
+    function updateHeroVisuals() {
+      if (!heroMesh || !heroMesh.userData) return;
+      const h = gameState.hero;
+      const ud = heroMesh.userData;
+
+      if (h.id === 'quincy') {
+        if (ud.bowArc) {
+          ud.bowArc.scale.set(1.25, 1.25, 1.25);
+          if (h.weaponTier >= 2 || h.volleyTier >= 2) {
+            ud.bowArc.material.color.setHex(0xf59e0b);
+            ud.bowArc.material.emissive = new THREE.Color(0xb45309);
+            ud.bowArc.material.roughness = 0.15;
+            ud.bowArc.material.metalness = 0.85;
+          }
+          if (h.weaponTier >= 3 || h.volleyTier >= 3) {
+            ud.bowArc.material.color.setHex(0x38bdf8);
+            ud.bowArc.material.emissive = new THREE.Color(0x0284c7);
+          }
+        }
+        if (ud.quiverArrows) {
+          const arrColor = (h.weaponTier >= 2 || h.explosiveTier >= 2) ? 0x00ffff : 0xfacc15;
+          ud.quiverArrows.children.forEach(c => {
+            if (c.material) {
+              c.material.color.setHex(arrColor);
+              c.material.emissive = new THREE.Color(arrColor);
+            }
+          });
+        }
+        if (ud.eyepiece) {
+          ud.eyepiece.visible = h.canSeeCamo || h.weaponTier >= 2 || h.opticsTier >= 1;
+        }
+      } else if (h.id === 'gwendolin') {
+        if (ud.tanks && ud.tanks.length > 0) {
+          ud.tanks.forEach(t => {
+            t.scale.set(1.25, 1.25, 1.25);
+            if (h.weaponTier >= 2 || h.explosiveTier >= 2) {
+              t.material.color.setHex(0xff3300);
+              t.material.emissive = new THREE.Color(0xcc2200);
+            }
+          });
+        }
+        if (ud.flameTip) {
+          ud.flameTip.visible = h.weaponTier >= 2 || h.explosiveTier >= 2;
+          ud.flameTip.scale.set(1.4, 1.4, 1.4);
+        }
+      } else if (h.id === 'sauda') {
+        if (ud.swords && ud.swords.length > 0) {
+          ud.swords.forEach((sw, idx) => {
+            sw.scale.set(1.35, 1.35, 1.35);
+            if (h.weaponTier >= 2) {
+              sw.material.color.setHex(idx === 0 ? 0xf43f5e : 0x06b6d4);
+              sw.material.emissive = new THREE.Color(idx === 0 ? 0xbe123c : 0x0284c7);
+            }
+            if (h.weaponTier >= 3 || h.volleyTier >= 3) {
+              sw.material.color.setHex(idx === 0 ? 0xff1493 : 0x38bdf8);
+              sw.material.emissive = new THREE.Color(idx === 0 ? 0xdb2777 : 0x0ea5e9);
+            }
+          });
+        }
+      } else if (h.id === 'supermonkey') {
+        if (ud.laserGoggles) {
+          ud.laserGoggles.visible = h.weaponTier >= 1;
+        }
+        if (ud.plasmaHorns) {
+          ud.plasmaHorns.visible = h.weaponTier >= 2;
+        }
+        if (ud.sunMask) {
+          ud.sunMask.visible = h.weaponTier >= 3 || h.volleyTier >= 3;
+          ud.sunMask.scale.set(1.2, 1.2, 1.2);
+        }
+        if (ud.capeMesh) {
+          if (h.weaponTier >= 3 || h.volleyTier >= 3) {
+            ud.capeMesh.material.color.setHex(0xffd700);
+            ud.capeMesh.material.metalness = 0.75;
+          }
+        }
+      }
+    }
+
+    function updateCompanionVisuals() {
+      const sq = gameState.squad;
+      if (squadMeshes.tack && sq.tack.level >= 2) {
+        squadMeshes.tack.scale.set(1.28, 1.28, 1.28);
+      }
+      if (squadMeshes.boomer && sq.boomer.level >= 2) {
+        squadMeshes.boomer.scale.set(1.25, 1.25, 1.25);
+      }
+      if (squadMeshes.wizard && sq.wizard.level >= 2) {
+        squadMeshes.wizard.scale.set(1.25, 1.25, 1.25);
+      }
+      if (squadMeshes.dartling && sq.dartling.level >= 2) {
+        squadMeshes.dartling.scale.set(1.28, 1.28, 1.28);
+      }
+      if (squadMeshes.mortar && sq.mortar.level >= 2) {
+        squadMeshes.mortar.scale.set(1.28, 1.28, 1.28);
+      }
+      if (squadMeshes.ice && sq.ice.level >= 2) {
+        squadMeshes.ice.scale.set(1.30, 1.30, 1.30);
+      }
     }
 
     function updateHUD() {
@@ -4222,9 +5743,7 @@
       }
     }
 
-    let cameraOffset = new THREE.Vector3(0, 24, 18.5);
-    let camSmoothX = 0;
-    let camSmoothZ = 0;
+    // cameraOffset, camSmoothX, camSmoothZ hoisted to top of script
 
     function calibrateResponsiveCamera() {
       const w = window.innerWidth;
@@ -4260,7 +5779,7 @@
         bloonShadowInstancedMesh.setMatrixAt(i, dummyObj.matrix);
       }
       bloonInstancedMesh.instanceMatrix.needsUpdate = true;
-      bloonGlintInstancedMesh.instanceMatrix.needsUpdate = true;
+      // bloonGlintInstancedMesh.instanceMatrix.needsUpdate = true;
       camoInstancedMesh.instanceMatrix.needsUpdate = true;
       regrowInstancedMesh.instanceMatrix.needsUpdate = true;
       fortifiedInstancedMesh.instanceMatrix.needsUpdate = true;
@@ -4388,6 +5907,8 @@
       document.getElementById('victory-modal').classList.add('hidden');
       document.getElementById('victory-modal').classList.remove('flex');
       updateHUD();
+      updateHeroVisuals();
+      updateCompanionVisuals();
 
       for (let i = 0; i < 3; i++) {
         const a = (i / 3) * Math.PI * 2 + 0.4;
@@ -4419,7 +5940,7 @@
 
       if (gameState.popStreakTimer > 0) {
         gameState.popStreakTimer -= dt;
-        if (gameState.popStreakTimer <= 0) gameState.popStreakCount = 0;
+        if (gameState.popStreakTimer <= 0) { gameState.popStreakCount = 0; }
       }
       const streakHud = document.getElementById('hero-streak-hud');
       if (gameState.popStreakCount >= 5) {
@@ -4431,7 +5952,7 @@
         streakHud.classList.remove('flex');
       }
 
-      // 1. Hero Movement
+      // 1. Hero Movement & Procedural Locomotion
       let moveX = 0;
       let moveZ = 0;
       if (keysPressed['KeyW'] || keysPressed['ArrowUp']) moveZ -= 1;
@@ -4468,8 +5989,49 @@
         h.vz *= 0.8;
       }
 
-      heroMesh.position.set(h.x, Math.sin(tSec * 8) * 0.06, h.z);
-      heroMesh.rotation.y = h.angle;
+      // EXAGGERATED HERO LOCOMOTION & WEAPON ANIMATIONS
+      const isHeroMoving = (moveX !== 0 || moveZ !== 0);
+      if (isHeroMoving) {
+        gameState.heroWalkPhase += dt * 14.0;
+      }
+
+      if (h.id === 'supermonkey') {
+        // SUPER MONKEY STRICTLY FLIES!
+        heroMesh.position.set(h.x, 0.75 + Math.sin(tSec * 4.2) * 0.12, h.z);
+        heroMesh.rotation.y = h.angle;
+        if (hd && hd.flightPose) {
+          hd.flightPose.rotation.x = 0.42; // Streamlined forward flight tilt
+        }
+        if (hd && hd.leftLeg && hd.rightLeg) {
+          hd.leftLeg.rotation.x = 0.38;
+          hd.rightLeg.rotation.x = 0.38;
+        }
+      } else {
+        // BIPEDAL GROUND MONKEYS WALK/RUN WITH EXAGGERATED GAIT
+        const bounceY = isHeroMoving ? Math.abs(Math.sin(gameState.heroWalkPhase * 2)) * 0.22 : Math.sin(tSec * 3) * 0.04;
+        heroMesh.position.set(h.x, bounceY, h.z);
+        heroMesh.rotation.y = h.angle;
+
+        if (hd && hd.flightPose) {
+          hd.flightPose.rotation.x = isHeroMoving ? 0.28 : 0.06; // Sprint lean forward
+        }
+        if (hd && hd.leftLeg && hd.rightLeg) {
+          const legSwing = isHeroMoving ? Math.sin(gameState.heroWalkPhase) * 1.15 : 0;
+          hd.leftLeg.rotation.x = legSwing;
+          hd.rightLeg.rotation.x = -legSwing;
+        }
+        if (hd && hd.leftArmGroup && hd.rightArmGroup && gameState.heroAttackAnimTimer <= 0) {
+          if (h.id === 'benjamin') {
+            // BENJAMIN TYPING ON LAPTOP ANIMATION
+            hd.leftArmGroup.rotation.x = -1.45 + Math.sin(tSec * 26) * 0.18;
+            hd.rightArmGroup.rotation.x = -1.45 - Math.sin(tSec * 26) * 0.18;
+          } else {
+            const armSwing = isHeroMoving ? Math.sin(gameState.heroWalkPhase) * 0.85 : 0;
+            hd.leftArmGroup.rotation.x = -0.65 - armSwing;
+            hd.rightArmGroup.rotation.x = -0.65 + armSwing;
+          }
+        }
+      }
       if (hd && hd.capeVertices && hd.capeGeo) {
         const posArr = hd.capeGeo.attributes.position.array;
         for (let k = 0; k < posArr.length; k += 3) {
@@ -4497,11 +6059,10 @@
       dirLight.target.updateMatrixWorld();
 
       const halfSpan = MEADOW_TILE_SPAN * 0.5;
-      meadowMesh.position.set(
-        Math.round(h.x / TILE_WORLD_STEP) * TILE_WORLD_STEP,
-        0,
-        Math.round(h.z / TILE_WORLD_STEP) * TILE_WORLD_STEP
-      );
+      meadowMesh.position.set(h.x, 0, h.z);
+      if (meadowMat.map) {
+        meadowMat.map.offset.set(h.x / TILE_WORLD_STEP, -h.z / TILE_WORLD_STEP);
+      }
       for (let i = 0; i < meadowProps.length; i++) {
         const p = meadowProps[i];
         if (p.position.x - h.x > halfSpan) p.position.x -= MEADOW_TILE_SPAN;
@@ -4534,7 +6095,8 @@
             h.shotCounter++;
             const baseAngle = Math.atan2(target.x - h.x, target.z - h.z);
             h.angle = baseAngle;
-            if (hd && hd.rightArmGroup) hd.rightArmGroup.rotation.x = -2.25;
+            gameState.heroAttackAnimTimer = 0.22;
+            if (hd && hd.rightArmGroup && hd.leftArmGroup) { hd.rightArmGroup.rotation.x = -1.95; hd.leftArmGroup.rotation.x = -1.95; if (hd.flightPose) hd.flightPose.rotation.y = (h.shotCounter % 2 === 0 ? 0.35 : -0.35); }
             const arcScale = 1.15 + h.volleyTier * 0.22;
             for (let p = 0; p < h.projectiles; p++) {
               const a = baseAngle + (p - (h.projectiles - 1) * 0.5) * 0.35;
@@ -4578,7 +6140,8 @@
             h.fireCooldown = 1.0 / h.fireRate;
             h.shotCounter++;
             h.angle = baseAngle;
-            if (hd && hd.rightArmGroup) hd.rightArmGroup.rotation.x = -1.85;
+            gameState.heroAttackAnimTimer = 0.18;
+            if (hd && hd.rightArmGroup) { hd.rightArmGroup.rotation.x = -2.15; hd.rightArmGroup.position.z = -0.12; }
 
             const isExplosiveVolley = h.explosiveShots && (h.shotCounter % 4 === 0);
             let colorHex = cfg.projColor;
@@ -4793,18 +6356,48 @@
         squadMeshes.sniper.position.set(sx, 0, sz);
         sn.cooldown -= dt * benSquadSpeedMult;
         if (sn.cooldown <= 0) {
-          sn.cooldown = Math.max(0.9, 2.2 - (sn.level - 1) * 0.35);
+          sn.cooldown = Math.max(0.85, 2.0 - (sn.level - 1) * 0.35);
+          let targetX = 0, targetY = 1.0, targetZ = 0, hasTarget = false;
+          const dmg = sn.level >= 4 ? 35 : (sn.level === 3 ? 15 : (sn.level === 2 ? 6 : 3));
+
           if (activeMOABs.length > 0) {
-            const dmg = sn.level >= 4 ? 28 : (sn.level === 3 ? 12 : (sn.level === 2 ? 5 : 3));
-            if (sn.level >= 4) activeMOABs[0].stunTimer = 0.85;
+            targetX = activeMOABs[0].x;
+            targetY = 2.6;
+            targetZ = activeMOABs[0].z;
+            hasTarget = true;
+            if (sn.level >= 4) activeMOABs[0].stunTimer = 0.95;
             damageMOAB(0, dmg, true);
           } else {
-            const target = findNearestEnemy(h.x, h.z, 32, true);
+            const target = findNearestEnemy(sx, sz, 36, true);
             if (target && !target.isMoab) {
-              const dmg = sn.level >= 4 ? 28 : (sn.level === 3 ? 12 : (sn.level === 2 ? 5 : 3));
-              damageBloon(target.index, dmg, true, true, 0, 0, 2.0, false);
+              targetX = bloonX[target.index];
+              targetY = 1.0;
+              targetZ = bloonZ[target.index];
+              hasTarget = true;
+              damageBloon(target.index, dmg, true, true, 0, 0, 2.5, false);
             }
           }
+
+          if (hasTarget) {
+            // Turn sniper model to aim at target
+            const aimAngle = Math.atan2(targetX - sx, targetZ - sz);
+            squadMeshes.sniper.rotation.y = aimAngle;
+            // Play loud high-velocity sniper gunshot SFX
+            soundFX.playSniperShot();
+            // Physical rifle recoil
+            squadMeshes.sniper.rotation.x = -0.35;
+            // Muzzle flash at barrel tip
+            spawnComicPop(sx + Math.sin(aimAngle) * 0.85, 0.85, sz + Math.cos(aimAngle) * 0.85, 0xffe066, 0.65);
+            // Instant golden bullet tracer line to target
+            spawnSniperBulletTracer(sx + Math.sin(aimAngle) * 0.85, 0.85, sz + Math.cos(aimAngle) * 0.85, targetX, targetY, targetZ);
+            // Impact pop starburst & floating critical text
+            spawnComicPop(targetX, targetY, targetZ, 0xffffff, 1.1);
+            spawnFloatingText(targetX, targetY + 0.6, targetZ, `CRACK! ${dmg}`, 'crit');
+          }
+        }
+        // Smooth recoil recovery
+        if (squadMeshes.sniper.rotation.x < 0) {
+          squadMeshes.sniper.rotation.x = Math.min(0, squadMeshes.sniper.rotation.x + dt * 2.8);
         }
       }
 
@@ -4913,7 +6506,17 @@
         const ixPos = h.x + Math.cos(squadOrbitAngle + Math.PI * 1.5) * 3.2;
         const izPos = h.z + Math.sin(squadOrbitAngle + Math.PI * 1.5) * 3.2;
         squadMeshes.ice.position.set(ixPos, 0, izPos);
-        squadMeshes.ice.rotation.y += dt * 1.8;
+
+        // Procedural bipedal stepping for Ice companion
+        const isTeamMoving = (moveX !== 0 || moveZ !== 0);
+        if (squadMeshes.ice.userData && squadMeshes.ice.userData.leftLeg) {
+          const ud = squadMeshes.ice.userData;
+          const legSwing = isTeamMoving ? Math.sin(gameState.heroWalkPhase) * 0.55 : 0;
+          ud.leftLeg.rotation.x = legSwing;
+          ud.rightLeg.rotation.x = -legSwing;
+        }
+
+        // 1. Cryo Freeze Nova Area Pulse
         ice.cooldown -= dt * benSquadSpeedMult;
         if (ice.cooldown <= 0) {
           ice.cooldown = Math.max(1.1, 2.5 - (ice.level - 1) * 0.35);
@@ -4939,6 +6542,56 @@
                 mb.stunTimer = Math.max(mb.stunTimer, 0.9);
                 damageMOAB(m, 35, true);
               }
+            }
+          }
+        }
+
+        // 2. Icicle Impale Long-Range Ice Shard Sniper Weapon (Level 2+)
+        if (ice.level >= 2) {
+          if (typeof ice.impaleTimer === 'undefined') ice.impaleTimer = 0;
+          ice.impaleTimer -= dt * benSquadSpeedMult;
+          if (ice.impaleTimer <= 0) {
+            ice.impaleTimer = Math.max(0.48, 0.88 - (ice.level - 2) * 0.12);
+            let targetX = 0, targetZ = 0, hasTarget = false, isMoabTarget = false;
+            if (activeMOABs.length > 0) {
+              let closestD = 28.0;
+              for (let m = 0; m < activeMOABs.length; m++) {
+                const mb = activeMOABs[m];
+                const d = Math.hypot(mb.x - ixPos, mb.z - izPos);
+                if (d < closestD) {
+                  closestD = d;
+                  targetX = mb.x;
+                  targetZ = mb.z;
+                  hasTarget = true;
+                  isMoabTarget = true;
+                }
+              }
+            }
+            if (!hasTarget) {
+              const enemy = findNearestEnemy(ixPos, izPos, 22.0, heroCanDetectCamo || ice.level >= 3);
+              if (enemy) {
+                targetX = enemy.x;
+                targetZ = enemy.z;
+                hasTarget = true;
+              }
+            }
+            if (hasTarget) {
+              const aimAngle = Math.atan2(targetX - ixPos, targetZ - izPos);
+              squadMeshes.ice.rotation.y = aimAngle;
+              spawnProjectile({
+                x: ixPos + Math.sin(aimAngle) * 0.85,
+                z: izPos + Math.cos(aimAngle) * 0.85,
+                vx: Math.sin(aimAngle) * 26.0,
+                vz: Math.cos(aimAngle) * 26.0,
+                life: 0.95,
+                radius: 0.55,
+                pierce: 3 + ice.level * 2,
+                damage: isMoabTarget ? (18 + ice.level * 8) : (3.5 + ice.level * 1.5),
+                canPopLead: ice.level >= 3,
+                colorHex: 0x38bdf8,
+                scale: 1.35
+              });
+              soundFX.playPop(false, 'WHITE', 1);
             }
           }
         }
@@ -5041,7 +6694,12 @@
       else if (w <= 28) baseSpawnRate = 9.5 + (w - 18) * 0.75;
       else baseSpawnRate = 7.0 + Math.min(12, (w - 28) * 0.5);
 
-      gameState.spawnAccumulator += dt * baseSpawnRate * stageCfg.densityMult;
+      // IN FREEPLAY (WAVE 41+): NO NATURAL REGULAR BLOONS! ONLY MOAB-CLASS BLIMPS SPAWN!
+      if (!gameState.freeplayMode) {
+        gameState.spawnAccumulator += dt * baseSpawnRate * stageCfg.densityMult;
+      } else {
+        gameState.spawnAccumulator = 0; // Natural bloons cease to spawn from perimeter!
+      }
       while (gameState.spawnAccumulator >= 1.0) {
         gameState.spawnAccumulator -= 1.0;
         if (activeBloonCount >= MAX_BLOONS - 25) break;
@@ -5101,14 +6759,25 @@
 
       if (gameState.firstMoabSpawned && (tSec < 595 || gameState.freeplayMode)) {
         gameState.blimpSpawnTimer -= dt;
-        if (gameState.blimpSpawnTimer <= 0 && activeMOABs.length < (gameState.freeplayMode ? 9 : 6)) {
+        const maxBlimps = gameState.freeplayMode ? 16 : 6;
+        if (gameState.blimpSpawnTimer <= 0 && activeMOABs.length < maxBlimps) {
           if (gameState.freeplayMode) {
-            gameState.blimpSpawnTimer = 14;
+            // Rapid MOAB-Class Swarms in Freeplay (Every 3 to 4.5 seconds!)
+            gameState.blimpSpawnTimer = Math.max(2.8, 4.5 - Math.min(2.0, (w - 40) * 0.12));
             const fRoll = Math.random();
-            if (fRoll < 0.22) spawnAirshipBoss('BAD');
-            else if (fRoll < 0.52) spawnAirshipBoss('ZOMG');
-            else if (fRoll < 0.78) spawnAirshipBoss('DDT');
-            else spawnAirshipBoss('BFB');
+            if (w >= 50) {
+              if (fRoll < 0.35) spawnAirshipBoss('BAD');
+              else if (fRoll < 0.65) spawnAirshipBoss('ZOMG');
+              else spawnAirshipBoss('DDT');
+            } else if (w >= 45) {
+              if (fRoll < 0.42) spawnAirshipBoss('DDT');
+              else if (fRoll < 0.78) spawnAirshipBoss('ZOMG');
+              else spawnAirshipBoss('BFB');
+            } else {
+              if (fRoll < 0.45) spawnAirshipBoss('BFB');
+              else if (fRoll < 0.85) spawnAirshipBoss('MOAB');
+              else spawnAirshipBoss('ZOMG');
+            }
           } else if (tSec < 420) {
             gameState.blimpSpawnTimer = 34;
             spawnAirshipBoss('MOAB');
@@ -5389,12 +7058,34 @@
         }
         const s = popMaxScale[i] * (1.15 - (popTimer[i] / 0.085) * 0.4);
         dummyObj.position.set(popX[i], popY[i], popZ[i]);
-        dummyObj.rotation.set(-0.6, 0, i * 0.7);
+        dummyObj.quaternion.copy(camera.quaternion);
+        dummyObj.rotateZ(i * 0.7);
         dummyObj.scale.setScalar(s);
         dummyObj.updateMatrix();
         popInstancedMesh.setMatrixAt(i, dummyObj.matrix);
       }
       popInstancedMesh.instanceMatrix.needsUpdate = true;
+
+      for (let i = _bulletTracers.length - 1; i >= 0; i--) {
+        const bt = _bulletTracers[i];
+        bt.life -= dt;
+        if (bt.life <= 0) {
+          scene.remove(bt.line);
+          bt.line.geometry.dispose();
+          bt.line.material.dispose();
+          _bulletTracers.splice(i, 1);
+        }
+      }
+      for (let i = _matrixBeams.length - 1; i >= 0; i--) {
+        const mb = _matrixBeams[i];
+        mb.life -= dt;
+        if (mb.life <= 0) {
+          scene.remove(mb.line);
+          mb.line.geometry.dispose();
+          mb.line.material.dispose();
+          _matrixBeams.splice(i, 1);
+        }
+      }
 
       for (let i = _explosions.length - 1; i >= 0; i--) {
         const ex = _explosions[i];
