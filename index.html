@@ -365,7 +365,7 @@
 
     <!-- Right: Active Hero Ability Button -->
     <div class="pointer-events-auto flex items-center gap-3">
-      <button id="btn-ability" class="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl btd-btn-gold flex flex-col items-center justify-center relative overflow-hidden cursor-pointer group">
+      <button id="btn-ability" class="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl btd-btn-gold flex flex-col items-center justify-center relative overflow-hidden cursor-pointer group hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg">
         <div id="ability-cooldown-overlay" class="absolute inset-0 bg-black/75 origin-bottom transition-transform duration-100" style="transform: scaleY(0);"></div>
         <span id="ability-icon" class="text-2xl sm:text-3xl leading-none relative z-10 group-hover:scale-110 transition">🏹</span>
         <span id="ability-label" class="font-btd-sm text-[10px] sm:text-xs text-white relative z-10 mt-0.5 tabular-nums">STORM ARROWS</span>
@@ -389,8 +389,8 @@
           <span class="text-white/30">•</span>
           <span>🏆 LIFETIME POPS: <strong id="start-lifetime-pops" class="text-cyan-300">0</strong></span>
         </div>
-        <button id="btn-start-audio" class="px-3 py-0.5 rounded-full bg-stone-900/90 border-2 border-amber-400/80 hover:bg-stone-800 flex items-center gap-1.5 text-xs font-extrabold text-yellow-300 cursor-pointer transition" title="Toggle Title Screen Music">
-          <span id="start-audio-icon">🔊</span>
+        <button id="btn-start-audio" class="px-3 py-1 rounded-full bg-stone-900/90 border-2 border-amber-400/80 hover:bg-stone-800 flex items-center gap-2 text-xs font-extrabold text-yellow-300 cursor-pointer transition hover:scale-105 active:scale-95 shadow-md" title="Toggle Title Screen Music">
+          <span id="start-audio-icon" class="inline-flex items-center justify-center w-5 h-5 min-w-[20px] max-w-[20px] h-5 max-h-[20px] overflow-hidden shrink-0">🔊</span>
           <span id="start-audio-label">MUSIC: ON</span>
         </button>
       </div>
@@ -511,11 +511,69 @@
         <button id="btn-settings-start" class="w-full sm:w-48 py-3 rounded-2xl btd-panel font-btd text-xl text-amber-200 hover:text-white tracking-wider cursor-pointer flex items-center justify-center gap-2 border-3 border-black active:scale-95 transition">
           ⚙️ SETTINGS
         </button>
-        <button id="btn-open-shop-start" class="w-full sm:w-56 py-3 rounded-2xl btd-btn-gold font-btd text-xl text-white tracking-wider cursor-pointer active:scale-95 transition">
+        <button id="btn-open-shop-start" class="w-full sm:w-56 py-3 rounded-2xl btd-btn-gold font-btd text-xl text-white tracking-wider cursor-pointer active:scale-95 transition hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg">
           🏪 MONKEY SHOP
         </button>
-        <button id="btn-start-run" class="w-full sm:w-72 py-3 rounded-2xl btd-btn-green font-btd text-2xl text-white tracking-wider cursor-pointer active:scale-95 transition">
+        <button id="btn-start-run" class="w-full sm:w-72 py-3 rounded-2xl btd-btn-green font-btd text-2xl text-white tracking-wider cursor-pointer active:scale-95 transition hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg">
           START ROAD TRIP!
+        </button>
+      </div>
+    </div>
+  </div>
+
+    <!-- Custom In-Game Hero Unlock Modal (Eliminates Browser Alert Popups) -->
+  <div id="modal-hero-unlock" class="fixed inset-0 z-[80] bg-black/85 backdrop-blur-md hidden items-center justify-center p-4 select-none">
+    <div class="btd-panel rounded-3xl p-6 sm:p-8 max-w-sm w-full flex flex-col items-center text-center border-4 border-[#2a1306] shadow-2xl animate-[fadeIn_0.2s_ease-out]">
+      <div id="unlock-hero-icon" class="w-20 h-20 rounded-2xl bg-black/50 border-3 border-amber-400/60 p-2 flex items-center justify-center mb-3"></div>
+      <h2 id="unlock-hero-title" class="font-btd text-2xl text-yellow-300 mb-1">UNLOCK HERO</h2>
+      <p id="unlock-hero-desc" class="text-xs font-bold text-amber-100/90 mb-4">Recruit this powerful Monkey Hero permanently for your road trip team!</p>
+
+      <div class="w-full bg-black/40 rounded-2xl p-3.5 border-2 border-black/60 mb-5 flex flex-col gap-2">
+        <div class="flex justify-between text-xs font-extrabold text-amber-200">
+          <span>REQUIRED COST:</span>
+          <span id="unlock-hero-cost" class="font-btd text-yellow-300 text-sm">$0 MM</span>
+        </div>
+        <div class="flex justify-between text-xs font-extrabold text-amber-200">
+          <span>YOUR MONKEY MONEY:</span>
+          <span id="unlock-hero-balance" class="font-btd text-cyan-300 text-sm">$0 MM</span>
+        </div>
+      </div>
+
+      <div class="w-full flex gap-3">
+        <button id="btn-cancel-unlock" class="flex-1 py-3 rounded-2xl btd-panel font-btd text-sm text-stone-300 hover:text-white cursor-pointer transition hover:scale-105 active:scale-95">
+          CANCEL
+        </button>
+        <button id="btn-confirm-unlock" class="flex-1 py-3 rounded-2xl btd-btn-green font-btd text-sm text-white cursor-pointer transition hover:scale-105 active:scale-95 hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg">
+          UNLOCK NOW!
+        </button>
+      </div>
+    </div>
+  </div>
+
+    <!-- Custom In-Game Hero Unlock Modal (Eliminates Browser Alert Popups) -->
+  <div id="modal-hero-unlock" class="fixed inset-0 z-[80] bg-black/85 backdrop-blur-md hidden items-center justify-center p-4 select-none">
+    <div class="btd-panel rounded-3xl p-6 sm:p-8 max-w-sm w-full flex flex-col items-center text-center border-4 border-[#2a1306] shadow-2xl animate-[fadeIn_0.2s_ease-out]">
+      <div id="unlock-hero-icon" class="w-20 h-20 rounded-2xl bg-black/50 border-3 border-amber-400/60 p-2 flex items-center justify-center mb-3"></div>
+      <h2 id="unlock-hero-title" class="font-btd text-2xl text-yellow-300 mb-1">UNLOCK HERO</h2>
+      <p id="unlock-hero-desc" class="text-xs font-bold text-amber-100/90 mb-4">Recruit this powerful Monkey Hero permanently for your road trip team!</p>
+
+      <div class="w-full bg-black/40 rounded-2xl p-3.5 border-2 border-black/60 mb-5 flex flex-col gap-2">
+        <div class="flex justify-between text-xs font-extrabold text-amber-200">
+          <span>REQUIRED COST:</span>
+          <span id="unlock-hero-cost" class="font-btd text-yellow-300 text-sm">$0 MM</span>
+        </div>
+        <div class="flex justify-between text-xs font-extrabold text-amber-200">
+          <span>YOUR MONKEY MONEY:</span>
+          <span id="unlock-hero-balance" class="font-btd text-cyan-300 text-sm">$0 MM</span>
+        </div>
+      </div>
+
+      <div class="w-full flex gap-3">
+        <button id="btn-cancel-unlock" class="flex-1 py-3 rounded-2xl btd-panel font-btd text-sm text-stone-300 hover:text-white cursor-pointer transition hover:scale-105 active:scale-95">
+          CANCEL
+        </button>
+        <button id="btn-confirm-unlock" class="flex-1 py-3 rounded-2xl btd-btn-green font-btd text-sm text-white cursor-pointer transition hover:scale-105 active:scale-95 hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg">
+          UNLOCK NOW!
         </button>
       </div>
     </div>
@@ -536,7 +594,7 @@
 
       <div id="shop-items-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full mb-5"></div>
 
-      <button id="btn-close-shop" class="w-full sm:w-64 py-3 rounded-2xl btd-btn-green font-btd text-xl text-white cursor-pointer">
+      <button id="btn-close-shop" class="w-full sm:w-64 py-3 rounded-2xl btd-btn-green font-btd text-xl text-white cursor-pointer hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg">
         DONE
       </button>
     </div>
@@ -573,7 +631,7 @@
           <span class="font-btd-sm text-xs text-yellow-300">UI ICON STYLE</span>
           <span class="text-[10px] text-stone-300">Choose between rich 3D vector badges or classic emojis</span>
         </div>
-        <button id="btn-toggle-icon-style" class="py-1 px-3.5 rounded-xl btd-btn-gold font-btd-sm text-xs text-white cursor-pointer active:scale-95 transition">
+        <button id="btn-toggle-icon-style" class="py-1 px-3.5 rounded-xl btd-btn-gold font-btd-sm text-xs text-white cursor-pointer active:scale-95 transition hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg">
           3D BADGES
         </button>
       </div>
@@ -644,10 +702,10 @@
         <button id="btn-settings-my-build" class="flex-1 py-2.5 rounded-2xl btd-btn-blue font-btd text-sm sm:text-base text-white cursor-pointer active:scale-95 transition">
           📜 MY BUILD
         </button>
-        <button id="btn-change-hero" class="flex-1 py-2.5 rounded-2xl btd-btn-gold font-btd text-sm sm:text-base text-white cursor-pointer">
+        <button id="btn-change-hero" class="flex-1 py-2.5 rounded-2xl btd-btn-gold font-btd text-sm sm:text-base text-white cursor-pointer hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg">
           HEROES
         </button>
-        <button id="btn-close-settings" class="flex-1 py-2.5 rounded-2xl btd-btn-green font-btd text-sm sm:text-base text-white cursor-pointer">
+        <button id="btn-close-settings" class="flex-1 py-2.5 rounded-2xl btd-btn-green font-btd text-sm sm:text-base text-white cursor-pointer hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg">
           RESUME
         </button>
       </div>
@@ -686,7 +744,7 @@
         <!-- Rendered dynamically -->
       </div>
 
-      <button id="btn-resume-from-build" class="w-full py-2.5 rounded-xl btd-btn-green font-btd text-sm text-white tracking-wider cursor-pointer">
+      <button id="btn-resume-from-build" class="w-full py-2.5 rounded-xl btd-btn-green font-btd text-sm text-white tracking-wider cursor-pointer hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg">
         RESUME GAME
       </button>
     </div>
@@ -741,10 +799,10 @@
         You conquered all 40 Waves and destroyed the Big Airship of Doom! Claim your Victory Trophy or enter scaling Endless Freeplay!
       </p>
       <div class="w-full flex flex-col sm:flex-row gap-3">
-        <button id="btn-end-victory" class="flex-1 py-3.5 rounded-2xl btd-btn-gold font-btd text-base text-white tracking-wider cursor-pointer">
+        <button id="btn-end-victory" class="flex-1 py-3.5 rounded-2xl btd-btn-gold font-btd text-base text-white tracking-wider cursor-pointer hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg">
           🏆 VICTORY! END RUN
         </button>
-        <button id="btn-enter-freeplay" class="flex-1 py-3.5 rounded-2xl btd-btn-green font-btd text-base text-white tracking-wider cursor-pointer">
+        <button id="btn-enter-freeplay" class="flex-1 py-3.5 rounded-2xl btd-btn-green font-btd text-base text-white tracking-wider cursor-pointer hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg">
           ♾️ ENDLESS FREEPLAY
         </button>
       </div>
@@ -778,10 +836,10 @@
       </div>
 
       <div class="w-full flex gap-3">
-        <button id="btn-gameover-hero" class="flex-1 py-3.5 rounded-2xl btd-btn-gold font-btd text-lg text-white tracking-wider cursor-pointer">
+        <button id="btn-gameover-hero" class="flex-1 py-3.5 rounded-2xl btd-btn-gold font-btd text-lg text-white tracking-wider cursor-pointer hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg">
           HEROES
         </button>
-        <button id="btn-restart" class="flex-1 py-3.5 rounded-2xl btd-btn-green font-btd text-lg text-white tracking-wider cursor-pointer">
+        <button id="btn-restart" class="flex-1 py-3.5 rounded-2xl btd-btn-green font-btd text-lg text-white tracking-wider cursor-pointer hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg">
           PLAY AGAIN!
         </button>
       </div>
@@ -806,6 +864,7 @@
 
     let gameState = null;
     let activeMOABs = [];
+    let heroMesh = null;
     let cameraOffset = new THREE.Vector3(0, 24, 18.5);
     let camSmoothX = 0;
     let camSmoothZ = 0;
@@ -1907,7 +1966,7 @@
     // ========================================================================
     const SVG_BADGES = {
       // --- HEROES ---
-      quincy: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+      quincy: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 64 64" fill="none">
         <defs>
           <radialGradient id="q-head" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#a16207"/><stop offset="70%" stop-color="#713f12"/><stop offset="100%" stop-color="#451a03"/></radialGradient>
           <linearGradient id="q-gog" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fb923c"/><stop offset="50%" stop-color="#ea580c"/><stop offset="100%" stop-color="#9a3412"/></linearGradient>
@@ -1941,7 +2000,7 @@
         <path d="M8 52C8 52 14 36 28 36" stroke="url(#q-bow)" stroke-width="4.5" stroke-linecap="round" filter="drop-shadow(0 2px 2px #000)"/>
       </svg>`,
 
-      gwendolin: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+      gwendolin: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 64 64" fill="none">
         <defs>
           <radialGradient id="gw-head" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#b45309"/><stop offset="70%" stop-color="#78350f"/><stop offset="100%" stop-color="#451a03"/></radialGradient>
           <linearGradient id="gw-flame" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#dc2626"/><stop offset="50%" stop-color="#ea580c"/><stop offset="100%" stop-color="#facc15"/></linearGradient>
@@ -1959,7 +2018,7 @@
         <path d="M32 16C32 16 37 21 37 26C37 28.8 34.8 31 32 31C29.2 31 27 28.8 27 26C27 22 32 16 32 16Z" fill="#fef08a"/>
       </svg>`,
 
-      sauda: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+      sauda: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 64 64" fill="none">
         <defs>
           <radialGradient id="sa-head" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#9a3412"/><stop offset="70%" stop-color="#7c2d12"/><stop offset="100%" stop-color="#451a03"/></radialGradient>
           <linearGradient id="sa-blade" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f8fafc"/><stop offset="40%" stop-color="#cbd5e1"/><stop offset="100%" stop-color="#64748b"/></linearGradient>
@@ -1978,7 +2037,7 @@
         <path d="M12 10L16 14M52 10L48 14" stroke="#facc15" stroke-width="4" stroke-linecap="round"/>
       </svg>`,
 
-      obyn: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+      obyn: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 64 64" fill="none">
         <defs>
           <radialGradient id="ob-head" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#115e59"/><stop offset="70%" stop-color="#0f766e"/><stop offset="100%" stop-color="#042f2e"/></radialGradient>
           <linearGradient id="ob-leaf" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#86efac"/><stop offset="60%" stop-color="#22c55e"/><stop offset="100%" stop-color="#15803d"/></linearGradient>
@@ -1997,7 +2056,7 @@
         <path d="M32 40V48M28 44H36" stroke="#22c55e" stroke-width="2" stroke-linecap="round"/>
       </svg>`,
 
-      benjamin: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+      benjamin: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 64 64" fill="none">
         <defs>
           <radialGradient id="bn-head" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#9a3412"/><stop offset="70%" stop-color="#713f12"/><stop offset="100%" stop-color="#451a03"/></radialGradient>
           <linearGradient id="bn-lap" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#e2e8f0"/><stop offset="60%" stop-color="#94a3b8"/><stop offset="100%" stop-color="#475569"/></linearGradient>
@@ -2019,7 +2078,7 @@
         <path d="M12 56H52L46 62H18Z" fill="url(#bn-lap)" stroke="#1c0d05" stroke-width="3"/>
       </svg>`,
 
-      supermonkey: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+      supermonkey: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 64 64" fill="none">
         <defs>
           <radialGradient id="sm-head" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#1d4ed8"/><stop offset="70%" stop-color="#1e40af"/><stop offset="100%" stop-color="#172554"/></radialGradient>
           <linearGradient id="sm-cape" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ef4444"/><stop offset="70%" stop-color="#dc2626"/><stop offset="100%" stop-color="#991b1b"/></linearGradient>
@@ -2044,7 +2103,7 @@
       </svg>`,
 
       // --- TOWERS & SQUAD COMPANIONS ---
-      dart: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+      dart: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 64 64" fill="none">
         <defs>
           <radialGradient id="dt-head" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#a16207"/><stop offset="70%" stop-color="#713f12"/><stop offset="100%" stop-color="#451a03"/></radialGradient>
           <linearGradient id="dt-feather" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f87171"/><stop offset="60%" stop-color="#dc2626"/><stop offset="100%" stop-color="#991b1b"/></linearGradient>
@@ -2059,7 +2118,7 @@
         <path d="M8 56L16 48L12 52L6 50Z" fill="url(#dt-feather)" stroke="#1c0d05" stroke-width="2.5"/>
       </svg>`,
 
-      tack: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+      tack: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 64 64" fill="none">
         <defs>
           <radialGradient id="tk-body" cx="40%" cy="35%" r="65%"><stop offset="0%" stop-color="#fb7185"/><stop offset="60%" stop-color="#e11d48"/><stop offset="100%" stop-color="#881337"/></radialGradient>
           <linearGradient id="tk-rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fecdd3"/><stop offset="100%" stop-color="#be123c"/></linearGradient>
@@ -2080,7 +2139,7 @@
         <circle cx="30" cy="30" r="2.5" fill="#fff"/>
       </svg>`,
 
-      bomb: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+      bomb: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 64 64" fill="none">
         <defs>
           <radialGradient id="bm-body" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#475569"/><stop offset="60%" stop-color="#1e293b"/><stop offset="100%" stop-color="#020617"/></radialGradient>
         </defs>
@@ -2096,7 +2155,7 @@
         <path d="M22 0L24 4M20 2L24 2" stroke="#fef08a" stroke-width="2"/>
       </svg>`,
 
-      boomerang: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+      boomerang: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 64 64" fill="none">
         <defs>
           <radialGradient id="bo-head" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#a16207"/><stop offset="70%" stop-color="#713f12"/><stop offset="100%" stop-color="#451a03"/></radialGradient>
           <linearGradient id="bo-wood" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fef08a"/><stop offset="50%" stop-color="#eab308"/><stop offset="100%" stop-color="#a16207"/></linearGradient>
@@ -2110,7 +2169,7 @@
         <path d="M28 17L32 20M36 21L40 25" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round"/>
       </svg>`,
 
-      ninja: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+      ninja: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 64 64" fill="none">
         <defs>
           <radialGradient id="nj-head" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#312e81"/><stop offset="70%" stop-color="#1e1b4b"/><stop offset="100%" stop-color="#020617"/></radialGradient>
         </defs>
@@ -2125,7 +2184,7 @@
         <circle cx="32" cy="30" r="3.5" fill="#e11d48" stroke="#1c0d05" stroke-width="2"/>
       </svg>`,
 
-      wizard: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+      wizard: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 64 64" fill="none">
         <defs>
           <linearGradient id="wz-hat" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#9333ea"/><stop offset="60%" stop-color="#6b21a8"/><stop offset="100%" stop-color="#3b0764"/></linearGradient>
           <radialGradient id="wz-orb" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#f0abfc"/><stop offset="60%" stop-color="#c084fc"/><stop offset="100%" stop-color="#7e22ce"/></radialGradient>
@@ -2145,7 +2204,7 @@
         <circle cx="48" cy="48" r="9" fill="url(#wz-orb)" stroke="#f5d0fe" stroke-width="2" filter="drop-shadow(0 0 6px #c084fc)"/>
       </svg>`,
 
-      ice: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+      ice: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 64 64" fill="none">
         <defs>
           <linearGradient id="ic-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#e0f2fe"/><stop offset="50%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#0284c7"/></linearGradient>
         </defs>
@@ -2157,7 +2216,7 @@
         <circle cx="38" cy="30" r="3" fill="#fff" filter="drop-shadow(0 0 4px #38bdf8)"/>
       </svg>`,
 
-      sniper: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+      sniper: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 64 64" fill="none">
         <defs>
           <radialGradient id="sn-head" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#a16207"/><stop offset="70%" stop-color="#713f12"/><stop offset="100%" stop-color="#451a03"/></radialGradient>
           <linearGradient id="sn-hat" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#4d7c0f"/><stop offset="50%" stop-color="#65a30d"/><stop offset="100%" stop-color="#365314"/></linearGradient>
@@ -2173,7 +2232,7 @@
         <circle cx="46" cy="24" r="2.5" fill="#ef4444"/>
       </svg>`,
 
-      mortar: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+      mortar: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 64 64" fill="none">
         <defs>
           <linearGradient id="mr-tube" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#64748b"/><stop offset="60%" stop-color="#334155"/><stop offset="100%" stop-color="#0f172a"/></linearGradient>
         </defs>
@@ -2187,7 +2246,7 @@
       </svg>`,
 
       // --- 3D UPGRADE & WEAPON EMBLEMS ---
-      storm_of_arrows: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+      storm_of_arrows: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 64 64" fill="none">
         <defs>
           <linearGradient id="soa-arr" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#ea580c"/><stop offset="50%" stop-color="#facc15"/><stop offset="100%" stop-color="#fff"/></linearGradient>
         </defs>
@@ -2199,7 +2258,7 @@
         <path d="M50 54L44 22M44 22L39 28M44 22L49 28" stroke="url(#soa-arr)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>`,
 
-      the_zone: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+      the_zone: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 64 64" fill="none">
         <!-- Golden Diamond Plaque with Glowing Avatar Silhouette -->
         <rect x="32" y="6" width="38" height="38" rx="6" transform="rotate(45 32 6)" fill="#ca8a04" stroke="#1c0d05" stroke-width="4"/>
         <rect x="32" y="9" width="34" height="34" rx="4" transform="rotate(45 32 9)" fill="#eab308"/>
@@ -2210,7 +2269,7 @@
         <path d="M23 44C23 37 41 37 41 44Z" fill="#1c0d05"/>
       </svg>`,
 
-      blade_shooter: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+      blade_shooter: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 64 64" fill="none">
         <defs>
           <linearGradient id="bs-blade" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f8fafc"/><stop offset="50%" stop-color="#94a3b8"/><stop offset="100%" stop-color="#475569"/></linearGradient>
         </defs>
@@ -2223,7 +2282,7 @@
         <path d="M12 18C18 8 36 8 46 16M22 50C34 58 50 54 56 42" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round"/>
       </svg>`,
 
-      icicle_impale: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+      icicle_impale: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 64 64" fill="none">
         <!-- Giant Multifaceted Crystal Blue Ice Javelin -->
         <path d="M32 4L42 24L36 58L32 60L28 58L22 24Z" fill="#38bdf8" stroke="#1c0d05" stroke-width="4"/>
         <path d="M32 4L32 60M22 24L32 32L42 24" stroke="#e0f2fe" stroke-width="2.5"/>
@@ -2231,7 +2290,7 @@
         <circle cx="32" cy="20" r="14" stroke="#bae6fd" stroke-width="2" stroke-dasharray="3 3"/>
       </svg>`,
 
-      sun_avatar: `<svg class="w-full h-full" viewBox="0 0 64 64" fill="none">
+      sun_avatar: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 64 64" fill="none">
         <!-- Radiant Golden Sun Mask with Fiery Corona Rays -->
         <circle cx="32" cy="32" r="16" fill="#facc15" stroke="#1c0d05" stroke-width="4"/>
         <circle cx="32" cy="32" r="10" fill="#f59e0b" stroke="#1c0d05" stroke-width="2.5"/>
@@ -2243,7 +2302,7 @@
       </svg>`,
 
       // --- GUI & CONTROL 3D BADGES ---
-      gear: `<svg class="w-full h-full" viewBox="0 0 48 48" fill="none">
+      gear: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 48 48" fill="none">
         <defs>
           <linearGradient id="ui-gear" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fef08a"/><stop offset="50%" stop-color="#eab308"/><stop offset="100%" stop-color="#a16207"/></linearGradient>
         </defs>
@@ -2256,7 +2315,7 @@
         <rect x="36" y="21" width="8" height="6" rx="2" fill="url(#ui-gear)" stroke="#1c0d05" stroke-width="2.5"/>
       </svg>`,
 
-      sound_on: `<svg class="w-full h-full" viewBox="0 0 48 48" fill="none">
+      sound_on: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 48 48" fill="none">
         <defs>
           <linearGradient id="ui-snd" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fde047"/><stop offset="60%" stop-color="#ca8a04"/><stop offset="100%" stop-color="#713f12"/></linearGradient>
         </defs>
@@ -2266,12 +2325,12 @@
         <path d="M33 16C37 20 37 28 33 32M39 12C45 18 45 30 39 36" stroke="#facc15" stroke-width="3" stroke-linecap="round"/>
       </svg>`,
 
-      sound_off: `<svg class="w-full h-full" viewBox="0 0 48 48" fill="none">
+      sound_off: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 48 48" fill="none">
         <path d="M12 18H18L28 10V38L18 30H12Z" fill="#94a3b8" stroke="#1c0d05" stroke-width="3" stroke-linejoin="round"/>
         <path d="M32 20L42 28M42 20L32 28" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round"/>
       </svg>`,
 
-      music: `<svg class="w-full h-full" viewBox="0 0 48 48" fill="none">
+      music: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 48 48" fill="none">
         <!-- 3D Beamed Eighth Notes -->
         <path d="M18 32V14L34 10V28" stroke="#1c0d05" stroke-width="4.5" stroke-linecap="round"/>
         <path d="M18 14L34 10" stroke="#facc15" stroke-width="4.5" stroke-linecap="round"/>
@@ -2279,7 +2338,7 @@
         <circle cx="30" cy="30" r="6" fill="#facc15" stroke="#1c0d05" stroke-width="3"/>
       </svg>`,
 
-      scroll: `<svg class="w-full h-full" viewBox="0 0 48 48" fill="none">
+      scroll: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 48 48" fill="none">
         <defs>
           <linearGradient id="ui-scr" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fef3c7"/><stop offset="60%" stop-color="#fde68a"/><stop offset="100%" stop-color="#d97706"/></linearGradient>
         </defs>
@@ -2290,7 +2349,7 @@
         <circle cx="25" cy="24" r="5" fill="#dc2626" stroke="#1c0d05" stroke-width="2"/>
       </svg>`,
 
-      shop: `<svg class="w-full h-full" viewBox="0 0 48 48" fill="none">
+      shop: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 48 48" fill="none">
         <!-- Wooden Shop Awning -->
         <path d="M8 20L12 8H36L40 20Z" fill="#ef4444" stroke="#1c0d05" stroke-width="3"/>
         <path d="M14 8L16 20M22 8L22 20M28 8L28 20M34 8L32 20" stroke="#facc15" stroke-width="3"/>
@@ -2298,7 +2357,7 @@
         <rect x="16" y="26" width="16" height="14" fill="#fde047" stroke="#1c0d05" stroke-width="2"/>
       </svg>`,
 
-      coin: `<svg class="w-full h-full" viewBox="0 0 48 48" fill="none">
+      coin: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 48 48" fill="none">
         <defs>
           <radialGradient id="ui-cn" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#fef08a"/><stop offset="60%" stop-color="#eab308"/><stop offset="100%" stop-color="#854d0e"/></radialGradient>
         </defs>
@@ -2307,14 +2366,14 @@
         <path d="M24 14V34M18 20C18 16 30 16 30 22C30 28 18 26 18 32" stroke="#1c0d05" stroke-width="3" stroke-linecap="round"/>
       </svg>`,
 
-      trophy: `<svg class="w-full h-full" viewBox="0 0 48 48" fill="none">
+      trophy: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 48 48" fill="none">
         <!-- 3D Golden Victory Cup -->
         <path d="M14 10H34V24C34 30 24 32 24 32C24 32 14 30 14 24Z" fill="#facc15" stroke="#1c0d05" stroke-width="3"/>
         <path d="M14 14H8C8 22 14 24 14 24M34 14H40C40 22 34 24 34 24" stroke="#ca8a04" stroke-width="3" stroke-linecap="round"/>
         <path d="M24 32V38M16 38H32" stroke="#1c0d05" stroke-width="3.5" stroke-linecap="round"/>
       </svg>`,
 
-      bloon: `<svg class="w-full h-full" viewBox="0 0 48 48" fill="none">
+      bloon: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 48 48" fill="none">
         <defs>
           <radialGradient id="ui-bl" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#f87171"/><stop offset="60%" stop-color="#dc2626"/><stop offset="100%" stop-color="#7f1d1d"/></radialGradient>
         </defs>
@@ -2325,7 +2384,7 @@
         <circle cx="18" cy="14" r="3" fill="#fff" opacity="0.65"/>
       </svg>`,
 
-      recommended_hand: `<svg class="w-full h-full" viewBox="0 0 48 48" fill="none">
+      recommended_hand: `<svg class="w-full h-full max-w-full max-h-full object-contain" viewBox="0 0 48 48" fill="none">
         <!-- Cartoon Monkey Hand Pointing Upward -->
         <path d="M24 6V26M24 26C20 26 16 28 16 34V42H32V34C32 28 28 26 24 26Z" fill="#a16207" stroke="#1c0d05" stroke-width="3.5"/>
         <rect x="21" y="6" width="6" height="24" rx="3" fill="#ca8a04" stroke="#1c0d05" stroke-width="2.5"/>
@@ -3756,6 +3815,40 @@
     const slashPierce = new Int16Array(MAX_SLASHES);
     const slashDamage = new Float32Array(MAX_SLASHES);
     const slashCanPopLead = new Uint8Array(MAX_SLASHES);
+    
+    // Benjamin Cyber Matrix Beam & Binary Hacking Particles
+    const cyberBeamGeo = new THREE.CylinderGeometry(0.06, 0.06, 1, 8);
+    cyberBeamGeo.rotateX(Math.PI / 2);
+    const cyberBeamMat = new THREE.MeshBasicMaterial({ color: 0x22d3ee, transparent: true, opacity: 0.88 });
+    const cyberBeamMesh = new THREE.Mesh(cyberBeamGeo, cyberBeamMat);
+    cyberBeamMesh.visible = false;
+    scene.add(cyberBeamMesh);
+
+    function triggerBenjaminHackBeam(targetX, targetY, targetZ) {
+      if (!heroMesh) return;
+      const hx = heroMesh.position.x;
+      const hy = heroMesh.position.y + 0.6;
+      const hz = heroMesh.position.z;
+      const dx = targetX - hx;
+      const dy = targetY - hy;
+      const dz = targetZ - hz;
+      const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      if (dist < 0.1) return;
+
+      cyberBeamMesh.position.set(hx + dx * 0.5, hy + dy * 0.5, hz + dz * 0.5);
+      cyberBeamMesh.scale.set(1, 1, dist);
+      cyberBeamMesh.lookAt(targetX, targetY, targetZ);
+      cyberBeamMesh.visible = true;
+
+      // Spawn floating 0101 matrix cyber text over hacked bloon
+      const binaryDigits = ['0101', '1010', '0011', '1100', '1001'][Math.floor(Math.random() * 5)];
+      spawnFloatingText(targetX, targetY + 0.5, targetZ, `<${binaryDigits}>`, 'crit');
+
+      setTimeout(() => {
+        cyberBeamMesh.visible = false;
+      }, 120);
+    }
+
     const slashHitMemory = Array.from({ length: MAX_SLASHES }, () => new Set());
     let slashCursor = 0;
 
@@ -3948,7 +4041,7 @@
     }
 
     let selectedHeroId = 'quincy';
-    let heroMesh = ProceduralAssetForge.createMonkeyHero(selectedHeroId);
+    heroMesh = ProceduralAssetForge.createMonkeyHero(selectedHeroId);
     scene.add(heroMesh);
 
     function rebuildHeroMesh(heroId) {
@@ -4039,6 +4132,63 @@
       supermonkey: 7500
     };
 
+                function openHeroUnlockModal(hid, price) {
+      const unlockModal = document.getElementById('modal-hero-unlock');
+      const titleEl = document.getElementById('unlock-hero-title');
+      const costEl = document.getElementById('unlock-hero-cost');
+      const balanceEl = document.getElementById('unlock-hero-balance');
+      const iconEl = document.getElementById('unlock-hero-icon');
+      const confirmBtn = document.getElementById('btn-confirm-unlock');
+      const cancelBtn = document.getElementById('btn-cancel-unlock');
+
+      if (!unlockModal) return;
+      soundFX.init();
+      titleEl.textContent = `UNLOCK ${hid.toUpperCase()}`;
+      costEl.textContent = `${price.toLocaleString()} MM`;
+      balanceEl.textContent = `${persistentStats.monkeyMoney.toLocaleString()} MM`;
+      iconEl.innerHTML = renderBadgeIcon(hid, '👑');
+
+      const canAfford = persistentStats.monkeyMoney >= price;
+      confirmBtn.textContent = canAfford ? `BUY FOR ${price.toLocaleString()}!` : 'NEED MORE MM!';
+      confirmBtn.className = canAfford
+        ? 'flex-1 py-3 rounded-2xl btd-btn-green font-btd text-sm text-white cursor-pointer transition hover:scale-105 active:scale-95'
+        : 'flex-1 py-3 rounded-2xl bg-stone-700/80 font-btd text-sm text-stone-400 cursor-not-allowed';
+
+      const newConfirm = confirmBtn.cloneNode(true);
+      confirmBtn.parentNode.replaceChild(newConfirm, confirmBtn);
+
+      newConfirm.addEventListener('click', () => {
+        if (persistentStats.monkeyMoney >= price) {
+          persistentStats.monkeyMoney -= price;
+          if (!persistentStats.unlockedHeroes) persistentStats.unlockedHeroes = ['quincy', 'gwendolin'];
+          persistentStats.unlockedHeroes.push(hid);
+          savePersistentStats();
+          soundFX.playLevelUpFanfare();
+          unlockModal.classList.add('hidden');
+          unlockModal.classList.remove('flex');
+          refreshHeroCardsUI();
+          syncMoneyLabels();
+          document.querySelectorAll('.hero-card').forEach(c => {
+            if (c.getAttribute('data-hero') === hid) c.classList.add('selected');
+            else c.classList.remove('selected');
+          });
+          selectedHeroId = hid;
+          rebuildHeroMesh(hid);
+          spawnFloatingText(0, 1.8, 0, `UNLOCKED ${hid.toUpperCase()}!`, 'crit');
+        } else {
+          soundFX.playCeramicOrLead(true);
+        }
+      });
+
+      cancelBtn.onclick = () => {
+        unlockModal.classList.add('hidden');
+        unlockModal.classList.remove('flex');
+      };
+
+      unlockModal.classList.remove('hidden');
+      unlockModal.classList.add('flex');
+    }
+
     function refreshHeroCardsUI() {
       if (!persistentStats.unlockedHeroes) persistentStats.unlockedHeroes = ['quincy', 'gwendolin'];
       document.querySelectorAll('.hero-card').forEach(card => {
@@ -4046,18 +4196,17 @@
         const isUnlocked = persistentStats.unlockedHeroes.includes(hid);
         const price = HERO_UNLOCK_PRICES[hid] || 0;
 
-        let badgeOverlay = card.querySelector('.hero-lock-overlay');
-        if (!isUnlocked) {
-          card.classList.add('opacity-75', 'border-stone-700');
-          if (!badgeOverlay) {
-            badgeOverlay = document.createElement('div');
-            badgeOverlay.className = 'hero-lock-overlay mt-1 w-full py-1 rounded-lg bg-amber-600/90 border border-amber-300 text-center font-btd text-[10px] text-white tabular-nums';
-            card.appendChild(badgeOverlay);
+        let badgeOverlay = card.querySelector('.hero-price-tag') || card.querySelector('.hero-lock-overlay') || card.querySelector('.px-2');
+        if (badgeOverlay) {
+          if (isUnlocked) {
+            badgeOverlay.className = 'px-2 py-0.5 rounded-full bg-emerald-600/90 border border-emerald-400 text-[10px] font-btd text-white uppercase mb-1 shadow';
+            badgeOverlay.textContent = price === 0 ? 'FREE' : 'UNLOCKED';
+            card.classList.remove('opacity-75', 'border-stone-700');
+          } else {
+            badgeOverlay.className = 'hero-price-tag px-2 py-0.5 rounded-full bg-amber-600/90 border border-yellow-400 text-[10px] font-btd text-yellow-200 uppercase mb-1 shadow';
+            badgeOverlay.textContent = `🔒 $${price.toLocaleString()}`;
+            card.classList.add('opacity-75');
           }
-          badgeOverlay.textContent = `🔒 UNLOCK • ${price}`;
-        } else {
-          card.classList.remove('opacity-75', 'border-stone-700');
-          if (badgeOverlay) badgeOverlay.remove();
         }
       });
     }
@@ -4087,7 +4236,7 @@
               <span class="text-xs font-bold text-amber-100/85">${def.desc}</span>
             </div>
           </div>
-          <button class="w-full py-2 rounded-xl ${canAfford ? 'btd-btn-green cursor-pointer' : 'bg-stone-800 border-2 border-black opacity-60 cursor-not-allowed'} font-btd text-sm text-white tabular-nums">
+          <button class="w-full py-2 rounded-xl ${canAfford ? 'btd-btn-green cursor-pointer' : 'bg-stone-800 border-2 border-black opacity-60 cursor-not-allowed'} font-btd text-sm text-white tabular-nums hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg">
             ${isMax ? 'MAX RANK REACHED' : `UPGRADE • $${cost}`}
           </button>
         `;
@@ -4978,19 +5127,8 @@
         const price = HERO_UNLOCK_PRICES[hid] || 0;
 
         if (!isUnlocked) {
-          if (persistentStats.monkeyMoney >= price) {
-            persistentStats.monkeyMoney -= price;
-            persistentStats.unlockedHeroes.push(hid);
-            savePersistentStats();
-            soundFX.playLevelUpFanfare();
-            refreshHeroCardsUI();
-            syncMoneyLabels();
-            spawnFloatingText(0, 1.8, 0, `UNLOCKED ${hid.toUpperCase()}!`, 'crit');
-          } else {
-            soundFX.playCeramicOrLead(true);
-            alert(`NEED ${price} MONKEY MONEY TO UNLOCK ${hid.toUpperCase()}! You currently have ${persistentStats.monkeyMoney}.`);
-            return;
-          }
+          openHeroUnlockModal(hid, price);
+          return;
         }
 
         document.querySelectorAll('.hero-card').forEach(c => c.classList.remove('selected'));
@@ -5073,13 +5211,28 @@
       });
     }
 
-        function refreshAllUIIcons() {
+                function refreshAllUIIcons() {
+      const heroEmojis = {
+        quincy: '🏹',
+        gwendolin: '🔥',
+        obyn: '🐺',
+        sauda: '⚔️',
+        benjamin: '💻',
+        supermonkey: '🦸‍♂️'
+      };
+
+      const mapEmojis = {
+        meadow: '🌼',
+        frozen: '❄️',
+        castle: '🏰'
+      };
+
       // 1. Hero selection cards on Title screen
       document.querySelectorAll('.hero-card').forEach(card => {
         const hid = card.getAttribute('data-hero');
-        const iconContainer = card.querySelector('div.text-2xl') || card.querySelector('div.w-11');
+        const iconContainer = card.querySelector('div.w-11') || card.querySelector('div.text-2xl');
         if (iconContainer && hid) {
-          iconContainer.innerHTML = renderBadgeIcon(hid, '👑');
+          iconContainer.innerHTML = renderBadgeIcon(hid, heroEmojis[hid] || '🐵');
         }
       });
 
@@ -5088,7 +5241,7 @@
         const mid = card.getAttribute('data-map');
         const iconContainer = card.querySelector('div.w-11');
         if (iconContainer && mid) {
-          iconContainer.innerHTML = renderBadgeIcon(mid, '🗺️');
+          iconContainer.innerHTML = renderBadgeIcon(mid, mapEmojis[mid] || '🗺️');
         }
       });
 
@@ -5389,7 +5542,92 @@
       }
     }
 
-        function openLevelUpModal() {
+        
+    // ========================================================================
+    // 3D MODEL PREVIEW GENERATOR FOR LEVEL-UP UPGRADE CARDS
+    // Renders the actual Three.js character models (Tack, Ninja, Wizard, Boomer,
+    // Quincy, Sauda, Gwen, Ben, Super) with studio lighting and comic outlines
+    // ========================================================================
+    class UpgradeCard3DRenderer {
+      constructor() {
+        this.cache = new Map();
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = 240;
+        this.canvas.height = 190;
+        try {
+          this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, alpha: true, antialias: true });
+          this.renderer.setSize(240, 190);
+          this.renderer.setClearColor(0x000000, 0);
+          this.scene = new THREE.Scene();
+          this.camera = new THREE.PerspectiveCamera(38, 240 / 190, 0.1, 50);
+          this.camera.position.set(0, 0.7, 3.1);
+          this.camera.lookAt(0, 0.45, 0);
+
+          // Studio Directional & Rim Lighting
+          const amb = new THREE.AmbientLight(0xffffff, 1.4);
+          this.scene.add(amb);
+          const sun = new THREE.DirectionalLight(0xffedd5, 3.2);
+          sun.position.set(2, 4, 3);
+          this.scene.add(sun);
+          const rim = new THREE.DirectionalLight(0x38bdf8, 2.5);
+          rim.position.set(-2, 2, -2);
+          this.scene.add(rim);
+        } catch(e) {
+          console.warn("Card3DRenderer fallback:", e);
+        }
+      }
+
+      getModelSnapshot(key) {
+        if (this.cache.has(key)) return this.cache.get(key);
+        if (!this.renderer) return '';
+
+        while (this.scene.children.length > 3) {
+          this.scene.remove(this.scene.children[this.scene.children.length - 1]);
+        }
+
+        let mesh = null;
+        const lk = String(key).toLowerCase();
+        if (lk.includes('tack')) mesh = ProceduralAssetForge.createTackTurret();
+        else if (lk.includes('bomb')) mesh = ProceduralAssetForge.createBombCannon();
+        else if (lk.includes('boomer')) mesh = ProceduralAssetForge.createBoomerangMesh();
+        else if (lk.includes('ninja')) mesh = ProceduralAssetForge.createNinjaMesh();
+        else if (lk.includes('wizard')) mesh = ProceduralAssetForge.createWizardMesh();
+        else if (lk.includes('ice')) mesh = ProceduralAssetForge.createIceSpire();
+        else if (lk.includes('sniper')) mesh = ProceduralAssetForge.createSniperMesh();
+        else if (lk.includes('mortar')) mesh = ProceduralAssetForge.createMortarMesh();
+        else if (lk.includes('quincy')) mesh = ProceduralAssetForge.createMonkeyHero('quincy');
+        else if (lk.includes('gwendolin')) mesh = ProceduralAssetForge.createMonkeyHero('gwendolin');
+        else if (lk.includes('sauda')) mesh = ProceduralAssetForge.createMonkeyHero('sauda');
+        else if (lk.includes('obyn')) mesh = ProceduralAssetForge.createMonkeyHero('obyn');
+        else if (lk.includes('benjamin')) mesh = ProceduralAssetForge.createMonkeyHero('benjamin');
+        else if (lk.includes('supermonkey') || lk.includes('super')) mesh = ProceduralAssetForge.createMonkeyHero('supermonkey');
+        else if (lk.includes('blade')) {
+          mesh = new THREE.Group();
+          const b1 = ProceduralAssetForge.createCrescentSlashGeometry();
+          const bMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.9, roughness: 0.1 });
+          const m1 = new THREE.Mesh(b1, bMat);
+          mesh.add(m1);
+        } else {
+          mesh = ProceduralAssetForge.createMonkeyHero('quincy');
+        }
+
+        if (mesh) {
+          mesh.position.set(0, 0, 0);
+          mesh.rotation.set(0.1, -0.35, 0);
+          mesh.scale.set(0.85, 0.85, 0.85);
+          this.scene.add(mesh);
+          this.renderer.render(this.scene, this.camera);
+          const dataUrl = this.canvas.toDataURL('image/png');
+          this.cache.set(key, dataUrl);
+          return dataUrl;
+        }
+        return '';
+      }
+    }
+
+    const card3DRenderer = new UpgradeCard3DRenderer();
+
+    function openLevelUpModal() {
       gameState.paused = true;
       soundFX.playLevelUpFanfare();
       const modal = document.getElementById('levelup-modal');
@@ -6121,7 +6359,8 @@
             if (bloonActive[bIdx] === 1) {
               hackedCount++;
               damageBloon(bIdx, h.damage, true, true, 0, 0, 0.5, false);
-              spawnComicPop(bloonX[bIdx], 1.1, bloonZ[bIdx], 0xffffff, 1.15);
+              spawnComicPop(bloonX[bIdx], 1.1, bloonZ[bIdx], 0x22d3ee, 1.25);
+              triggerBenjaminHackBeam(bloonX[bIdx], 1.0, bloonZ[bIdx]);
             }
           }
           if (hackedCount > 0 || activeMOABs.length > 0) {
@@ -7219,5 +7458,9 @@
 
     requestAnimationFrame(stepFrame);
   </script>
+
+  <!-- Non-Destructive Bloons Blitz UI Overrides -->
+  <link rel="stylesheet" href="src/bloons_ui_override.css">
+  <script src="src/bloons_ui_override.js"></script>
 </body>
 </html>

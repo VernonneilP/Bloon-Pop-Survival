@@ -1,0 +1,451 @@
+/* ========================================================================
+   BLOONS BLITZ 3D SURVIVOR - OFFICIAL BLOONS BLITZ UI OVERRIDE STYLESHEET
+   100% Matches Official Bloons Blitz Mobile References
+   ======================================================================== */
+
+/* 1. Translucent Arena Blur Backdrop over Live Meadow */
+#levelup-modal {
+  background: rgba(10, 26, 8, 0.52) !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+  z-index: 9999 !important;
+}
+
+/* 2. Bloons Blitz Banner Cards (Outer Container: OVERFLOW VISIBLE for Overhanging Ribbons & Portraits) */
+.blitz-upgrade-card {
+  position: relative !important;
+  width: 242px !important;
+  min-height: 485px !important;
+  overflow: visible !important; /* CRITICAL: Allows top portrait and ribbons to overhang cleanly */
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  padding: 24px 12px 42px 12px !important;
+  cursor: pointer !important;
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease !important;
+  box-sizing: border-box !important;
+  user-select: none !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.blitz-upgrade-card:hover {
+  transform: scale(1.045) translateY(-8px) !important;
+}
+
+/* Middle Card Stagger */
+.blitz-upgrade-card.stagger-middle {
+  transform: translateY(26px) !important;
+}
+
+.blitz-upgrade-card.stagger-middle:hover {
+  transform: translateY(18px) scale(1.045) !important;
+}
+
+/* 3. Inner Card Background Layer (HOLDS CHEVRON CLIP-PATH & HARLEQUIN PATTERN) */
+.card-bg-layer {
+  position: absolute !important;
+  inset: 0 !important;
+  clip-path: polygon(0% 0%, 100% 0%, 100% 92%, 50% 100%, 0% 92%) !important;
+  border-radius: 28px !important;
+  border: 3.5px solid #ffffff !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+  box-sizing: border-box !important;
+}
+
+/* Harlequin Diamond Gradients on Background Layer */
+.card-theme-hero .card-bg-layer {
+  background: 
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.12) 0 12px, transparent 12px 24px),
+    repeating-linear-gradient(-45deg, rgba(255,255,255,0.12) 0 12px, transparent 12px 24px),
+    linear-gradient(180deg, #ffe033 0%, #ff9800 48%, #e65100 100%) !important;
+  box-shadow: 0 14px 32px rgba(0,0,0,0.65), 0 0 20px rgba(255,160,0,0.4) !important;
+}
+
+.card-theme-squad .card-bg-layer {
+  background: 
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.10) 0 12px, transparent 12px 24px),
+    repeating-linear-gradient(-45deg, rgba(255,255,255,0.10) 0 12px, transparent 12px 24px),
+    linear-gradient(180deg, #38b6ff 0%, #0288d1 50%, #01579b 100%) !important;
+  box-shadow: 0 14px 32px rgba(0,0,0,0.65), 0 0 20px rgba(2,136,209,0.4) !important;
+}
+
+/* 4. Top Peak Portrait Shield (OVERHANGS TOP EDGE BY 28PX, ZERO CLIPPING) */
+.blitz-peak-portrait {
+  position: absolute !important;
+  top: -28px !important;
+  width: 60px !important;
+  height: 60px !important;
+  border-radius: 20px !important;
+  background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%) !important;
+  border: 3.5px solid #2a1306 !important;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.6) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 30 !important;
+  overflow: hidden !important;
+  padding: 3px !important;
+}
+.blitz-peak-portrait img, .blitz-peak-portrait svg {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+}
+
+/* 5. Full-Width Angled Character Ribbon (OVERHANGS LEFT & RIGHT BORDERS) */
+.blitz-ribbon {
+  position: relative !important;
+  width: 108% !important;
+  margin-left: -4% !important;
+  padding: 4px 12px !important;
+  border-radius: 10px !important;
+  font-family: 'Luckiest Guy', cursive !important;
+  font-size: 0.90rem !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  text-align: center !important;
+  margin-top: 14px !important;
+  margin-bottom: 6px !important;
+  border: 2.5px solid #ffffff !important;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.35), 0 4px 8px rgba(0,0,0,0.4) !important;
+  z-index: 25 !important;
+  box-sizing: border-box !important;
+}
+
+.blitz-ribbon-hero {
+  background: linear-gradient(180deg, #fff59d 0%, #ffd54f 50%, #ffb300 100%) !important;
+  color: #1a0d00 !important;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.8) !important;
+}
+
+.blitz-ribbon-squad {
+  background: linear-gradient(180deg, #4fc3f7 0%, #039be5 50%, #0277bd 100%) !important;
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8) !important;
+}
+
+/* 6. 5-Dot Tier Indicator */
+.blitz-tier-dots {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  margin-bottom: 6px !important;
+  z-index: 20 !important;
+}
+.blitz-tier-dot {
+  width: 9px !important;
+  height: 9px !important;
+  border-radius: 9999px !important;
+  background: #1a0d00 !important;
+  box-shadow: 0 1px 2px rgba(255,255,255,0.5) !important;
+}
+.blitz-tier-dot.empty {
+  background: rgba(0,0,0,0.25) !important;
+  box-shadow: none !important;
+}
+
+/* 7. Center Display: Frameless 3D Model for Recruits OR Framed 3D Emblem for Upgrades */
+.blitz-model-viewport-frameless {
+  width: 170px !important;
+  height: 155px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 2px 0 6px 0 !important;
+  position: relative !important;
+  z-index: 20 !important;
+}
+.blitz-model-viewport-frameless img {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+  filter: drop-shadow(0 10px 16px rgba(0,0,0,0.65)) !important;
+}
+
+.blitz-emblem-frame {
+  width: 126px !important;
+  height: 126px !important;
+  border-radius: 20px !important;
+  background: rgba(0,0,0,0.3) !important;
+  border: 3.5px solid #ffffff !important;
+  box-shadow: inset 0 4px 10px rgba(0,0,0,0.65), 0 6px 14px rgba(0,0,0,0.4) !important;
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 6px 0 8px 0 !important;
+  padding: 8px !important;
+  z-index: 20 !important;
+}
+
+.blitz-emblem-frame img, .blitz-emblem-frame svg {
+  max-width: 85% !important;
+  max-height: 85% !important;
+  object-fit: contain !important;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)) !important;
+}
+
+.blitz-emblem-frame.frame-diamond {
+  transform: rotate(45deg) !important;
+  width: 105px !important;
+  height: 105px !important;
+  margin: 16px 0 16px 0 !important;
+}
+.blitz-emblem-frame.frame-diamond > * {
+  transform: rotate(-45deg) !important;
+}
+
+.blitz-roman-numeral {
+  position: absolute !important;
+  bottom: 4px !important;
+  right: 6px !important;
+  font-family: 'Luckiest Guy', cursive !important;
+  font-size: 0.95rem !important;
+  color: #ffffff !important;
+  text-shadow: -1px -1px 0 #1a0d00, 1px -1px 0 #1a0d00, -1px 1px 0 #1a0d00, 1px 1px 0 #1a0d00, 0 2px 4px rgba(0,0,0,0.9) !important;
+  z-index: 22 !important;
+}
+
+/* 8. Crisp Readable Text (Thin 1px Dark Outline - Zero Smear) */
+.blitz-card-title {
+  font-family: 'Luckiest Guy', cursive, sans-serif !important;
+  color: #ffffff !important;
+  font-size: 1.25rem !important;
+  line-height: 1.15 !important;
+  text-align: center !important;
+  margin: 4px 0 3px 0 !important;
+  text-shadow: 
+    -1px -1px 0 #1a0d00,
+     1px -1px 0 #1a0d00,
+    -1px  1px 0 #1a0d00,
+     1px  1px 0 #1a0d00,
+     0 2px 4px rgba(0,0,0,0.85) !important;
+  letter-spacing: 0.03em !important;
+  word-break: break-word !important;
+  z-index: 20 !important;
+}
+
+.blitz-card-desc {
+  font-family: 'Nunito', sans-serif !important;
+  font-weight: 800 !important;
+  font-size: 0.78rem !important;
+  line-height: 1.25 !important;
+  color: #ffffff !important;
+  text-align: center !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.9) !important;
+  flex: 1 1 auto !important;
+  margin-bottom: 6px !important;
+  padding: 0 6px !important;
+  z-index: 20 !important;
+}
+
+/* 9. Circular (i) Info Button */
+.blitz-info-btn {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 9999px !important;
+  background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%) !important;
+  border: 2.5px solid #2a1306 !important;
+  color: #2a1306 !important;
+  font-family: 'Luckiest Guy', cursive !important;
+  font-size: 0.95rem !important;
+  font-weight: 900 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.4) !important;
+  z-index: 20 !important;
+}
+
+/* 10. Recommended Hand Pointer */
+.blitz-recommended-wrapper {
+  position: absolute !important;
+  bottom: -32px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  z-index: 40 !important;
+  pointer-events: none !important;
+}
+.blitz-recommended-pill {
+  padding: 2px 10px !important;
+  border-radius: 9999px !important;
+  background: #facc15 !important;
+  border: 2px solid #1a0d00 !important;
+  font-family: 'Luckiest Guy', cursive !important;
+  font-size: 0.72rem !important;
+  color: #1a0d00 !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+/* 11. Bottom Action Buttons: Red Banish, Blue Refresh, Yellow Pin */
+.blitz-bottom-actions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  margin-top: 24px !important;
+  z-index: 30 !important;
+}
+
+.blitz-btn-action {
+  font-family: 'Luckiest Guy', cursive !important;
+  border: 2.5px solid #ffffff !important;
+  border-radius: 14px !important;
+  padding: 8px 18px !important;
+  font-size: 0.95rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  cursor: pointer !important;
+  transition: transform 0.15s ease, filter 0.15s ease !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8) !important;
+  user-select: none !important;
+}
+
+.blitz-btn-action:hover {
+  transform: scale(1.05) translateY(-2px) !important;
+  filter: brightness(1.1) !important;
+}
+.blitz-btn-action:active {
+  transform: scale(0.96) translateY(2px) !important;
+}
+
+.btn-blitz-banish {
+  background: linear-gradient(180deg, #ff4d4d 0%, #cc0000 100%) !important;
+  box-shadow: 0 5px 0 #800000, 0 8px 16px rgba(0,0,0,0.5) !important;
+  color: #ffffff !important;
+}
+
+.btn-blitz-refresh {
+  background: linear-gradient(180deg, #38d6ff 0%, #0099e6 100%) !important;
+  box-shadow: 0 5px 0 #0059b3, 0 8px 16px rgba(0,0,0,0.5) !important;
+  color: #ffffff !important;
+}
+
+.btn-blitz-pin {
+  background: linear-gradient(180deg, #ffea38 0%, #ffaa00 100%) !important;
+  box-shadow: 0 5px 0 #b37400, 0 8px 16px rgba(0,0,0,0.5) !important;
+  color: #241306 !important;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.6) !important;
+}
+
+.blitz-badge-cost {
+  padding: 1px 6px !important;
+  border-radius: 6px !important;
+  background: rgba(0,0,0,0.45) !important;
+  font-family: 'Nunito', sans-serif !important;
+  font-size: 0.72rem !important;
+  font-weight: 900 !important;
+  border: 1px solid rgba(255,255,255,0.3) !important;
+}
+
+/* 12. Global 3D In-Line Badges & Stage Dioramas */
+.badge-3d-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  vertical-align: middle !important;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.45)) !important;
+}
+.badge-3d-icon svg, .badge-3d-icon img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+}
+
+.stage-diorama-container {
+  width: 48px !important;
+  height: 48px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5) !important;
+  border: 2px solid rgba(255,255,255,0.4) !important;
+}
+
+/* 13. Matrix Green Binary Hack Text & Glitch Glow */
+#floating-texts div,
+.matrix-hack-text {
+  color: #00ff66 !important;
+  text-shadow: 0 0 12px #00ff66, 0 0 20px rgba(0,255,102,0.95), 0 2px 4px #000000 !important;
+  font-family: 'Luckiest Guy', monospace !important;
+  letter-spacing: 0.08em !important;
+  font-weight: 900 !important;
+}
+
+/* 14. Main Menu Hero Price Tags & Lock Badges */
+.hero-price-tag {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding: 3px 10px !important;
+  border-radius: 9999px !important;
+  background: linear-gradient(180deg, #d97706 0%, #b45309 100%) !important;
+  border: 1.5px solid #fde68a !important;
+  font-family: 'Luckiest Guy', cursive !important;
+  font-size: 0.72rem !important;
+  color: #fef08a !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5) !important;
+  letter-spacing: 0.04em !important;
+}
+
+.hero-unlocked-tag {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding: 3px 10px !important;
+  border-radius: 9999px !important;
+  background: linear-gradient(180deg, #16a34a 0%, #15803d 100%) !important;
+  border: 1.5px solid #86efac !important;
+  font-family: 'Luckiest Guy', cursive !important;
+  font-size: 0.72rem !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5) !important;
+  letter-spacing: 0.04em !important;
+}
+
+/* 15. Main Menu Large 3D Hero Portrait Cards (Replacing Tiny 2D Squares) */
+.hero-3d-portrait {
+  width: 76px !important;
+  height: 76px !important;
+  min-width: 76px !important;
+  min-height: 76px !important;
+  border-radius: 20px !important;
+  background: radial-gradient(circle at 50% 35%, rgba(60, 30, 15, 0.8) 0%, rgba(12, 10, 8, 0.96) 100%) !important;
+  border: 2.5px solid #f59e0b !important;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.8), 0 6px 14px rgba(0,0,0,0.6) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  margin: 4px 0 6px 0 !important;
+  position: relative !important;
+  flex-shrink: 0 !important;
+}
+
+.hero-3d-portrait img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.75)) !important;
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.hero-card:hover .hero-3d-portrait img {
+  transform: scale(1.12) !important;
+}
+
+.hero-card.selected .hero-3d-portrait {
+  border-color: #facc15 !important;
+  box-shadow: 0 0 18px rgba(250, 204, 21, 0.65), inset 0 2px 6px rgba(0,0,0,0.8) !important;
+}
+
+
