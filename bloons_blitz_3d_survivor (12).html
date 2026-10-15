@@ -3365,75 +3365,95 @@
     const TILE_WORLD_STEP = MEADOW_PLANE_SIZE / MEADOW_TEX_REPEAT;
 
     const createMeadowCanvasTexture = (stageId = 'meadow') => {
+      const S = 1024;
       const c = document.createElement('canvas');
-      c.width = 1024;
-      c.height = 1024;
+      c.width = S;
+      c.height = S;
       const ctx = c.getContext('2d');
 
       const palettes = {
-        meadow: { base: '#68b030', mid: '#5ea328', light: '#76bf3b', tuftDark: '#47821b', tuftLight: '#88d14a' },
-        frozen: { base: '#4a8db7', mid: '#3f7fa8', light: '#5ba0cb', tuftDark: '#2f668a', tuftLight: '#bae6fd' },
-        castle: { base: '#333846', mid: '#2b303c', light: '#3d4354', tuftDark: '#1e222b', tuftLight: '#525b70' }
+        meadow: { base: '#62a82c', patchA: '#599c25', patchB: '#6ab332', bladeDark: '#48821a', bladeLight: '#78c23e' },
+        frozen: { base: '#4a8db7', patchA: '#3f7fa8', patchB: '#5ba0cb', bladeDark: '#2f668a', bladeLight: '#bae6fd' },
+        castle: { base: '#333846', patchA: '#2b303c', patchB: '#3d4354', bladeDark: '#1e222b', bladeLight: '#525b70' }
       };
       const pal = palettes[stageId] || palettes.meadow;
 
-      // 1. Smooth Painterly Base (Zero Checkerboard Squares!)
       ctx.fillStyle = pal.base;
-      ctx.fillRect(0, 0, 1024, 1024);
+      ctx.fillRect(0, 0, S, S);
 
-      // Soft organic rolling grass patches
-      for (let i = 0; i < 90; i++) {
-        const x = Math.random() * 1024;
-        const y = Math.random() * 1024;
-        const r = 60 + Math.random() * 110;
-        const grad = ctx.createRadialGradient(x, y, r * 0.1, x, y, r);
-        grad.addColorStop(0, i % 2 === 0 ? pal.light : pal.mid);
-        grad.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(x, y, r, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      // 2. Hand-Painted 3-Blade Grass Tufts (Matches unnamed.jpg)
-      ctx.lineCap = 'round';
-      for (let i = 0; i < 420; i++) {
-        const gx = Math.random() * 1024;
-        const gy = Math.random() * 1024;
-        ctx.strokeStyle = i % 3 === 0 ? pal.tuftLight : pal.tuftDark;
-        ctx.lineWidth = 3.2;
-        for (let b = -1; b <= 1; b++) {
-          ctx.beginPath();
-          ctx.moveTo(gx, gy);
-          ctx.quadraticCurveTo(gx + b * 6, gy - 8, gx + b * 10, gy - 14);
-          ctx.stroke();
-        }
-      }
-
-      // 3. Tiny White & Yellow 5-Petal Wildflowers (Meadow only)
-      if (stageId === 'meadow') {
-        for (let f = 0; f < 85; f++) {
-          const fx = Math.random() * 1024;
-          const fy = Math.random() * 1024;
-          const petalCol = f % 3 === 0 ? '#fde047' : '#ffffff';
-          ctx.fillStyle = petalCol;
-          for (let p = 0; p < 5; p++) {
-            const a = (p / 5) * Math.PI * 2;
-            ctx.beginPath();
-            ctx.arc(fx + Math.cos(a) * 4.2, fy + Math.sin(a) * 4.2, 2.6, 0, Math.PI * 2);
-            ctx.fill();
+      // Helper to draw across all 9 toroidal tile offsets so edges are 100% seamless!
+      const drawSeamless = (drawCb) => {
+        for (let ox = -S; ox <= S; ox += S) {
+          for (let oy = -S; oy <= S; oy += S) {
+            ctx.save();
+            ctx.translate(ox, oy);
+            drawCb();
+            ctx.restore();
           }
-          ctx.fillStyle = '#f97316';
+        }
+      };
+
+      // 1. Subtle seamless organic grass tone variation (zero bright polka-dot blobs)
+      for (let i = 0; i < 45; i++) {
+        const x = Math.random() * S;
+        const y = Math.random() * S;
+        const r = 90 + Math.random() * 120;
+        const col = i % 2 === 0 ? pal.patchA : pal.patchB;
+        drawSeamless(() => {
+          const grad = ctx.createRadialGradient(x, y, r * 0.1, x, y, r);
+          grad.addColorStop(0, col);
+          grad.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = grad;
           ctx.beginPath();
-          ctx.arc(fx, fy, 2.2, 0, Math.PI * 2);
+          ctx.arc(x, y, r, 0, Math.PI * 2);
           ctx.fill();
+        });
+      }
+
+      // 2. Seamless soft grass tufts
+      ctx.lineCap = 'round';
+      for (let i = 0; i < 260; i++) {
+        const gx = Math.random() * S;
+        const gy = Math.random() * S;
+        const stroke = i % 3 === 0 ? pal.bladeLight : pal.bladeDark;
+        drawSeamless(() => {
+          ctx.strokeStyle = stroke;
+          ctx.lineWidth = 2.6;
+          for (let b = -1; b <= 1; b++) {
+            ctx.beginPath();
+            ctx.moveTo(gx + b * 2, gy);
+            ctx.quadraticCurveTo(gx + b * 5, gy - 6, gx + b * 8, gy - 11);
+            ctx.stroke();
+          }
+        });
+      }
+
+      // 3. Seamless tiny wildflowers (Meadow only)
+      if (stageId === 'meadow') {
+        for (let f = 0; f < 55; f++) {
+          const fx = Math.random() * S;
+          const fy = Math.random() * S;
+          const pCol = f % 3 === 0 ? '#fde047' : '#ffffff';
+          drawSeamless(() => {
+            ctx.fillStyle = pCol;
+            for (let p = 0; p < 5; p++) {
+              const a = (p / 5) * Math.PI * 2;
+              ctx.beginPath();
+              ctx.arc(fx + Math.cos(a) * 3.6, fy + Math.sin(a) * 3.6, 2.2, 0, Math.PI * 2);
+              ctx.fill();
+            }
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.arc(fx, fy, 1.8, 0, Math.PI * 2);
+            ctx.fill();
+          });
         }
       }
 
       const tex = new THREE.CanvasTexture(c);
       tex.wrapS = THREE.RepeatWrapping;
       tex.wrapT = THREE.RepeatWrapping;
-      tex.repeat.set(10, 10);
+      tex.repeat.set(12, 12);
       return tex;
     };
 
@@ -7320,15 +7340,23 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
           continue;
         }
 
-        const pulse = 1.0 + Math.sin(tSec * 6.5 + blopPhase[i]) * 0.16;
-        const oy = 0.45 + Math.sin(tSec * 4.2 + blopPhase[i]) * 0.12;
-        dummyObj.position.set(blopX[i], oy, blopZ[i]);
-        dummyObj.rotation.set(-0.45, tSec * 3.2 + blopPhase[i], 0);
-        dummyObj.scale.setScalar(cfgOrb.scale * pulse);
+        const pulse = 1.0 + Math.sin(tSec * 6.5 + blopPhase[i]) * 0.14;
+        // 2D Cartoon Star XP Pickup with White Inner Star Core (Matches unnamed.jpg!)
+        dummyObj.position.set(blopX[i], 0.12, blopZ[i]);
+        dummyObj.rotation.set(-Math.PI / 2, 0, tSec * 1.5 + blopPhase[i]);
+        dummyObj.scale.set(cfgOrb.scale * pulse, cfgOrb.scale * pulse, 0.25);
+        dummyObj.updateMatrix();
+        blopHaloMesh.setMatrixAt(i, dummyObj.matrix);
+
+        dummyObj.position.set(blopX[i], 0.16, blopZ[i]);
+        dummyObj.scale.set(cfgOrb.scale * pulse * 0.48, cfgOrb.scale * pulse * 0.48, 0.30);
+        dummyObj.updateMatrix();
+        blopCoreMesh.setMatrixAt(i, dummyObj.matrix);
+
+        dummyObj.position.set(0, -999, 0);
+        dummyObj.scale.set(0.001, 0.001, 0.001);
         dummyObj.updateMatrix();
         blopGlowMesh.setMatrixAt(i, dummyObj.matrix);
-        blopHaloMesh.setMatrixAt(i, dummyObj.matrix);
-        blopCoreMesh.setMatrixAt(i, dummyObj.matrix);
       }
       blopGlowMesh.instanceMatrix.needsUpdate = true;
       blopHaloMesh.instanceMatrix.needsUpdate = true;

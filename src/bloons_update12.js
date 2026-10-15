@@ -728,54 +728,16 @@
   function installSmoothBloonGeometry() {
     if (typeof ProceduralAssetForge === 'undefined') return;
 
+    // Keep Regular Bloons as 2D Camera-Facing Billboards in 3D Space (2 triangles -> Zero Lag & 1:1 Reference Look!)
     ProceduralAssetForge.createBloonGeometry = function() {
-      const points = [];
-      // 1. Knot base
-      points.push(new THREE.Vector2(0.0, -1.02));
-      points.push(new THREE.Vector2(0.12, -0.98));
-      points.push(new THREE.Vector2(0.14, -0.94));
-      points.push(new THREE.Vector2(0.07, -0.90));
-      points.push(new THREE.Vector2(0.09, -0.84));
-
-      // 2. Lower body: plump, smooth balloon shape up to equator
-      const stepsLower = 32;
-      const yNeck = -0.84;
-      const yEq = 0.15;
-      const rNeck = 0.09;
-      const rMax = 0.98;
-      for (let i = 1; i < stepsLower; i++) {
-        const u = i / stepsLower;
-        const ease = Math.sin(u * Math.PI * 0.5);
-        const r = rNeck + (rMax - rNeck) * Math.pow(ease, 1.15);
-        const y = yNeck + (yEq - yNeck) * u;
-        points.push(new THREE.Vector2(r, y));
-      }
-
-      // 3. Equator
-      points.push(new THREE.Vector2(rMax, yEq));
-
-      // 4. Upper dome: pure smooth spherical arc from equator to apex (ZERO cone pointiness!)
-      const stepsTop = 32;
-      const hTop = 0.68;
-      for (let i = 1; i <= stepsTop; i++) {
-        const theta = (i / stepsTop) * (Math.PI * 0.5);
-        const r = rMax * Math.cos(theta);
-        const y = yEq + hTop * Math.sin(theta);
-        points.push(new THREE.Vector2(Math.max(0.0, r), y));
-      }
-
-      const geo = new THREE.LatheGeometry(points, 36);
-      geo.computeVertexNormals();
-      return geo;
+      return new THREE.PlaneGeometry(1.85, 2.25, 1, 1);
     };
 
     if (typeof scene !== 'undefined') {
       scene.traverse(obj => {
-        if (obj.isInstancedMesh && obj.count >= 1000) {
+        if (obj.isInstancedMesh && obj.count >= 1000 && obj.geometry && obj.geometry.attributes && obj.geometry.attributes.aLivery) {
           const newGeo = ProceduralAssetForge.createBloonGeometry();
-          if (obj.geometry && obj.geometry.attributes && obj.geometry.attributes.aLivery) {
-            newGeo.setAttribute('aLivery', obj.geometry.attributes.aLivery);
-          }
+          newGeo.setAttribute('aLivery', obj.geometry.attributes.aLivery);
           obj.geometry = newGeo;
         }
       });
