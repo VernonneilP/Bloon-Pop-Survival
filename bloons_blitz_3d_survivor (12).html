@@ -3372,88 +3372,104 @@
       const ctx = c.getContext('2d');
 
       const palettes = {
-        meadow: { base: '#62a82c', patchA: '#599c25', patchB: '#6ab332', bladeDark: '#48821a', bladeLight: '#78c23e' },
-        frozen: { base: '#4a8db7', patchA: '#3f7fa8', patchB: '#5ba0cb', bladeDark: '#2f668a', bladeLight: '#bae6fd' },
-        castle: { base: '#333846', patchA: '#2b303c', patchB: '#3d4354', bladeDark: '#1e222b', bladeLight: '#525b70' }
+        meadow: { base: '#65b032', patchA: '#5ea62c', patchB: '#6cb638', tuftDark: '#49871d', tuftMid: '#539623', flowerA: '#ffffff', flowerB: '#bae6fd', flowerC: '#fde047' },
+        frozen: { base: '#4a8db7', patchA: '#4283ac', patchB: '#5396c0', tuftDark: '#2f668a', tuftMid: '#38759c', flowerA: '#e0f2fe', flowerB: '#bae6fd', flowerC: '#ffffff' },
+        castle: { base: '#353b49', patchA: '#2f3542', patchB: '#3b4252', tuftDark: '#20242d', tuftMid: '#282d38', flowerA: '#94a3b8', flowerB: '#64748b', flowerC: '#cbd5e1' }
       };
       const pal = palettes[stageId] || palettes.meadow;
 
       ctx.fillStyle = pal.base;
       ctx.fillRect(0, 0, S, S);
 
-      // Helper to draw across all 9 toroidal tile offsets so edges are 100% seamless!
-      const drawSeamless = (drawCb) => {
+      const drawSeamless = (cb) => {
         for (let ox = -S; ox <= S; ox += S) {
           for (let oy = -S; oy <= S; oy += S) {
             ctx.save();
             ctx.translate(ox, oy);
-            drawCb();
+            cb();
             ctx.restore();
           }
         }
       };
 
-      // 1. Subtle seamless organic grass tone variation (zero bright polka-dot blobs)
-      for (let i = 0; i < 45; i++) {
+      // Very gentle matte tone variation (zero bright neon blobs!)
+      for (let i = 0; i < 35; i++) {
         const x = Math.random() * S;
         const y = Math.random() * S;
-        const r = 90 + Math.random() * 120;
+        const r = 110 + Math.random() * 130;
         const col = i % 2 === 0 ? pal.patchA : pal.patchB;
         drawSeamless(() => {
-          const grad = ctx.createRadialGradient(x, y, r * 0.1, x, y, r);
-          grad.addColorStop(0, col);
-          grad.addColorStop(1, 'rgba(0,0,0,0)');
-          ctx.fillStyle = grad;
+          ctx.fillStyle = col;
+          ctx.globalAlpha = 0.28;
           ctx.beginPath();
           ctx.arc(x, y, r, 0, Math.PI * 2);
           ctx.fill();
+          ctx.globalAlpha = 1.0;
         });
       }
 
-      // 2. Seamless soft grass tufts
+      // Lush darker-green leafy grass clumps (matches unnamed.jpg & unnamed (1).jpg)
       ctx.lineCap = 'round';
-      for (let i = 0; i < 260; i++) {
+      for (let i = 0; i < 320; i++) {
         const gx = Math.random() * S;
         const gy = Math.random() * S;
-        const stroke = i % 3 === 0 ? pal.bladeLight : pal.bladeDark;
+        const col = i % 2 === 0 ? pal.tuftDark : pal.tuftMid;
         drawSeamless(() => {
-          ctx.strokeStyle = stroke;
-          ctx.lineWidth = 2.6;
-          for (let b = -1; b <= 1; b++) {
+          ctx.strokeStyle = col;
+          ctx.lineWidth = 3.0;
+          for (let b = -2; b <= 2; b++) {
             ctx.beginPath();
-            ctx.moveTo(gx + b * 2, gy);
-            ctx.quadraticCurveTo(gx + b * 5, gy - 6, gx + b * 8, gy - 11);
+            ctx.moveTo(gx + b * 2.2, gy);
+            ctx.quadraticCurveTo(gx + b * 4.5, gy - 7, gx + b * 7.5, gy - 13 - (2 - Math.abs(b)) * 2);
             ctx.stroke();
           }
         });
       }
 
-      // 3. Seamless tiny wildflowers (Meadow only)
-      if (stageId === 'meadow') {
-        for (let f = 0; f < 55; f++) {
-          const fx = Math.random() * S;
-          const fy = Math.random() * S;
-          const pCol = f % 3 === 0 ? '#fde047' : '#ffffff';
-          drawSeamless(() => {
-            ctx.fillStyle = pCol;
-            for (let p = 0; p < 5; p++) {
-              const a = (p / 5) * Math.PI * 2;
-              ctx.beginPath();
-              ctx.arc(fx + Math.cos(a) * 3.6, fy + Math.sin(a) * 3.6, 2.2, 0, Math.PI * 2);
-              ctx.fill();
-            }
-            ctx.fillStyle = '#f59e0b';
+      // Small cobble stepping stones scattered on meadow (matches unnamed.jpg)
+      for (let s = 0; s < 28; s++) {
+        const sx = Math.random() * S;
+        const sy = Math.random() * S;
+        const sr = 7 + Math.random() * 6;
+        drawSeamless(() => {
+          ctx.fillStyle = '#3f6212';
+          ctx.beginPath();
+          ctx.ellipse(sx, sy + 2, sr * 1.1, sr * 0.8, 0.2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#9ca3af';
+          ctx.strokeStyle = '#4b5563';
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.ellipse(sx, sy, sr, sr * 0.72, 0.2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        });
+      }
+
+      // Tiny pale-blue, white & yellow wildflowers
+      for (let f = 0; f < 65; f++) {
+        const fx = Math.random() * S;
+        const fy = Math.random() * S;
+        const pCol = f % 3 === 0 ? pal.flowerB : (f % 3 === 1 ? pal.flowerA : pal.flowerC);
+        drawSeamless(() => {
+          ctx.fillStyle = pCol;
+          for (let p = 0; p < 5; p++) {
+            const a = (p / 5) * Math.PI * 2;
             ctx.beginPath();
-            ctx.arc(fx, fy, 1.8, 0, Math.PI * 2);
+            ctx.arc(fx + Math.cos(a) * 3.8, fy + Math.sin(a) * 3.8, 2.3, 0, Math.PI * 2);
             ctx.fill();
-          });
-        }
+          }
+          ctx.fillStyle = '#f59e0b';
+          ctx.beginPath();
+          ctx.arc(fx, fy, 1.8, 0, Math.PI * 2);
+          ctx.fill();
+        });
       }
 
       const tex = new THREE.CanvasTexture(c);
       tex.wrapS = THREE.RepeatWrapping;
       tex.wrapT = THREE.RepeatWrapping;
-      tex.repeat.set(12, 12);
+      tex.repeat.set(10, 10);
       return tex;
     };
 

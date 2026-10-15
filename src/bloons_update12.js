@@ -726,22 +726,7 @@
   }
 
   function installSmoothBloonGeometry() {
-    if (typeof ProceduralAssetForge === 'undefined') return;
-
-    // Keep Regular Bloons as 2D Camera-Facing Billboards in 3D Space (2 triangles -> Zero Lag & 1:1 Reference Look!)
-    ProceduralAssetForge.createBloonGeometry = function() {
-      return new THREE.PlaneGeometry(1.85, 2.25, 1, 1);
-    };
-
-    if (typeof scene !== 'undefined') {
-      scene.traverse(obj => {
-        if (obj.isInstancedMesh && obj.count >= 1000 && obj.geometry && obj.geometry.attributes && obj.geometry.attributes.aLivery) {
-          const newGeo = ProceduralAssetForge.createBloonGeometry();
-          newGeo.setAttribute('aLivery', obj.geometry.attributes.aLivery);
-          obj.geometry = newGeo;
-        }
-      });
-    }
+    // Keep 2D Billboard PlaneGeometry intact from base HTML!
   }
 
   // ==========================================================================
