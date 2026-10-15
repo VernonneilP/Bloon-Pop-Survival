@@ -4784,9 +4784,9 @@
 // ============================================================================
 
 // ============================================================================
+
 // BLOONS BLITZ 3D — STATIC WORLD GROUND (ZERO PARALLAX DRIFT), BEAST HANDLER
 // ANIMALS & DEDICATED CLICKABLE HERO SELECTION MODAL FOR MOBILE/DESKTOP
-// ============================================================================
 (function initStaticGroundAndHeroModal() {
   'use strict';
 
@@ -4798,36 +4798,68 @@
     }
 
     // ------------------------------------------------------------------------
-    // 1. LOCK GROUND AS A GIANT STATIONARY 3D WORLD PLANE AT (0, 0, 0)
-    //    Because the mesh never translates or shifts UVs, parallax with all
-    //    3D monkeys, bloons, and pickups is 100% mathematically locked!
+    // 1. LOCK GROUND 1:1 IN 3D WORLD SPACE (ZERO UV SCROLLING / ZERO PARALLAX)
     // ------------------------------------------------------------------------
     function lockStaticWorldGround() {
-      if (!G.meadowMesh || !G.groundMat || !G.groundMat.map) return;
-      if (!G.meadowMesh.userData._staticWorldConfigured) {
-        G.meadowMesh.userData._staticWorldConfigured = true;
-        G.meadowMesh.scale.set(10, 10, 1); // 2400m x 2400m static world arena
+      const mesh = G.meadowMesh;
+      if (!mesh) return;
+      const mat = mesh.material;
+      const tex = mat ? mat.map : null;
+
+      if (!mesh.userData._worldLocked12) {
+        mesh.userData._worldLocked12 = true;
+        mesh.scale.set(12, 12, 1); // Expand ground plane across 2880m x 2880m world
+        if (tex) {
+          tex.wrapS = THREE.RepeatWrapping;
+          tex.wrapT = THREE.RepeatWrapping;
+          tex.repeat.set(144, 144);
+          tex.offset.set(0, 0);
+          // Lock offset.set so nothing can ever scroll the ground texture again
+          tex.offset.set = function() { this.x = 0; this.y = 0; return this; };
+          tex.needsUpdate = true;
+        }
+        // Remove the 6 ugly flat brown dirt circles around (0,0) and replace with 3D gray stone ruins
+        const stoneMat = new THREE.MeshStandardMaterial({ color: 0x8d9096, roughness: 0.82, flatShading: true });
+        const darkStoneMat = new THREE.MeshStandardMaterial({ color: 0x686b72, roughness: 0.88, flatShading: true });
+        G.scene.traverse(obj => {
+          if (obj.isMesh && obj !== mesh && obj.geometry && obj.geometry.type === 'CylinderGeometry' && obj.position.y < 0.15) {
+            obj.visible = false;
+          }
+          if (obj.isMesh && obj !== mesh && obj.geometry && obj.geometry.type === 'CircleGeometry' && obj.position.y < 0.15 && obj.material && obj.material.color && obj.material.color.r > 0.5 && obj.material.color.g < 0.45) {
+            obj.visible = false;
+          }
+        });
+        for (let i = 0; i < 36; i++) {
+          const a = (i / 36) * Math.PI * 2 + (i % 4) * 0.4;
+          const r = 14 + (i % 6) * 14;
+          const ruin = new THREE.Group();
+          const block = new THREE.Mesh(new THREE.BoxGeometry(1.1, 1.15, 0.8), i % 2 === 0 ? stoneMat : darkStoneMat);
+          block.position.y = 0.58;
+          block.rotation.set(0.08, a, -0.06);
+          ruin.add(block);
+          const step = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.35, 0.6), darkStoneMat);
+          step.position.set(0.6, 0.18, 0.25);
+          ruin.add(step);
+          ruin.position.set(Math.cos(a) * r, 0, Math.sin(a) * r);
+          G.scene.add(ruin);
+        }
       }
-      if (G.groundMat.map.repeat.x !== 120) {
-        G.groundMat.map.repeat.set(120, 120); // Exact 20m tile density across 2400m
-        G.groundMat.map.offset.set(0, 0);
-        G.groundMat.map.needsUpdate = true;
+      mesh.position.set(0, 0, 0);
+      if (tex) {
+        tex.offset.x = 0;
+        tex.offset.y = 0;
       }
-      G.meadowMesh.position.set(0, 0, 0);
-      G.groundMat.map.offset.set(0, 0);
     }
     lockStaticWorldGround();
 
     // ------------------------------------------------------------------------
-    // 2. MOVE THE 10-HERO GRID INTO A DEDICATED CLICKABLE HERO SELECTION MODAL
-    //    So the Main Menu fits 100% on a single Mobile screen without scrolling!
+    // 2. DEDICATED CLICKABLE HERO SELECTION MODAL (USING .hero-card.parentElement)
     // ------------------------------------------------------------------------
     function setupDedicatedHeroPickerModal() {
-      const heroGrid = document.getElementById('hero-select-grid');
-      const startModal = document.getElementById('start-modal');
-      if (!heroGrid || !startModal || document.getElementById('hero-picker-modal')) return;
+      const firstHeroCard = document.querySelector('.hero-card');
+      const heroGrid = firstHeroCard ? firstHeroCard.parentElement : null;
+      if (!heroGrid || document.getElementById('hero-picker-modal')) return;
 
-      // Create the compact Active Hero Spotlight Bar on the Main Menu
       const spotlightBar = document.createElement('div');
       spotlightBar.id = 'active-hero-spotlight-bar';
       spotlightBar.innerHTML = `
@@ -4842,34 +4874,26 @@
             <p id="spotlight-hero-desc" class="text-[10px] text-amber-100/90 font-bold truncate">Tap to switch or upgrade your 10 Monkey Heroes!</p>
           </div>
         </div>
-        <button id="btn-open-hero-picker" class="btd-btn-gold py-2.5 px-3.5 rounded-xl font-btd text-xs sm:text-sm text-white shrink-0 cursor-pointer shadow-lg">
-          🐒 CHANGE HERO (10)
+        <button id="btn-open-hero-picker" type="button" class="btd-btn-gold py-2.5 px-3.5 rounded-xl font-btd text-xs sm:text-sm text-white shrink-0 cursor-pointer shadow-lg">
+          🐒 HEROES (10)
         </button>
       `;
 
-      // Insert spotlight bar right where hero-select-grid used to sit
       heroGrid.parentNode.insertBefore(spotlightBar, heroGrid);
 
-      // Hide the old "CHOOSE YOUR MONKEY HERO & STAGE" long subtitle on mobile to save vertical space
-      const chooseHeader = spotlightBar.previousElementSibling;
-      if (chooseHeader && chooseHeader.tagName === 'P') {
-        chooseHeader.className = 'hidden sm:block text-[11px] font-bold text-amber-100/90 mb-1.5 max-w-xl';
-      }
-
-      // Create the Dedicated Hero Picker Modal & move #hero-select-grid inside it
       const pickerModal = document.createElement('div');
       pickerModal.id = 'hero-picker-modal';
       pickerModal.innerHTML = `
         <div class="btd-panel rounded-3xl p-4 sm:p-5 max-w-4xl w-full max-h-[90dvh] flex flex-col items-center text-center shadow-2xl overflow-hidden">
           <div class="w-full flex items-center justify-between border-b-2 border-amber-900/60 pb-2.5 mb-3">
             <div class="flex flex-col text-left">
-              <h2 class="font-btd text-xl sm:text-2xl text-yellow-300">🐒 SELECT & UPGRADE YOUR HERO</h2>
-              <span class="text-[11px] font-bold text-amber-200/90">Tap any unlocked Hero to equip, or spend Monkey Money to unlock & upgrade ★ Star Rank!</span>
+              <h2 class="font-btd text-xl sm:text-2xl text-yellow-300">🐒 SELECT & UPGRADE YOUR HERO (10)</h2>
+              <span class="text-[11px] font-bold text-amber-200/90">Tap any Hero to equip, unlock with Monkey Money, or upgrade ★ Star Rank!</span>
             </div>
-            <button id="btn-close-hero-picker-top" class="w-9 h-9 rounded-xl bg-rose-600 hover:bg-rose-500 border-2 border-black font-btd text-base text-white cursor-pointer">✕</button>
+            <button id="btn-close-hero-picker-top" type="button" class="w-9 h-9 rounded-xl bg-rose-600 hover:bg-rose-500 border-2 border-black font-btd text-base text-white cursor-pointer">✕</button>
           </div>
           <div id="hero-picker-grid-host" class="w-full overflow-y-auto pr-1 flex-1" style="-webkit-overflow-scrolling: touch;"></div>
-          <button id="btn-confirm-hero-picker" class="w-full mt-3 py-2.5 rounded-2xl btd-btn-green font-btd text-lg text-white tracking-wider cursor-pointer">
+          <button id="btn-confirm-hero-picker" type="button" class="w-full mt-3 py-2.5 rounded-2xl btd-btn-green font-btd text-lg text-white tracking-wider cursor-pointer">
             ✓ CONFIRM SELECTED HERO
           </button>
         </div>
@@ -4918,30 +4942,17 @@
       pickerModal.querySelector('#btn-close-hero-picker-top').addEventListener('click', closePicker);
       pickerModal.querySelector('#btn-confirm-hero-picker').addEventListener('click', closePicker);
 
-      // Update spotlight whenever any hero card inside the modal is clicked
-      heroGrid.addEventListener('click', (e) => {
-        const card = e.target.closest('.hero-card');
-        const isStarBtn = e.target.closest('.btn-star-upgrade');
-        setTimeout(() => {
-          syncActiveHeroSpotlight();
-          // If the user clicked an unlocked hero card (not the star upgrade button), auto-confirm after a brief beat
-          if (card && !isStarBtn) {
-            const hid = card.getAttribute('data-hero');
-            const unl = (G.persistentStats && G.persistentStats.unlockedHeroes) || ['quincy', 'gwendolin'];
-            if (hid && unl.includes(hid)) {
-              syncActiveHeroSpotlight();
-            }
-          }
-        }, 50);
+      heroGrid.addEventListener('click', () => {
+        setTimeout(syncActiveHeroSpotlight, 60);
       });
 
-      setTimeout(syncActiveHeroSpotlight, 250);
-      setInterval(syncActiveHeroSpotlight, 800);
+      setTimeout(syncActiveHeroSpotlight, 200);
+      setInterval(syncActiveHeroSpotlight, 700);
     }
     setupDedicatedHeroPickerModal();
 
     // ------------------------------------------------------------------------
-    // 3. WHITE HERO GROUND RING, SHIELD HP BADGE & BEAST HANDLER 3D ANIMALS
+    // 3. WHITE HERO RING, SHIELD ICON & BEAST HANDLER 3D ANIMALS
     // ------------------------------------------------------------------------
     const heroWhiteRing = new THREE.Mesh(
       new THREE.RingGeometry(0.68, 0.82, 32).rotateX(-Math.PI / 2),
@@ -5035,16 +5046,16 @@
       const h = st.hero;
       if (!h) return;
 
-      // Keep ground 100% locked at world (0,0,0) with zero UV scrolling every frame!
       lockStaticWorldGround();
       heroWhiteRing.position.set(h.x, 0.03, h.z);
 
       if (st.paused || st.gameOver || st.inStartMenu) return;
 
+      // Hide screen-edge Boss Pointer Pill when the Boss is already visible on screen (< 14m)
       if (G.activeMOABs.length > 0) {
         const mb = G.activeMOABs[0];
         const ptr = document.getElementById('boss-screen-pointer');
-        if (ptr && Math.hypot(mb.x - h.x, mb.z - h.z) < 11.5) {
+        if (ptr && Math.hypot(mb.x - h.x, mb.z - h.z) < 14.0) {
           ptr.style.display = 'none';
         }
       }

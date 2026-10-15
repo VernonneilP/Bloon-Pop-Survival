@@ -6336,7 +6336,7 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
       const halfSpan = MEADOW_TILE_SPAN * 0.5;
       meadowMesh.position.set(0, 0, 0);
       if (meadowMat.map) {
-        meadowMat.map.offset.set(h.x / TILE_WORLD_STEP, -h.z / TILE_WORLD_STEP);
+/* UV scrolling disabled: ground is 100% world-locked */
       }
       for (let i = 0; i < meadowProps.length; i++) {
         const p = meadowProps[i];
@@ -7492,8 +7492,8 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
         
     window.__GAME = {
       get scene() { return scene; },
-      get meadowMesh() { return meadowMesh; },
-      get groundMat() { return groundMat; },
+      get meadowMesh() { return typeof meadowMesh !== 'undefined' ? meadowMesh : null; },
+      get groundMat() { return (typeof meadowMesh !== 'undefined' && meadowMesh) ? meadowMesh.material : null; },
       get envPropsGroup() { return typeof envPropsGroup !== 'undefined' ? envPropsGroup : null; },
       get bloonInstancedMesh() { return bloonInstancedMesh; },
       get bloonOutlineInstancedMesh() { return bloonOutlineInstancedMesh; },
