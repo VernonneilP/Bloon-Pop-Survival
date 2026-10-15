@@ -4299,7 +4299,8 @@
       if (st.wave !== lastAnnouncedWave) {
         lastAnnouncedWave = st.wave;
         triggerWaveTitleCard(st.wave);
-        if (st.wave === 30) G.spawnAirshipBoss('VORTEX');
+        if (window.__B13_BOSS_SCHEDULER) { /* Build 13 rotation owns W15-W45+ boss spawns */ }
+        else if (st.wave === 30) G.spawnAirshipBoss('VORTEX');
         else if (st.wave === 45 || (st.wave === 40 && st.difficultyId !== 'easy')) G.spawnAirshipBoss('DREADBLOON');
         else if (st.wave === 60) G.spawnAirshipBoss('PHAYZE');
         else if (st.wave === 80 || st.wave === 100) G.spawnAirshipBoss('BLASTAPOPOULOS');
@@ -5487,6 +5488,8 @@
 // ============================================================================
 (function initBloonsBuild13MasterEngine() {
   'use strict';
+  if (window.__B13_MASTER_ENGINE_ACTIVE) return; // Build 13 engine is merged into src/bloons_update12.js
+  window.__B13_MASTER_ENGINE_ACTIVE = true;
 
   // --------------------------------------------------------------------------
   // 1. DEVICE HAPTIC VIBRATION ENGINE
@@ -6200,6 +6203,374 @@
     // ------------------------------------------------------------------------
     // C. UNIVERSAL 5-TIER & PATH-SPECIFIC 3D MODEL + PROJECTILE EVOLUTION
     // ------------------------------------------------------------------------
+    // ---- Build 13: Sculpted Path/Tier Gear Helpers -------------------------
+    const b13AnimatedCrests = new Set();
+    function animateB13Crests(dt) {
+      b13AnimatedCrests.forEach(function(cg) {
+        if (!cg.parent) { b13AnimatedCrests.delete(cg); return; }
+        const ud = cg.userData;
+        ud.clock = (ud.clock || 0) + dt;
+        for (let i = 0; i < ud.spin.length; i++) {
+          const s = ud.spin[i];
+          s.o.rotation[s.ax] += s.s * dt;
+        }
+        for (let i = 0; i < ud.orbit.length; i++) {
+          const o = ud.orbit[i];
+          const a = o.ph + ud.clock * o.s;
+          o.o.position.set(Math.cos(a) * o.r, o.y + Math.sin(ud.clock * 3.0 + o.ph) * (o.bob || 0), Math.sin(a) * o.r);
+          if (o.face) {
+            const sg = o.s >= 0 ? 1 : -1;
+            o.o.rotation.y = Math.atan2(-Math.sin(a) * sg, Math.cos(a) * sg);
+          }
+        }
+      });
+    }
+    function b13Std(hex, emiHex, emiI, metal, rough) {
+      const m = new THREE.MeshStandardMaterial({
+        color: hex,
+        roughness: rough === undefined ? 0.35 : rough,
+        metalness: metal === undefined ? 0.35 : metal,
+        side: THREE.DoubleSide
+      });
+      if (emiHex !== undefined && emiHex !== null) {
+        m.emissive = new THREE.Color(emiHex);
+        m.emissiveIntensity = emiI === undefined ? 0.6 : emiI;
+      }
+      return m;
+    }
+    function b13Glow(hex, opacity) {
+      const op = opacity === undefined ? 1 : opacity;
+      return new THREE.MeshBasicMaterial({ color: hex, transparent: op < 1, opacity: op, side: THREE.DoubleSide, depthWrite: op >= 1 });
+    }
+    function b13Add(grp, geo, mat, x, y, z, rx, ry, rz) {
+      const m = new THREE.Mesh(geo, mat);
+      m.position.set(x || 0, y || 0, z || 0);
+      m.rotation.set(rx || 0, ry || 0, rz || 0);
+      m.name = 'b13_gear';
+      grp.add(m);
+      return m;
+    }
+    function b13Group(parent, x, y, z) {
+      const g = new THREE.Group();
+      g.name = 'b13_gear_grp';
+      g.position.set(x || 0, y || 0, z || 0);
+      parent.add(g);
+      return g;
+    }
+    // Radial cones in the XZ plane pointing outward (sawblade teeth / shuriken points)
+    function b13RadialCones(grp, count, dist, rad, len, mat, y) {
+      for (let i = 0; i < count; i++) {
+        const a = (i / count) * Math.PI * 2;
+        b13Add(grp, new THREE.ConeGeometry(rad, len, 3), mat, Math.cos(a) * dist, y || 0, Math.sin(a) * dist, 0, -a, -Math.PI / 2);
+      }
+    }
+    function b13Sawblade(parent, radius, teeth, mat, y) {
+      const g = b13Group(parent, 0, y, 0);
+      b13Add(g, new THREE.CylinderGeometry(radius, radius, 0.035, 36), mat, 0, 0, 0);
+      b13Add(g, new THREE.CylinderGeometry(radius * 0.22, radius * 0.22, 0.07, 16), b13Std(0x1f2937, null, 0, 0.8, 0.3), 0, 0, 0);
+      b13RadialCones(g, teeth, radius * 1.06, radius * 0.1, radius * 0.24, mat, 0);
+      return g;
+    }
+    function b13Shuriken(parent, mat) {
+      const g = b13Group(parent, 0, 0, 0);
+      b13Add(g, new THREE.CylinderGeometry(0.045, 0.045, 0.03, 10), mat, 0, 0, 0);
+      b13RadialCones(g, 4, 0.1, 0.045, 0.16, mat, 0);
+      return g;
+    }
+    function b13Hood(grp, hex, emi, emiI, r, y) {
+      // Open-faced cowl: gap faces +Z so the eyes/face stay visible
+      return b13Add(grp, new THREE.SphereGeometry(r || 0.41, 20, 12, Math.PI * 0.8, Math.PI * 1.4, 0, Math.PI * 0.6), b13Std(hex, emi, emiI, 0.25, 0.5), 0, y || 0.92, -0.01);
+    }
+    function b13Cape(grp, hex, emi, emiI, w, hgt) {
+      const cape = b13Add(grp, new THREE.PlaneGeometry(w || 0.72, hgt || 0.95), b13Std(hex, emi, emiI, 0.1, 0.65), 0, 0.5, -0.36, 0.2, 0, 0);
+      return cape;
+    }
+    function b13Visor(grp, hex) {
+      b13Add(grp, new THREE.BoxGeometry(0.5, 0.1, 0.1), b13Glow(hex), 0, 0.92, 0.37);
+      [-0.12, 0.12].forEach(function(px) {
+        b13Add(grp, new THREE.SphereGeometry(0.045, 8, 8), b13Glow(0xffffff), px, 0.92, 0.43);
+      });
+    }
+    function b13SunHalo(grp, rays, discHex, rayHex, radius) {
+      const halo = b13Group(grp, 0, 1.0, -0.34);
+      b13Add(halo, new THREE.CircleGeometry(radius * 0.72, 32), b13Glow(discHex, 0.55), 0, 0, 0);
+      for (let r = 0; r < rays; r++) {
+        const ra = (r / rays) * Math.PI * 2;
+        b13Add(halo, new THREE.ConeGeometry(0.06, radius * 0.5, 4), b13Glow(rayHex), Math.cos(ra) * radius, Math.sin(ra) * radius, 0, 0, 0, ra - Math.PI / 2);
+      }
+      grp.userData.spin.push({ o: halo, ax: 'z', s: 0.8 });
+      return halo;
+    }
+
+    function buildSuperSunGear(grp, T) {
+      if (T === 2) { b13Visor(grp, 0xff2a2a); return; }
+      if (T === 3) {
+        b13Visor(grp, 0xc084fc);
+        b13Hood(grp, 0x5b21b6, 0xa855f7, 0.35);
+        b13Cape(grp, 0x6d28d9, 0x7c3aed, 0.25);
+        for (let i = 0; i < 2; i++) {
+          const orb = b13Add(grp, new THREE.SphereGeometry(0.11, 12, 12), b13Glow(0xa855f7), 0, 0.8, 0);
+          grp.userData.orbit.push({ o: orb, r: 0.66, y: 0.8, s: 2.4, ph: i * Math.PI, bob: 0.06 });
+        }
+        return;
+      }
+      // T4 Golden Sun Avatar / T5 True Sun God
+      const gold = T >= 5 ? 0xfff3c4 : 0xfacc15;
+      b13Visor(grp, T >= 5 ? 0xfffbeb : 0xfde047);
+      b13Hood(grp, gold, 0xf59e0b, T >= 5 ? 0.6 : 0.4);
+      b13Cape(grp, T >= 5 ? 0xfffbeb : 0xf59e0b, 0xfbbf24, 0.35);
+      b13SunHalo(grp, T >= 5 ? 16 : 12, T >= 5 ? 0xfffbeb : 0xfde047, T >= 5 ? 0xffffff : 0xfbbf24, T >= 5 ? 0.86 : 0.7);
+      if (T >= 5) {
+        // White-gold temple crown
+        const crownMat = b13Std(0xfffbeb, 0xfacc15, 0.7, 0.85, 0.2);
+        b13Add(grp, new THREE.CylinderGeometry(0.3, 0.33, 0.12, 18, 1, true), crownMat, 0, 1.2, 0);
+        for (let s = 0; s < 5; s++) {
+          const sa = (s / 5) * Math.PI * 2 + Math.PI / 2;
+          b13Add(grp, new THREE.ConeGeometry(0.05, s === 0 ? 0.32 : 0.22, 4), crownMat, Math.cos(sa) * 0.3, 1.36, Math.sin(sa) * 0.3);
+        }
+        // Solar wings (3 feathers per side)
+        [-1, 1].forEach(function(w) {
+          const wing = b13Group(grp, w * 0.42, 0.95, -0.32);
+          for (let f = 0; f < 3; f++) {
+            b13Add(wing, new THREE.ConeGeometry(0.11, 0.95 - f * 0.18, 4), b13Glow(f === 0 ? 0xffffff : 0xfde047, 0.92), w * (0.22 + f * 0.12), 0.18 - f * 0.12, 0, 0, 0, -w * (0.9 + f * 0.32));
+          }
+        });
+        // Floating sun orbs
+        for (let i = 0; i < 3; i++) {
+          const orb = b13Group(grp, 0, 1.55, 0);
+          b13Add(orb, new THREE.SphereGeometry(0.12, 12, 12), b13Std(0xfffbeb, 0xfacc15, 1.0, 0.2, 0.3), 0, 0, 0);
+          b13Add(orb, new THREE.SphereGeometry(0.19, 12, 12), b13Glow(0xfde047, 0.3), 0, 0, 0);
+          grp.userData.orbit.push({ o: orb, r: 0.95, y: 1.55, s: 1.3, ph: (i / 3) * Math.PI * 2, bob: 0.08 });
+        }
+      }
+    }
+    function buildSuperRoboGear(grp, T) {
+      b13Visor(grp, T >= 5 ? 0x22c55e : 0x38bdf8);
+      if (T < 3) return;
+      const metal = b13Std(T >= 5 ? 0x1e293b : 0x475569, null, 0, 0.85, 0.25);
+      const glowHex = T >= 5 ? 0x4ade80 : 0x22d3ee;
+      [-1, 1].forEach(function(s) {
+        const arm = b13Group(grp, s * 0.5, 0.56, 0.12);
+        b13Add(arm, new THREE.BoxGeometry(0.2, 0.2, 0.34), metal, 0, 0, 0);
+        b13Add(arm, new THREE.CylinderGeometry(0.06, 0.07, 0.44, 12), metal, 0, 0.02, 0.32, Math.PI / 2, 0, 0);
+        b13Add(arm, new THREE.SphereGeometry(0.065, 10, 10), b13Glow(glowHex), 0, 0.02, 0.56);
+        b13Add(arm, new THREE.BoxGeometry(0.22, 0.03, 0.2), b13Glow(glowHex), 0, 0.115, 0);
+      });
+      if (T >= 4) {
+        b13Add(grp, new THREE.CylinderGeometry(0.12, 0.12, 0.05, 20), b13Glow(glowHex), 0, 0.6, 0.36, Math.PI / 2, 0, 0);
+        b13Add(grp, new THREE.CylinderGeometry(0.015, 0.015, 0.36, 6), metal, 0.16, 1.32, 0);
+        b13Add(grp, new THREE.SphereGeometry(0.04, 8, 8), b13Glow(0xef4444), 0.16, 1.5, 0);
+      }
+      if (T >= 5) {
+        [-1, 1].forEach(function(s) {
+          const pod = b13Group(grp, s * 0.42, 0.98, -0.12);
+          b13Add(pod, new THREE.BoxGeometry(0.26, 0.18, 0.32), metal, 0, 0, 0);
+          for (let m = 0; m < 4; m++) {
+            b13Add(pod, new THREE.ConeGeometry(0.03, 0.08, 6), b13Glow(0x4ade80), (m % 2 ? 0.06 : -0.06), (m < 2 ? 0.04 : -0.04), 0.18, Math.PI / 2, 0, 0);
+          }
+        });
+      }
+    }
+    function buildSuperDarkKnightGear(grp, T) {
+      b13Visor(grp, 0xa855f7);
+      if (T < 3) return;
+      b13Hood(grp, 0x18181b, 0x3b0764, 0.2);
+      [-1, 1].forEach(function(s) {
+        b13Add(grp, new THREE.ConeGeometry(0.07, 0.3, 4), b13Std(0x18181b, 0x3b0764, 0.2, 0.3, 0.5), s * 0.19, 1.3, 0, 0, 0, -s * 0.18);
+      });
+      b13Cape(grp, 0x09090b, 0x3b0764, 0.15, 0.82, 1.05);
+      for (let c = 0; c < 3; c++) {
+        b13Add(grp, new THREE.ConeGeometry(0.09, 0.2, 3), b13Std(0x09090b, null, 0, 0.1, 0.7), -0.26 + c * 0.26, -0.02, -0.46, Math.PI, 0, 0);
+      }
+      if (T >= 4) {
+        const n = T >= 5 ? 4 : 2;
+        for (let i = 0; i < n; i++) {
+          const gl = b13Group(grp, 0, 0.8, 0);
+          b13Add(gl, new THREE.TorusGeometry(0.2, 0.035, 6, 18, Math.PI * 1.35), b13Std(0x3b0764, 0xa855f7, 0.9, 0.6, 0.3), 0, 0, 0, Math.PI / 2, 0, 0);
+          grp.userData.spin.push({ o: gl, ax: 'y', s: 9 });
+          grp.userData.orbit.push({ o: gl, r: 0.82, y: 0.8, s: 2.0, ph: (i / n) * Math.PI * 2, bob: 0.05 });
+        }
+      }
+      if (T >= 5) {
+        [-0.1, 0.1].forEach(function(px) { b13Add(grp, new THREE.SphereGeometry(0.05, 8, 8), b13Glow(0xd8b4fe), px, 0.95, 0.4); });
+        [-1, 1].forEach(function(s) {
+          for (let k = 0; k < 3; k++) b13Add(grp, new THREE.ConeGeometry(0.04, 0.2, 4), b13Std(0x27272a, 0x7e22ce, 0.4, 0.7, 0.3), s * (0.34 + k * 0.06), 0.84 + k * 0.03, -0.05 + k * 0.05, 0, 0, -s * 0.6);
+        });
+      }
+    }
+    function buildIceGear(grp, T) {
+      if (T < 3) return;
+      const big = T >= 5 ? 1.25 : 1.0;
+      const gun = b13Group(grp, 0.42, 0.52, 0.22);
+      gun.scale.setScalar(big);
+      const frame = b13Std(0xe0f2fe, null, 0, 0.75, 0.25);
+      b13Add(gun, new THREE.CylinderGeometry(0.08, 0.1, 0.62, 14), frame, 0, 0, 0.18, Math.PI / 2, 0, 0);
+      b13Add(gun, new THREE.SphereGeometry(0.15, 14, 12), b13Std(0x38bdf8, 0x0ea5e9, 0.45, 0.3, 0.2), 0, 0.05, -0.16);
+      b13Add(gun, new THREE.TorusGeometry(0.1, 0.028, 8, 18), b13Glow(0x67e8f9), 0, 0, 0.5);
+      b13Add(gun, new THREE.SphereGeometry(0.07, 10, 10), b13Glow(0xf0f9ff), 0, 0, 0.53);
+      b13Add(gun, new THREE.BoxGeometry(0.06, 0.18, 0.08), b13Std(0x334155, null, 0, 0.5, 0.5), 0, -0.13, 0);
+      if (T >= 5) {
+        for (let s = 0; s < 3; s++) {
+          b13Add(grp, new THREE.ConeGeometry(0.08, 0.4, 5), b13Std(0xbae6fd, 0x38bdf8, 0.5, 0.2, 0.1), -0.18 + s * 0.18, 0.95 + (s === 1 ? 0.1 : 0), -0.34, -0.35, 0, 0);
+        }
+        for (let i = 0; i < 3; i++) {
+          const shard = b13Add(grp, new THREE.OctahedronGeometry(0.08), b13Glow(0xa5f3fc, 0.85), 0, 0.7, 0);
+          grp.userData.orbit.push({ o: shard, r: 0.8, y: 0.7, s: 1.8, ph: (i / 3) * Math.PI * 2, bob: 0.1 });
+          grp.userData.spin.push({ o: shard, ax: 'y', s: 4 });
+        }
+      }
+    }
+    function buildWizardGear(grp, T) {
+      if (T < 4) return;
+      const hatMat = b13Std(T >= 5 ? 0x4c1d95 : 0x1e3a8a, T >= 5 ? 0x7c3aed : 0x1d4ed8, 0.25, 0.1, 0.6);
+      b13Add(grp, new THREE.CylinderGeometry(0.44, 0.44, 0.04, 26), hatMat, 0, 1.12, 0);
+      const spire = b13Add(grp, new THREE.ConeGeometry(0.3, 0.95, 20), hatMat, 0, 1.6, 0, 0, 0, 0.1);
+      spire.name = 'b13_gear';
+      for (let i = 0; i < 7; i++) {
+        const a = i * 2.4;
+        const hh = 0.12 + (i / 7) * 0.7;
+        const rr = 0.3 * (1 - hh / 0.95) + 0.015;
+        b13Add(grp, new THREE.OctahedronGeometry(0.045), b13Glow(0xfde047), Math.cos(a) * rr, 1.13 + hh, Math.sin(a) * rr);
+      }
+      b13Add(grp, new THREE.OctahedronGeometry(0.085), b13Glow(0xfef08a), 0.05, 2.1, 0);
+      // Orbiting 3D Flame Phoenix
+      const ph = b13Group(grp, 0.95, 1.05, 0);
+      ph.scale.setScalar(T >= 5 ? 1.35 : 1.0);
+      const fire = b13Std(0xf97316, 0xef4444, 0.9, 0.1, 0.4);
+      const fireHot = b13Std(0xfde047, 0xf59e0b, 1.0, 0.1, 0.4);
+      const body = b13Add(ph, new THREE.SphereGeometry(0.12, 12, 10), fire, 0, 0, 0);
+      body.scale.set(0.8, 0.8, 1.5);
+      b13Add(ph, new THREE.SphereGeometry(0.075, 10, 8), fireHot, 0, 0.05, 0.19);
+      b13Add(ph, new THREE.ConeGeometry(0.03, 0.09, 6), fireHot, 0, 0.04, 0.29, Math.PI / 2, 0, 0);
+      [-1, 1].forEach(function(s) {
+        const wing = b13Add(ph, new THREE.ConeGeometry(0.1, 0.46, 3), fire, s * 0.25, 0.04, -0.02, 0, 0, -s * Math.PI / 2);
+        wing.scale.set(1, 1, 0.25);
+      });
+      for (let t = 0; t < 3; t++) {
+        b13Add(ph, new THREE.ConeGeometry(0.05, 0.32, 4), t === 1 ? fireHot : fire, (t - 1) * 0.06, 0, -0.3, -Math.PI / 2, 0, (t - 1) * 0.25);
+      }
+      if (T >= 5) {
+        for (let tr = 0; tr < 3; tr++) b13Add(ph, new THREE.SphereGeometry(0.07 - tr * 0.015, 8, 8), b13Glow(0xfb923c, 0.55 - tr * 0.14), 0, 0, -0.5 - tr * 0.16);
+      }
+      grp.userData.orbit.push({ o: ph, r: 0.95, y: 1.05, s: 1.6, ph: 0, bob: 0.12, face: true });
+    }
+    function buildNinjaGear(grp, T) {
+      if (T < 4) return;
+      const crimson = b13Std(0xdc2626, 0xb91c1c, T >= 5 ? 0.6 : 0.3, 0.2, 0.45);
+      b13Hood(grp, 0xf8fafc, T >= 5 ? 0xfecaca : null, 0.15, 0.42, 0.92);
+      b13Add(grp, new THREE.TorusGeometry(0.37, 0.035, 8, 26), crimson, 0, 0.99, 0, Math.PI / 2, 0, 0);
+      [-0.06, 0.06].forEach(function(px, i) {
+        b13Add(grp, new THREE.BoxGeometry(0.06, 0.34, 0.02), crimson, px, 0.86, -0.4, 0.5, 0, (i ? 0.15 : -0.15));
+      });
+      const n = T >= 5 ? 8 : 6;
+      const starMat = T >= 5 ? b13Std(0xef4444, 0xdc2626, 0.8, 0.6, 0.25) : b13Std(0xcbd5e1, null, 0, 0.9, 0.2);
+      for (let i = 0; i < n; i++) {
+        const sh = b13Shuriken(grp, starMat);
+        grp.userData.spin.push({ o: sh, ax: 'y', s: 14 });
+        grp.userData.orbit.push({ o: sh, r: 0.9, y: 0.7, s: 2.4, ph: (i / n) * Math.PI * 2, bob: 0 });
+      }
+    }
+    function buildTackGear(grp, T) {
+      if (T < 4) return;
+      const sawMat = T >= 5 ? b13Std(0xf97316, 0xef4444, 0.85, 0.6, 0.3) : b13Std(0xfacc15, 0xb45309, 0.25, 0.9, 0.22);
+      const b1 = b13Sawblade(grp, 0.78, 18, sawMat, 0.42);
+      grp.userData.spin.push({ o: b1, ax: 'y', s: 6 });
+      if (T >= 5) {
+        const b2 = b13Sawblade(grp, 0.55, 14, b13Std(0xfde047, 0xf97316, 0.9, 0.6, 0.3), 0.78);
+        grp.userData.spin.push({ o: b2, ax: 'y', s: -9 });
+        b13Add(grp, new THREE.TorusGeometry(0.86, 0.06, 8, 36), b13Glow(0xfb923c, 0.45), 0, 0.42, 0, Math.PI / 2, 0, 0);
+      }
+    }
+    function buildSniperGear(grp, T) {
+      if (T < 4) return;
+      const gunMetal = b13Std(0x27272a, null, 0, 0.85, 0.3);
+      const rifle = b13Group(grp, 0.3, 0.6, 0.2);
+      b13Add(rifle, new THREE.CylinderGeometry(0.045, 0.05, 1.1, 10), gunMetal, 0, 0, 0.4, Math.PI / 2, 0, 0);
+      b13Add(rifle, new THREE.CylinderGeometry(0.085, 0.085, 0.38, 14), b13Std(0x18181b, null, 0, 0.7, 0.4), 0, 0, 1.12, Math.PI / 2, 0, 0);
+      b13Add(rifle, new THREE.BoxGeometry(0.1, 0.16, 0.36), b13Std(0x3f3f46, null, 0, 0.4, 0.6), 0, -0.03, -0.3);
+      b13Add(rifle, new THREE.CylinderGeometry(0.05, 0.05, 0.34, 12), gunMetal, 0, 0.1, 0.12, Math.PI / 2, 0, 0);
+      b13Add(rifle, new THREE.CircleGeometry(0.045, 12), b13Glow(0x22c55e), 0, 0.1, 0.295);
+      if (T >= 5) {
+        b13Add(rifle, new THREE.BoxGeometry(0.14, 0.06, 0.1), gunMetal, 0, 0, 1.34);
+        [-1, 1].forEach(function(s) { b13Add(rifle, new THREE.CylinderGeometry(0.012, 0.012, 0.3, 6), gunMetal, s * 0.06, -0.13, 0.75, 0, 0, s * 0.4); });
+      }
+      b13Add(grp, new THREE.BoxGeometry(0.66, 0.05, 0.05), gunMetal, 0, 0.98, 0.3);
+      const tubes = T >= 5 ? [-0.24, -0.1, 0.1, 0.24] : [-0.11, 0.11];
+      tubes.forEach(function(px) {
+        b13Add(grp, new THREE.CylinderGeometry(0.065, 0.075, 0.2, 12), gunMetal, px, 0.95, 0.43, Math.PI / 2, 0, 0);
+        b13Add(grp, new THREE.CircleGeometry(0.058, 12), b13Glow(0x4ade80), px, 0.95, 0.535);
+      });
+    }
+    function buildAlchemistGear(grp, T) {
+      if (T < 4) return;
+      const goldMat = b13Std(0xd4a017, 0x92400e, 0.2, 0.85, 0.25);
+      b13Add(grp, new THREE.BoxGeometry(0.46, 0.5, 0.24), goldMat, 0, 0.62, -0.4);
+      [-0.15, 0.15].forEach(function(px) { b13Add(grp, new THREE.BoxGeometry(0.05, 0.55, 0.04), b13Std(0x78350f, null, 0, 0.1, 0.7), px, 0.66, -0.26); });
+      [0x22c55e, 0xa855f7, 0xef4444].forEach(function(col, i) {
+        const fx = -0.14 + i * 0.14;
+        b13Add(grp, new THREE.SphereGeometry(0.075, 10, 10), b13Std(col, col, 0.6, 0.1, 0.1), fx, 0.95, -0.4);
+        b13Add(grp, new THREE.CylinderGeometry(0.025, 0.03, 0.1, 8), b13Glow(0xe2e8f0, 0.8), fx, 1.05, -0.4);
+      });
+      const acid = T >= 5 ? 0xa3e635 : 0x84cc16;
+      [-1, 1].forEach(function(s) {
+        const fl = b13Group(grp, s * 0.44, 0.52, 0.22);
+        b13Add(fl, new THREE.SphereGeometry(0.12, 14, 12), b13Glow(acid, 0.85), 0, 0, 0);
+        b13Add(fl, new THREE.CylinderGeometry(0.035, 0.04, 0.12, 10), b13Glow(0xe2e8f0, 0.8), 0, 0.13, 0);
+        b13Add(fl, new THREE.CylinderGeometry(0.042, 0.042, 0.05, 10), b13Std(0x92400e, null, 0, 0.1, 0.8), 0, 0.21, 0);
+      });
+      if (T >= 5) {
+        for (let i = 0; i < 3; i++) {
+          const bub = b13Add(grp, new THREE.SphereGeometry(0.06, 8, 8), b13Glow(0xbef264, 0.7), 0, 0.9, 0);
+          grp.userData.orbit.push({ o: bub, r: 0.7, y: 0.9, s: 2.2, ph: (i / 3) * Math.PI * 2, bob: 0.15 });
+        }
+      }
+    }
+
+    function buildB13TierGear(unitKey, tier, path, pri, acc) {
+      const grp = new THREE.Group();
+      grp.name = 'b13_tier_crest';
+      grp.userData = { spin: [], orbit: [], clock: 0 };
+      const T = Math.max(1, Math.min(5, tier));
+      const isSuper = unitKey === 'supermonkey' || unitKey === 'super';
+
+      if (isSuper) {
+        if (path === 1) buildSuperRoboGear(grp, T);
+        else if (path === 2) buildSuperDarkKnightGear(grp, T);
+        else buildSuperSunGear(grp, T);
+        return grp;
+      }
+
+      const SPECIAL = { ice: buildIceGear, wizard: buildWizardGear, ninja: buildNinjaGear, tack: buildTackGear, sniper: buildSniperGear, alchemist: buildAlchemistGear };
+      const headGearAtT4 = unitKey === 'wizard' || unitKey === 'ninja' || unitKey === 'sniper';
+      const accMat = b13Std(acc, acc, 0.5, 0.2, 0.4);
+      const priMat = b13Std(pri, null, 0, 0.6, 0.3);
+
+      // Base gear shared by every unit: T2 headband, T3 shoulder pauldrons
+      if (T >= 2 && !(headGearAtT4 && T >= 4)) b13Add(grp, new THREE.BoxGeometry(0.48, 0.08, 0.12), accMat, 0, 0.92, 0.35);
+      if (T >= 3) {
+        [-0.38, 0.38].forEach(function(px) {
+          const p = b13Add(grp, new THREE.SphereGeometry(0.17, 10, 8), priMat, px, 0.72, 0);
+          p.scale.set(1.2, 0.75, 1.1);
+        });
+      }
+
+      if (SPECIAL[unitKey]) {
+        SPECIAL[unitKey](grp, T);
+        return grp;
+      }
+
+      // Other heroes/companions: T4 back cape, T5 energy wings
+      if (T >= 4) b13Cape(grp, pri, acc, 0.2);
+      if (T >= 5) {
+        [-1, 1].forEach(function(w) {
+          for (let f = 0; f < 2; f++) {
+            b13Add(grp, new THREE.ConeGeometry(0.12, 0.85 - f * 0.2, 4), b13Glow(acc, 0.85), w * (0.5 + f * 0.12), 1.05 - f * 0.1, -0.3, 0, 0, -w * (0.75 + f * 0.35));
+          }
+        });
+      }
+      return grp;
+    }
+
     function applyCharacterTierEvolution(mesh, unitKey, tier, pathIndex) {
       if (!mesh) return;
       const sig = String(unitKey) + '_T' + String(tier) + '_P' + String(pathIndex || 0);
@@ -6234,7 +6605,7 @@
       let meshIdx = 0;
       const isSolarAvatar = (unitKey === 'supermonkey' || unitKey === 'super') && pathIndex === 0 && tier >= 4;
       mesh.traverse(function(c) {
-        if (c.isMesh && c.material && c.material.color && c.name !== 'b13_tier_crest') {
+        if (c.isMesh && c.material && c.material.color && String(c.name || '').indexOf('b13_') !== 0) {
           const hex = c.material.color.getHex();
           const isEye = (hex === 0x111827 || hex === 0x000000 || hex === 0xffffff) && c.scale.x < 0.35;
           const isSkin = [0x8b4513, 0x7c2d12, 0xd97706, 0xfde68a, 0x92400e, 0x78350f].indexOf(hex) !== -1;
@@ -6256,69 +6627,14 @@
         }
       });
 
-      // 3. Build Path & Tier Specific 3D Attachments (Visors, Sun Ray Crowns, Robo Cannons, Ice Cryo Cannon, etc.)
+      // 3. Path & Tier Specific Sculpted 3D Gear (Build 13: no generic stacked rings)
       const oldCrest = mesh.getObjectByName('b13_tier_crest');
-      if (oldCrest) mesh.remove(oldCrest);
-
-      if (tier >= 2) {
-        const crestGrp = new THREE.Group();
-        crestGrp.name = 'b13_tier_crest';
-        const glowMat = new THREE.MeshBasicMaterial({ color: accentHex, side: THREE.DoubleSide });
-        const priMat  = new THREE.MeshStandardMaterial({ color: primaryHex, roughness: 0.3, metalness: 0.65 });
-
-        // Tier 2+: Glowing Eye Visor / Headband Crest
-        const visor = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.10, 0.16), glowMat);
-        visor.position.set(0, 0.92, 0.36);
-        crestGrp.add(visor);
-
-        // Ice Monkey Tier 3+: 3D Arm-Mounted Cryo Cannon!
-        if (unitKey === 'ice' && tier >= 3) {
-          const cannon = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.18, 0.68, 12).rotateX(Math.PI / 2), glowMat);
-          cannon.position.set(0.45, 0.58, 0.38);
-          crestGrp.add(cannon);
-        }
-
-        // Tier 3+: Sculpted Shoulder Pauldrons (or Twin Robo Cannons / Bat Ears)
-        if (tier >= 3) {
-          [-0.38, 0.38].forEach(function(px) {
-            const pauldron = new THREE.Mesh(new THREE.SphereGeometry(0.17, 10, 8), priMat);
-            pauldron.scale.set(1.2, 0.75, 1.1);
-            pauldron.position.set(px, 0.72, 0);
-            crestGrp.add(pauldron);
-          });
-        }
-
-        // Tier 4+: Radiant Sun-Ray Crown / Arcane Halo Ring
-        if (tier >= 4) {
-          const halo = new THREE.Mesh(new THREE.TorusGeometry(0.64, 0.06, 8, 28), glowMat);
-          halo.position.set(0, 1.05, -0.25);
-          crestGrp.add(halo);
-
-          // 8 Radial Sunburst Crown Spikes around the Halo
-          for (let r = 0; r < 8; r++) {
-            const ra = (r / 8) * Math.PI * 2;
-            const ray = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.32, 4), glowMat);
-            ray.position.set(Math.cos(ra) * 0.72, 1.05 + Math.sin(ra) * 0.72, -0.25);
-            ray.rotation.z = ra - Math.PI / 2;
-            crestGrp.add(ray);
-          }
-        }
-
-        // Tier 5 (True Sun God / Paragon): Luminous Energy Wings & Floating Temple Orbs
-        if (tier >= 5) {
-          [-1, 1].forEach(function(w) {
-            const wing = new THREE.Mesh(new THREE.ConeGeometry(0.24, 1.05, 4), glowMat);
-            wing.position.set(w * 0.58, 1.18, -0.28);
-            wing.rotation.z = -w * 0.65;
-            crestGrp.add(wing);
-
-            const orb = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 10), glowMat);
-            orb.position.set(w * 0.75, 1.48, 0.1);
-            crestGrp.add(orb);
-          });
-        }
-
+      if (oldCrest && oldCrest.parent) oldCrest.parent.remove(oldCrest);
+      if (tier < 2) return;
+      const crestGrp = buildB13TierGear(String(unitKey), tier, pathIndex || 0, primaryHex, accentHex);
+      if (crestGrp) {
         mesh.add(crestGrp);
+        if (crestGrp.userData.spin.length || crestGrp.userData.orbit.length) b13AnimatedCrests.add(crestGrp);
       }
     }
 
@@ -6328,7 +6644,7 @@
       if (!h) return;
 
       const vTier = h.volleyTier || 0;
-      const eTier = h.elementalTier || 0;
+      const eTier = h.weaponTier || h.elementalTier || 0;
       const xTier = h.explosiveTier || 0;
       const maxHeroTier = 1 + Math.max(vTier, eTier, xTier);
       const dominantPath = vTier >= eTier && vTier >= xTier ? 0 : (eTier >= xTier ? 1 : 2);
@@ -6355,7 +6671,7 @@
         const h = st && st.hero;
         if (opts && h && !opts._isChildBeam) {
           const vTier = h.volleyTier || 0;
-          const eTier = h.elementalTier || 0;
+          const eTier = h.weaponTier || h.elementalTier || 0;
           const xTier = h.explosiveTier || 0;
           const highestTier = Math.min(5, 1 + Math.max(vTier, eTier, xTier));
 
@@ -6370,19 +6686,39 @@
               opts.isEnergy = true;
               opts.scale = Math.max(opts.scale || 1, 1.05 + (highestTier - 1) * 0.18);
             }
-            // Sun Avatar (T4) & True Sun God (T5) Multi-Beam Solar Spread!
-            if ((h.id === 'supermonkey' || h.id === 'super') && vTier >= 3 && opts.vx !== undefined && opts.vz !== undefined) {
-              const baseSpd = Math.hypot(opts.vx, opts.vz) || 28;
-              const baseAng = Math.atan2(opts.vx, opts.vz);
-              const extraAngles = vTier >= 4 ? [-0.22, -0.11, 0.11, 0.22] : [-0.14, 0.14];
-              extraAngles.forEach(function(da) {
-                const cloneOpts = Object.assign({}, opts, {
-                  vx: Math.sin(baseAng + da) * baseSpd,
-                  vz: Math.cos(baseAng + da) * baseSpd,
-                  _isChildBeam: true
-                });
-                origSpawnProj(cloneOpts);
-              });
+            // Super Monkey path-specific projectiles: Sun (3-way T4 / 5-way T5), Robo twin parallel blasters, Dark Knight glaives
+            if (h.id === 'supermonkey' || h.id === 'super') {
+              const smPath = vTier >= eTier && vTier >= xTier ? 0 : (eTier >= xTier ? 1 : 2);
+              const SM_PROJ = [
+                [0x93c5fd, 0xff2a2a, 0xa855f7, 0xfacc15, 0xfff7d6],
+                [0x93c5fd, 0x38bdf8, 0x22d3ee, 0x22c55e, 0x4ade80],
+                [0x93c5fd, 0x7e22ce, 0x6b21a8, 0x581c87, 0xa855f7]
+              ];
+              opts.colorHex = SM_PROJ[smPath][highestTier - 1];
+              if (opts.vx !== undefined && opts.vz !== undefined && highestTier >= 4) {
+                const baseSpd = Math.hypot(opts.vx, opts.vz) || 28;
+                const baseAng = Math.atan2(opts.vx, opts.vz);
+                const spawnChild = function(da, lateral) {
+                  const cloneOpts = Object.assign({}, opts, {
+                    vx: Math.sin(baseAng + da) * baseSpd,
+                    vz: Math.cos(baseAng + da) * baseSpd,
+                    _isChildBeam: true
+                  });
+                  if (lateral) {
+                    cloneOpts.x = (opts.x || 0) + Math.cos(baseAng) * lateral;
+                    cloneOpts.z = (opts.z || 0) - Math.sin(baseAng) * lateral;
+                  }
+                  origSpawnProj(cloneOpts);
+                };
+                if (smPath === 0) {
+                  (highestTier >= 5 ? [-0.24, -0.12, 0.12, 0.24] : [-0.15, 0.15]).forEach(function(da) { spawnChild(da, 0); });
+                } else if (smPath === 1) {
+                  spawnChild(0, 0.38);
+                  if (highestTier >= 5) spawnChild(0, -0.38);
+                } else {
+                  (highestTier >= 5 ? [-0.3, -0.15, 0.15, 0.3] : [-0.2, 0.2]).forEach(function(da) { spawnChild(da, 0); });
+                }
+              }
             }
           }
         }
@@ -6504,6 +6840,12 @@
             br = mix(br, 0.30, purpleRim * 0.78);
             bg = mix(bg, 0.94, purpleRim * 0.78);
             bb = mix(bb, 1.00, purpleRim * 0.78);
+          } else if (k === 'GOLDEN') {
+            const sheenBand = 1.0 - smoothstep(0.0, 0.16, Math.abs((bpX * 0.7 + bpY * 0.7) - 0.18));
+            const goldRim = smoothstep(-0.20, -0.08, bodyDist);
+            br = mix(mix(br, 1.00, sheenBand * 0.75), 0.72, goldRim * 0.6);
+            bg = mix(mix(bg, 0.96, sheenBand * 0.75), 0.45, goldRim * 0.6);
+            bb = mix(mix(bb, 0.62, sheenBand * 0.75), 0.05, goldRim * 0.6);
           } else if (k === 'GLASS' || k === 'DIAMOND') {
             const facet = Math.abs(Math.sin(bpX * 6.0) * Math.cos(bpY * 6.0));
             br = mix(br, 0.88, facet * 0.55);
@@ -6595,6 +6937,102 @@
       return sp;
     }
 
+    // North Row (Z = -26): Tier 1 -> Tier 5 Hero & Monkey Evolution Lineup
+    function buildDevEvolutionRow(pedMat, rimMat) {
+      const PAF = G.ProceduralAssetForge;
+      if (!PAF) return;
+      const SM = ['Sun Path (Top)', 'Robo Path (Mid)', 'Dark Knight Path (Bottom)'];
+      const ROW = [
+        { u: 'supermonkey', hero: true, t: 1, p: 0, g: 'Standard Super Darts' },
+        { u: 'supermonkey', hero: true, t: 2, p: 0, g: 'Red Laser Visor • Crimson Laser Beams' },
+        { u: 'supermonkey', hero: true, t: 3, p: 0, g: 'Violet Plasma Hood & Cape • Purple Plasma Spheres' },
+        { u: 'supermonkey', hero: true, t: 4, p: 0, g: 'Golden Sun Avatar • Sun-Ray Halo • 3-Way Sunbeams' },
+        { u: 'supermonkey', hero: true, t: 5, p: 0, g: 'True Sun God • Temple Crown • Solar Wings • Sun Orbs • 5-Way Beams' },
+        { u: 'supermonkey', hero: true, t: 3, p: 1, g: 'Robo Dual-Arm Blasters' },
+        { u: 'supermonkey', hero: true, t: 5, p: 1, g: 'Tech Terror Reactor • Missile Pods • Triple Parallel Beams' },
+        { u: 'supermonkey', hero: true, t: 3, p: 2, g: 'Dark Knight Bat-Cowl & Cape' },
+        { u: 'supermonkey', hero: true, t: 5, p: 2, g: 'Dark Champion • 4 Orbiting Dark Glaives' },
+        { u: 'ice', t: 1, g: 'Base Ice Monkey' },
+        { u: 'ice', t: 3, g: 'Handheld Cryo Cannon' },
+        { u: 'ice', t: 5, g: 'Absolute Zero Cryo Cannon • Ice Spikes • Orbiting Shards' },
+        { u: 'wizard', t: 1, g: 'Base Wizard Monkey' },
+        { u: 'wizard', t: 4, g: 'Archmage Starry Spire Hat • Orbiting Flame Phoenix' },
+        { u: 'wizard', t: 5, g: 'Prince of Darkness Spire Hat • Greater Phoenix' },
+        { u: 'ninja', t: 1, g: 'Base Ninja Monkey' },
+        { u: 'ninja', t: 4, g: 'Grandmaster Cowl • 6-Shuriken Ring' },
+        { u: 'ninja', t: 5, g: 'Crimson Grandmaster Cowl • 8-Shuriken Ring' },
+        { u: 'tack', t: 1, g: 'Base Tack Shooter' },
+        { u: 'tack', t: 4, g: 'Golden Sawblade Ring' },
+        { u: 'tack', t: 5, g: 'Inferno Twin Sawblade Rings' },
+        { u: 'sniper', t: 1, g: 'Base Sniper Monkey' },
+        { u: 'sniper', t: 4, g: 'Anti-Materiel Suppressor • Night-Vision Goggles' },
+        { u: 'sniper', t: 5, g: 'Heavy Suppressor + Bipod • Quad-Tube NVGs' },
+        { u: 'alchemist', t: 1, g: 'Base Alchemist' },
+        { u: 'alchemist', t: 4, g: 'Golden Potion Backpack • Dual Acid Flasks' },
+        { u: 'alchemist', t: 5, g: 'Golden Backpack • Unstable Acid Flasks • Bubble Orbit' }
+      ];
+      const catalog = G.COMPANION_CATALOG || [];
+      const heroCfgs = G.HERO_CONFIGS || {};
+      const STEP = 5.5;
+      let x = 5 - ((ROW.length - 1) * STEP) / 2;
+
+      ROW.forEach(function(it) {
+        const px = x;
+        x += STEP;
+        let unitMesh = null;
+        try {
+          unitMesh = it.hero ? PAF.createMonkeyHero(it.u) : PAF.createCompanionMesh(it.u);
+        } catch (err) {
+          console.warn('[B13 Dev World] could not build unit mesh for', it.u, err);
+          unitMesh = null;
+        }
+        if (!unitMesh || !unitMesh.children || unitMesh.children.length === 0) return;
+
+        const holder = new THREE.Group();
+        holder.position.set(px, 0, -26);
+        const ped = new THREE.Mesh(new THREE.CylinderGeometry(1.15, 1.29, 0.25, 24), pedMat);
+        ped.position.y = 0.12;
+        const rim = new THREE.Mesh(new THREE.TorusGeometry(1.15, 0.06, 8, 28).rotateX(Math.PI / 2), rimMat);
+        rim.position.y = 0.25;
+        holder.add(ped, rim);
+
+        unitMesh.scale.multiplyScalar(1.6);
+        unitMesh.position.y = 0.26;
+        try {
+          applyCharacterTierEvolution(unitMesh, it.u, it.t, it.p || 0);
+        } catch (err) {
+          console.warn('[B13 Dev World] tier evolution failed for', it.u, it.t, err);
+        }
+        holder.add(unitMesh);
+
+        const comp = catalog.find(function(c) { return c && c.key === it.u; });
+        const baseName = it.hero ? ((heroCfgs[it.u] && heroCfgs[it.u].name) || 'Super Monkey') : ((comp && comp.name) || it.u);
+        const pathTxt = it.hero ? SM[it.p || 0] : 'Companion Path';
+        const label = createLabelSprite(baseName + ' T' + it.t, it.hero ? pathTxt : it.g.split(' • ')[0]);
+        label.position.set(0, 3.4, 0);
+        holder.add(label);
+
+        devShowcaseGroup.add(holder);
+        devExhibits.push({
+          kind: 'unit',
+          key: it.u + '_T' + it.t + '_P' + (it.p || 0),
+          name: baseName + ' — Tier ' + it.t,
+          cat: (it.hero ? 'HERO' : 'COMPANION') + ' • ' + pathTxt,
+          scaleTxt: '1.60x',
+          lore: it.g,
+          children: '',
+          hp: it.t,
+          speed: pathTxt,
+          imm: it.g,
+          tier: it.t,
+          x: px,
+          z: -26,
+          mesh: unitMesh,
+          holder: holder
+        });
+      });
+    }
+
     function buildDevShowcaseExhibits() {
       if (devExhibits.length > 0) return;
 
@@ -6627,18 +7065,18 @@
         { key: 'BFB', name: 'B.F.B.', cat: 'Brutal Floating Behemoth', hp: 2200, speed: '0.25x', lore: '12 ft 2 in (4 MOABs)', scaleTxt: '2.00x', children: '4x M.O.A.B.', imm: 'Heavy Hull', kind: 'moab', gap: 11.5 },
         { key: 'FORTIFIED_BFB', name: 'Fortified B.F.B.', cat: 'Armored Floating Behemoth', hp: 4400, speed: '0.25x', lore: '12 ft 2 in (Riveted Hull)', scaleTxt: '2.00x', children: '4x Fortified M.O.A.B.', imm: '2x Fortified Hull', kind: 'moab', gap: 13.0 },
         { key: 'ZOMG', name: 'Z.O.M.G.', cat: 'Zeppelin of Mighty Gargantuaness', hp: 6500, speed: '0.18x', lore: '44 ft 8 in (4 BFBs)', scaleTxt: '2.75x', children: '4x B.F.B.', imm: '4x Turbo Propellers', kind: 'moab', gap: 14.5 },
-        { key: 'FORTIFIED_ZOMG', name: 'Fortified Z.O.M.G.', cat: 'Armored Gargantuan Zeppelin', hp: 13000, speed: '0.18x', lore: '44 ft 8 in (2x Armor)', scaleTxt: '2.75x', children: '4x Fortified B.F.B.', imm: '2x Fortified Hull', kind: 'moab', gap: 16.5 },
-        { key: 'BAD', name: 'B.A.D.', cat: 'Big Airship of Doom', hp: 18000, speed: '0.18x', lore: '113 ft 5 in (2 ZOMGs + 3 DDTs)', scaleTxt: '3.70x', children: '2x Z.O.M.G. + 3x D.D.T.', imm: 'Stun & Slow Immune', kind: 'moab', gap: 18.0 },
-        { key: 'FORTIFIED_BAD', name: 'Fortified B.A.D.', cat: 'Supreme Armored Airship of Doom', hp: 36000, speed: '0.18x', lore: '113 ft 5 in (2x Dreadnought)', scaleTxt: '3.70x', children: '2x Fort. ZOMG + 3x Fort. DDT', imm: 'Total Crowd-Control Immunity', kind: 'moab', gap: 20.0 },
+        { key: 'FORTIFIED_ZOMG', name: 'Fortified Z.O.M.G.', cat: 'Armored Gargantuan Zeppelin', hp: 13000, speed: '0.18x', lore: '44 ft 8 in (2x Armor)', scaleTxt: '2.75x', children: '4x Fortified B.F.B.', imm: '2x Fortified Hull', kind: 'moab', gap: 24.0 },
+        { key: 'BAD', name: 'B.A.D.', cat: 'Big Airship of Doom', hp: 18000, speed: '0.18x', lore: '113 ft 5 in (2 ZOMGs + 3 DDTs)', scaleTxt: '3.70x', children: '2x Z.O.M.G. + 3x D.D.T.', imm: 'Stun & Slow Immune', kind: 'moab', gap: 28.0 },
+        { key: 'FORTIFIED_BAD', name: 'Fortified B.A.D.', cat: 'Supreme Armored Airship of Doom', hp: 36000, speed: '0.18x', lore: '113 ft 5 in (2x Dreadnought)', scaleTxt: '3.70x', children: '2x Fort. ZOMG + 3x Fort. DDT', imm: 'Total Crowd-Control Immunity', kind: 'moab', gap: 29.0 },
 
         // All 7 Boss Bloons continuing in the exact same horizontal line!
-        { key: 'BLOONARIUS', name: 'Bloonarius the Inflator', cat: '1st Boss — Poison Swamp', hp: 25000, speed: '0.14x', lore: 'Swamp Behemoth (3 Skulls)', scaleTxt: '4.30x', children: 'Bloon Tide Swarm on Skull', imm: '3x Skull Shield Gates', kind: 'moab', gap: 21.0 },
-        { key: 'LYCH', name: 'Gravelord Lych', cat: '2nd Boss — Ghost Undead', hp: 24000, speed: '0.18x', lore: 'Stitched Necro-Zeppelin', scaleTxt: '4.25x', children: 'Resurrects Chained Moabs', imm: 'Drains Buffs & Heals', kind: 'moab', gap: 21.0 },
-        { key: 'VORTEX', name: 'Vortex: Master of Air', cat: '3rd Boss — Electric Tempest', hp: 24500, speed: '0.24x', lore: 'Supersonic Storm Blimp', scaleTxt: '4.25x', children: 'Shockwave Stun on Skull', imm: 'Wind Slipstream Shield', kind: 'moab', gap: 21.0 },
-        { key: 'DREADBLOON', name: 'Dreadbloon: Behemoth', cat: '4th Boss — Armored Rock Drill', hp: 28000, speed: '0.12x', lore: 'Titanium Spiral Drill', scaleTxt: '4.35x', children: 'Rock Bloon Escort Swarm', imm: 'Rotating Rock Shield', kind: 'moab', gap: 21.0 },
-        { key: 'PHAYZE', name: 'Phayze: Reality Warper', cat: '5th Boss — Twin-Hull Dark Glitch', hp: 26000, speed: '0.20x', lore: 'Split Dimensional Airship', scaleTxt: '4.35x', children: 'Rift Warp Dash on Skull', imm: 'Radar-Jamming Camo Pulse', kind: 'moab', gap: 21.0 },
-        { key: 'BLASTAPOPOULOS', name: 'Blastapopoulos: Core Demon', cat: '6th Boss — Volcanic Magma', hp: 29000, speed: '0.15x', lore: 'Molten Magma Dreadnought', scaleTxt: '4.45x', children: 'Meteor Fireballs on Skull', imm: 'Overheats Rapid Towers', kind: 'moab', gap: 21.0 },
-        { key: 'TERRACOTTA', name: 'Quetzal: Ancient Guardian', cat: '7th Boss — Ground Temple Serpent', hp: 32000, speed: '0.16x', lore: '5-Segment Aztec Serpent', scaleTxt: '4.40x', children: 'Golden Temple Totems', imm: 'Stone Armor Segments', kind: 'moab', gap: 21.0 }
+        { key: 'BLOONARIUS', name: 'Bloonarius the Inflator', cat: '1st Boss — Poison Swamp', hp: 25000, speed: '0.14x', lore: 'Swamp Behemoth (3 Skulls)', scaleTxt: '4.30x', children: 'Bloon Tide Swarm on Skull', imm: '3x Skull Shield Gates', kind: 'moab', gap: 30.0 },
+        { key: 'LYCH', name: 'Gravelord Lych', cat: '2nd Boss — Ghost Undead', hp: 24000, speed: '0.18x', lore: 'Stitched Necro-Zeppelin', scaleTxt: '4.25x', children: 'Resurrects Chained Moabs', imm: 'Drains Buffs & Heals', kind: 'moab', gap: 30.0 },
+        { key: 'VORTEX', name: 'Vortex: Master of Air', cat: '3rd Boss — Electric Tempest', hp: 24500, speed: '0.24x', lore: 'Supersonic Storm Blimp', scaleTxt: '4.25x', children: 'Shockwave Stun on Skull', imm: 'Wind Slipstream Shield', kind: 'moab', gap: 30.0 },
+        { key: 'DREADBLOON', name: 'Dreadbloon: Behemoth', cat: '4th Boss — Armored Rock Drill', hp: 28000, speed: '0.12x', lore: 'Titanium Spiral Drill', scaleTxt: '4.35x', children: 'Rock Bloon Escort Swarm', imm: 'Rotating Rock Shield', kind: 'moab', gap: 30.0 },
+        { key: 'PHAYZE', name: 'Phayze: Reality Warper', cat: '5th Boss — Twin-Hull Dark Glitch', hp: 26000, speed: '0.20x', lore: 'Split Dimensional Airship', scaleTxt: '4.35x', children: 'Rift Warp Dash on Skull', imm: 'Radar-Jamming Camo Pulse', kind: 'moab', gap: 30.0 },
+        { key: 'BLASTAPOPOULOS', name: 'Blastapopoulos: Core Demon', cat: '6th Boss — Volcanic Magma', hp: 29000, speed: '0.15x', lore: 'Molten Magma Dreadnought', scaleTxt: '4.45x', children: 'Meteor Fireballs on Skull', imm: 'Overheats Rapid Towers', kind: 'moab', gap: 30.0 },
+        { key: 'TERRACOTTA', name: 'Quetzal: Ancient Guardian', cat: '7th Boss — Ground Temple Serpent', hp: 32000, speed: '0.16x', lore: '5-Segment Aztec Serpent', scaleTxt: '4.40x', children: 'Golden Temple Totems', imm: 'Stone Armor Segments', kind: 'moab', gap: 30.0 }
       ];
 
       let curX = -75;
@@ -6676,6 +7114,8 @@
         item.holder = holder;
         devExhibits.push(item);
       });
+
+      buildDevEvolutionRow(pedMat, rimMat);
     }
 
     function setupDevWorldUI() {
@@ -6703,7 +7143,7 @@
         '  </div>',
         '</div>',
         '<div class="flex items-center justify-between gap-2 pt-1 border-t border-slate-700/80">',
-        '  <span class="text-[10px] text-amber-200 font-bold">💡 Walk Left/Right along the Horizontal Lineup (Bloons -> MOABs -> 7 Bosses) • Attacks Disabled</span>',
+        '  <span class="text-[10px] text-amber-200 font-bold">💡 South Row: Bloons -> MOABs -> 7 Bosses • North Row (walk up): T1 -> T5 Evolutions • Attacks Disabled</span>',
         '  <div class="flex items-center gap-1.5">',
         '    <button id="btn-waila-spin" type="button" class="px-2.5 py-1 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-btd text-xs cursor-pointer">🔄 SPIN MODELS</button>',
         '    <button id="btn-exit-dev-world" type="button" class="px-3 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-btd text-xs cursor-pointer">🚪 EXIT DEV WORLD</button>',
@@ -6739,6 +7179,7 @@
     window.enterDevShowcaseWorld = function() {
       buildDevShowcaseExhibits();
       window.__IN_DEV_SHOWCASE = true;
+      window.__DEV_CLOCK = 0;
       devShowcaseGroup.visible = true;
 
       const startModal = document.getElementById('start-modal');
@@ -6765,6 +7206,7 @@
 
     window.exitDevShowcaseWorld = function() {
       window.__IN_DEV_SHOWCASE = false;
+      if (G.gameState) G.gameState.spawnAccumulator = 0;
       if (G.bloonInstancedMesh) G.bloonInstancedMesh.visible = true;
       if (G.bloonOutlineInstancedMesh) G.bloonOutlineInstancedMesh.visible = true;
       devShowcaseGroup.visible = false;
@@ -6779,6 +7221,208 @@
     };
 
     // ------------------------------------------------------------------------
+    // E2. REAL-GAMEPLAY AIRSHIP/BOSS GUARANTEE + FORTIFIED W24+ + BOSS ROTATION
+    // ------------------------------------------------------------------------
+    const B13_BOSS_ROTATION = ['BLOONARIUS', 'LYCH', 'VORTEX', 'DREADBLOON', 'PHAYZE', 'BLASTAPOPOULOS', 'TERRACOTTA'];
+    const B13_BOSS_SET = new Set(B13_BOSS_ROTATION);
+    const B13_FORTIFIABLE = ['MOAB', 'DDT', 'BFB', 'ZOMG', 'BAD'];
+    let b13TypesRegistered = false;
+    let b13LastBossWave = 0;
+
+    function registerB13BlimpTypes() {
+      const BT = G.BLIMP_TYPES;
+      if (!BT || b13TypesRegistered) return;
+      b13TypesRegistered = true;
+      if (!BT.BLOONARIUS) BT.BLOONARIUS = { key: 'BLOONARIUS', title: 'BLOONARIUS — THE INFLATOR', icon: '🟢', hp: 2400, speed: 1.0, scale: 1.65, isCamo: false, isLead: false, moneyReward: 45, xpReward: 420, childBloons: ['CERAMIC', 'CERAMIC', 'RAINBOW', 'RAINBOW'], childBlimps: ['MOAB'] };
+      if (!BT.LYCH) BT.LYCH = { key: 'LYCH', title: 'LYCH — GRAVELORD', icon: '💀', hp: 2600, speed: 1.4, scale: 1.6, isCamo: false, isLead: false, moneyReward: 48, xpReward: 460, childBloons: ['PURPLE', 'PURPLE'], childBlimps: ['MOAB', 'MOAB'] };
+      if (!BT.TERRACOTTA) BT.TERRACOTTA = { key: 'TERRACOTTA', title: 'QUETZAL — ANCIENT GUARDIAN', icon: '🐍', hp: 6000, speed: 1.1, scale: 1.9, isCamo: false, isLead: true, moneyReward: 80, xpReward: 900, childBloons: ['CERAMIC', 'LEAD'], childBlimps: ['ZOMG'] };
+      B13_FORTIFIABLE.forEach(function(k) {
+        const src = BT[k];
+        const fk = 'FORTIFIED_' + k;
+        if (!src || BT[fk]) return;
+        BT[fk] = Object.assign({}, src, {
+          key: fk,
+          title: 'FORTIFIED ' + src.title,
+          hp: Math.round(src.hp * 2),
+          moneyReward: Math.round((src.moneyReward || 40) * 1.6),
+          xpReward: Math.round((src.xpReward || 120) * 1.6),
+          childBloons: (src.childBloons || []).slice(),
+          childBlimps: (src.childBlimps || []).map(function(c) { return B13_FORTIFIABLE.indexOf(c) !== -1 ? 'FORTIFIED_' + c : c; })
+        });
+      });
+    }
+    registerB13BlimpTypes();
+
+    function b13AuthenticateBlimp(mb) {
+      if (!mb) return;
+      const key = String(mb.blimpKey || mb.type || 'MOAB').toUpperCase();
+      const ud = mb.mesh && mb.mesh.userData;
+      if (mb.mesh && ud && ud.isAuthenticB13 && String(ud.moabType || '').toUpperCase() === key) return;
+      const fresh = buildAuthentic3DAirshipOrBoss(key);
+      if (!fresh.userData || !fresh.userData.isAuthenticB13) {
+        fresh.userData = Object.assign({}, fresh.userData || {}, { moabType: key, baseHierarchyScale: fresh.scale.x || 1.25, propellers: [], isAuthenticB13: true });
+      }
+      if (mb.mesh) {
+        const parent = mb.mesh.parent || G.scene;
+        fresh.position.copy(mb.mesh.position);
+        fresh.rotation.copy(mb.mesh.rotation);
+        parent.remove(mb.mesh);
+        parent.add(fresh);
+      } else {
+        fresh.position.set(mb.x || 0, 0, mb.z || 0);
+        G.scene.add(fresh);
+      }
+      mb.mesh = fresh;
+      mb._skullShieldMesh = null;
+    }
+
+    function b13OnBlimpSpawned(mb) {
+      if (!mb || mb._b13Seen) return;
+      mb._b13Seen = true;
+      const st = G.gameState;
+      const key = String(mb.blimpKey || mb.type || 'MOAB').toUpperCase();
+      mb.blimpKey = key;
+      const w = (st && st.wave) || 1;
+      if (!window.__IN_DEV_SHOWCASE && B13_FORTIFIABLE.indexOf(key) !== -1 && w >= 24) {
+        const chance = Math.min(0.8, 0.35 + (w - 24) * 0.03);
+        if (Math.random() < chance) {
+          const fk = 'FORTIFIED_' + key;
+          const fc = G.BLIMP_TYPES && G.BLIMP_TYPES[fk];
+          mb.blimpKey = fk;
+          mb.hp = Math.round((mb.hp || 0) * 2);
+          mb.maxHp = Math.round((mb.maxHp || mb.hp) * 2);
+          if (fc) mb.title = fc.title;
+        }
+      }
+      if (B13_BOSS_SET.has(mb.blimpKey)) {
+        mb._skullGates = [0.75, 0.5, 0.25];
+        mb._skullIdx = 0;
+        mb._skullShield = 0;
+      }
+      b13AuthenticateBlimp(mb);
+    }
+
+    function b13UpdateSkullGates(mb, dt) {
+      if (mb._skullShield > 0) {
+        mb._skullShield -= dt;
+        if (mb.hp < mb._skullHpLock) mb.hp = mb._skullHpLock;
+      } else if (mb._skullIdx < mb._skullGates.length && mb.hp > 0 && mb.hp <= mb.maxHp * mb._skullGates[mb._skullIdx]) {
+        mb._skullHpLock = Math.ceil(mb.maxHp * mb._skullGates[mb._skullIdx]);
+        mb.hp = mb._skullHpLock;
+        mb._skullIdx++;
+        mb._skullShield = 3.0;
+        if (typeof G.spawnFloatingText === 'function') G.spawnFloatingText(mb.x, 4.5, mb.z, '💀 SKULL SHIELD ' + mb._skullIdx + '/3', 'crit');
+        if (typeof G.triggerScreenShake === 'function') G.triggerScreenShake(0.18, 0.25, 0);
+        window.triggerHaptic([40, 30, 40]);
+      }
+      if (!mb.mesh) return;
+      let sh = mb._skullShieldMesh;
+      if (!sh || sh.parent !== mb.mesh) {
+        sh = new THREE.Mesh(
+          new THREE.SphereGeometry(1.9, 22, 14),
+          new THREE.MeshBasicMaterial({ color: 0xa855f7, transparent: true, opacity: 0.3, wireframe: true, depthWrite: false })
+        );
+        sh.name = 'b13_skull_shield';
+        sh.position.y = 0.9;
+        mb.mesh.add(sh);
+        mb._skullShieldMesh = sh;
+      }
+      sh.visible = mb._skullShield > 0;
+      if (sh.visible) sh.rotation.y += dt * 2.2;
+    }
+
+    // Every legacy blimp build path now returns the authentic B13 hull
+    const PAF13 = G.ProceduralAssetForge;
+    if (PAF13 && typeof PAF13.createMOABBlimp === 'function' && !PAF13._b13BlimpPatched) {
+      PAF13._b13BlimpPatched = true;
+      const origCreateBlimp = PAF13.createMOABBlimp;
+      PAF13.createMOABBlimp = function(blimpKey) {
+        try {
+          return buildAuthentic3DAirshipOrBoss(blimpKey || 'MOAB');
+        } catch (err) {
+          console.warn('[B13] authentic blimp build failed, using legacy mesh:', err);
+          return origCreateBlimp.apply(this, arguments);
+        }
+      };
+    }
+
+    // Direct spawn hook (G.spawnAirshipBoss) + G.spawnMOAB alias
+    if (typeof G.spawnAirshipBoss === 'function' && !G.spawnAirshipBoss._b13Hooked) {
+      const origSpawnAirship = G.spawnAirshipBoss;
+      const hookedSpawn = function(blimpKey, customX, customZ) {
+        registerB13BlimpTypes();
+        const list = G.activeMOABs;
+        const before = list ? list.length : 0;
+        const r = origSpawnAirship.apply(this, arguments);
+        const after = G.activeMOABs;
+        if (after) for (let i = before; i < after.length; i++) b13OnBlimpSpawned(after[i]);
+        return r;
+      };
+      hookedSpawn._b13Hooked = true;
+      G.spawnAirshipBoss = hookedSpawn;
+    }
+    G.spawnMOAB = function(blimpKey, customX, customZ) {
+      return G.spawnAirshipBoss(blimpKey || 'MOAB', customX === undefined ? null : customX, customZ === undefined ? null : customZ);
+    };
+    window.__B13_BOSS_SCHEDULER = true;
+
+    // ------------------------------------------------------------------------
+    // E3. STRICT SEQUENTIAL UPGRADE CARD GATING (10 HEROES / 14 COMPANIONS)
+    // ------------------------------------------------------------------------
+    function b13PathAccessor(state, card) {
+      const id = String((card && card.id) || '');
+      const h = (state && state.hero) || {};
+      if (id.indexOf('hero_volley') === 0) return { key: 'hv', get: function() { return h.volleyTier || 0; }, set: function(v) { h.volleyTier = v; } };
+      if (id.indexOf('hero_elemental') === 0) return { key: 'he', get: function() { return h.weaponTier || 0; }, set: function(v) { h.weaponTier = v; } };
+      if (id.indexOf('hero_explosive') === 0) return { key: 'hx', get: function() { return h.explosiveTier || 0; }, set: function(v) { h.explosiveTier = v; } };
+      const m = id.match(/^(?:recruit|squad)_(.+)$/);
+      if (m && state && state.squad) {
+        const k = m[1];
+        return {
+          key: 'sq_' + k,
+          get: function() { return (state.squad[k] && state.squad[k].level) || 0; },
+          set: function(v) { if (state.squad[k]) state.squad[k].level = v; }
+        };
+      }
+      return null;
+    }
+    function installB13UpgradeGating() {
+      const cur = G.getAvailableUpgradeCards;
+      if (typeof cur !== 'function' || cur._b13Gated) return;
+      const gated = function(state) {
+        const raw = cur.apply(this, arguments) || [];
+        const seen = new Set();
+        const out = [];
+        for (let i = 0; i < raw.length; i++) {
+          const card = raw[i];
+          const acc = b13PathAccessor(state, card);
+          if (!acc) { out.push(card); continue; }
+          const nextT = acc.get() + 1;
+          if (nextT > 5 || seen.has(acc.key)) continue;
+          if (card.tier !== undefined && card.tier !== nextT) continue;
+          seen.add(acc.key);
+          card.tier = nextT;
+          if (typeof card.apply === 'function' && !card._b13Wrapped) {
+            const origApply = card.apply;
+            card._b13Wrapped = true;
+            card.apply = function(st) {
+              const a2 = b13PathAccessor(st, card);
+              if (a2 && a2.get() !== nextT - 1) return; // stale card: path already advanced
+              const res = origApply.apply(this, arguments);
+              if (a2 && a2.get() > nextT) a2.set(nextT);
+              return res;
+            };
+          }
+          out.push(card);
+        }
+        return out;
+      };
+      gated._b13Gated = true;
+      G.getAvailableUpgradeCards = gated;
+    }
+    installB13UpgradeGating();
+
+    // ------------------------------------------------------------------------
     // F. MAIN SIMULATION LOOP HOOK
     // ------------------------------------------------------------------------
     const prevSim = G.updateSimulation;
@@ -6787,6 +7431,13 @@
       const h = st && st.hero;
 
       if (window.__IN_DEV_SHOWCASE && h) {
+        // Freeze the wave clock + natural spawner so Dev World never advances past W1
+        st.waveTimer = 999999;
+        st.elapsedTime = 0;
+        st.spawnAccumulator = -1e9;
+        st.firstMoabSpawned = false;
+        st.finalBadSpawned = true;
+        st.blimpSpawnTimer = 999999;
         if (G.bloonActive) {
           for (let i = 0; i < G.bloonActive.length; i++) G.bloonActive[i] = 0;
         }
@@ -6804,9 +7455,13 @@
 
       if (!h || st.paused || st.gameOver || st.inStartMenu) return;
 
+      installB13UpgradeGating();
       updateAllHeroAndCompanionEvolutions();
+      animateB13Crests(dt);
 
       if (window.__IN_DEV_SHOWCASE) {
+        window.__DEV_CLOCK = (window.__DEV_CLOCK || 0) + dt;
+        const devClock = window.__DEV_CLOCK;
         // Clear any wild wave bloons that prevSim(dt) tried to spawn & hide instanced wave meshes!
         if (G.bloonActive) {
           for (let i = 0; i < G.bloonActive.length; i++) G.bloonActive[i] = 0;
@@ -6830,7 +7485,7 @@
             const qMesh = ex.mesh.getObjectByName('dev_bloon_quad');
             if (qMesh) {
               qMesh.quaternion.copy(G.camera.quaternion);
-              qMesh.position.y = 1.35 + Math.sin(st.elapsedTime * 3.5 + i * 0.7) * 0.08;
+              qMesh.position.y = 1.35 + Math.sin(devClock * 3.5 + i * 0.7) * 0.08;
             }
           }
           if (ex.mesh && ex.kind === 'moab' && window.__DEV_SPIN_MODELS) {
@@ -6838,6 +7493,9 @@
             if (ex.mesh.userData && ex.mesh.userData.propellers) {
               ex.mesh.userData.propellers.forEach(function(p) { p.rotation.z += dt * 16; });
             }
+          }
+          if (ex.mesh && ex.kind === 'unit' && window.__DEV_SPIN_MODELS) {
+            ex.mesh.rotation.y += dt * 0.5;
           }
           const d = Math.hypot(ex.x - h.x, ex.z - h.z);
           if (d < minDist) {
@@ -6854,33 +7512,45 @@
           const hpEl = document.getElementById('waila-hp');
           const spEl = document.getElementById('waila-speed');
           const imEl = document.getElementById('waila-imm');
-          if (tEl) tEl.textContent = closest.name;
-          if (cEl) cEl.textContent = closest.cat;
-          if (sEl) sEl.textContent = '3D Scale: ' + closest.scaleTxt;
-          if (lEl) lEl.textContent = 'Lore Size: ' + closest.lore + ' • Pop Spawns: ' + closest.children;
-          if (hpEl) hpEl.textContent = '❤️ ' + closest.hp.toLocaleString() + ' HP';
-          if (spEl) spEl.textContent = '⚡ ' + closest.speed + ' SPD';
-          if (imEl) imEl.textContent = '🛡️ ' + closest.imm;
+          if (closest.kind === 'unit') {
+            if (tEl) tEl.textContent = closest.name;
+            if (cEl) cEl.textContent = closest.cat;
+            if (sEl) sEl.textContent = 'Tier ' + closest.tier + ' / 5';
+            if (lEl) lEl.textContent = '3D Gear: ' + closest.lore;
+            if (hpEl) hpEl.textContent = '⭐ T' + closest.tier;
+            if (spEl) spEl.textContent = '🧭 ' + closest.speed;
+            if (imEl) imEl.textContent = '🛠️ Sequential T1 → T5';
+          } else {
+            if (tEl) tEl.textContent = closest.name;
+            if (cEl) cEl.textContent = closest.cat;
+            if (sEl) sEl.textContent = '3D Scale: ' + closest.scaleTxt;
+            if (lEl) lEl.textContent = 'Lore Size: ' + closest.lore + ' • Pop Spawns: ' + closest.children;
+            if (hpEl) hpEl.textContent = '❤️ ' + closest.hp.toLocaleString() + ' HP';
+            if (spEl) spEl.textContent = '⚡ ' + closest.speed + ' SPD';
+            if (imEl) imEl.textContent = '🛡️ ' + closest.imm;
+          }
         }
         return;
+      }
+
+      // Boss rotation: W15, W20, W25, W30, W35, W40, then every 5 waves in Freeplay (W45+)
+      if (st.wave < b13LastBossWave) b13LastBossWave = 0;
+      if (st.wave !== b13LastBossWave) {
+        b13LastBossWave = st.wave;
+        const bw = st.wave;
+        if (bw >= 15 && bw % 5 === 0) {
+          const idx = ((((bw / 5) - 3) % B13_BOSS_ROTATION.length) + B13_BOSS_ROTATION.length) % B13_BOSS_ROTATION.length;
+          G.spawnAirshipBoss(B13_BOSS_ROTATION[idx]);
+        }
       }
 
       let activeRiftBoss = null;
       if (G.activeMOABs && G.activeMOABs.length > 0) {
         for (let m = 0; m < G.activeMOABs.length; m++) {
           const mb = G.activeMOABs[m];
-          const bType = String(mb.type || 'MOAB').toUpperCase();
-
-          if (mb.mesh && (!mb.mesh.userData || !mb.mesh.userData.isAuthenticB13)) {
-            const parent = mb.mesh.parent || G.scene;
-            const pos = mb.mesh.position.clone();
-            const rot = mb.mesh.rotation.clone();
-            parent.remove(mb.mesh);
-            mb.mesh = buildAuthentic3DAirshipOrBoss(bType);
-            mb.mesh.position.copy(pos);
-            mb.mesh.rotation.copy(rot);
-            parent.add(mb.mesh);
-          }
+          if (!mb._b13Seen) b13OnBlimpSpawned(mb); // catches closure-internal spawns (wave timer, child blimps)
+          b13AuthenticateBlimp(mb);
+          if (mb._skullGates) b13UpdateSkullGates(mb, dt);
 
           if (mb.mesh) {
             const trueScale = (mb.mesh.userData && mb.mesh.userData.baseHierarchyScale) || 1.25;
