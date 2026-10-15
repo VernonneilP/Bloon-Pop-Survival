@@ -14,13 +14,14 @@
 /* 2. Bloons Blitz Banner Cards (Outer Container: OVERFLOW VISIBLE for Overhanging Ribbons & Portraits) */
 .blitz-upgrade-card {
   position: relative !important;
-  width: 242px !important;
-  min-height: 485px !important;
+  width: clamp(105px, 29vw, 242px) !important;
+  max-height: 62dvh !important;
+  min-height: auto !important;
   overflow: visible !important; /* CRITICAL: Allows top portrait and ribbons to overhang cleanly */
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
-  padding: 24px 12px 42px 12px !important;
+  padding: clamp(14px, 2.2dvh, 24px) clamp(4px, 1.2vw, 12px) clamp(16px, 3.2dvh, 42px) !important;
   cursor: pointer !important;
   transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease !important;
   box-sizing: border-box !important;
@@ -30,16 +31,16 @@
 }
 
 .blitz-upgrade-card:hover {
-  transform: scale(1.045) translateY(-8px) !important;
+  transform: scale(1.035) translateY(-4px) !important;
 }
 
 /* Middle Card Stagger */
 .blitz-upgrade-card.stagger-middle {
-  transform: translateY(26px) !important;
+  transform: translateY(clamp(6px, 1.8dvh, 26px)) !important;
 }
 
 .blitz-upgrade-card.stagger-middle:hover {
-  transform: translateY(18px) scale(1.045) !important;
+  transform: translateY(clamp(4px, 1.2dvh, 18px)) scale(1.035) !important;
 }
 
 /* 3. Inner Card Background Layer (HOLDS CHEVRON CLIP-PATH & HARLEQUIN PATTERN) */
@@ -71,22 +72,22 @@
   box-shadow: 0 14px 32px rgba(0,0,0,0.65), 0 0 20px rgba(2,136,209,0.4) !important;
 }
 
-/* 4. Top Peak Portrait Shield (OVERHANGS TOP EDGE BY 28PX, ZERO CLIPPING) */
+/* 4. Top Peak Portrait Shield (OVERHANGS TOP EDGE, ZERO CLIPPING) */
 .blitz-peak-portrait {
   position: absolute !important;
-  top: -28px !important;
-  width: 60px !important;
-  height: 60px !important;
-  border-radius: 20px !important;
+  top: clamp(-18px, -2.8dvh, -28px) !important;
+  width: clamp(34px, 7vw, 60px) !important;
+  height: clamp(34px, 7vw, 60px) !important;
+  border-radius: clamp(10px, 2vw, 20px) !important;
   background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%) !important;
-  border: 3.5px solid #2a1306 !important;
-  box-shadow: 0 6px 14px rgba(0,0,0,0.6) !important;
+  border: clamp(2px, 0.4vw, 3.5px) solid #2a1306 !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.6) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   z-index: 30 !important;
   overflow: hidden !important;
-  padding: 3px !important;
+  padding: 2px !important;
 }
 .blitz-peak-portrait img, .blitz-peak-portrait svg {
   width: 100% !important;
@@ -97,19 +98,19 @@
 /* 5. Full-Width Angled Character Ribbon (OVERHANGS LEFT & RIGHT BORDERS) */
 .blitz-ribbon {
   position: relative !important;
-  width: 108% !important;
-  margin-left: -4% !important;
-  padding: 4px 12px !important;
-  border-radius: 10px !important;
+  width: 106% !important;
+  margin-left: -3% !important;
+  padding: clamp(2px, 0.4dvh, 4px) clamp(4px, 1vw, 12px) !important;
+  border-radius: clamp(6px, 1vw, 10px) !important;
   font-family: 'Luckiest Guy', cursive !important;
-  font-size: 0.90rem !important;
+  font-size: clamp(0.55rem, 1.8vw, 0.90rem) !important;
   letter-spacing: 0.05em !important;
   text-transform: uppercase !important;
   text-align: center !important;
-  margin-top: 14px !important;
-  margin-bottom: 6px !important;
-  border: 2.5px solid #ffffff !important;
-  box-shadow: 0 4px 0 rgba(0,0,0,0.35), 0 4px 8px rgba(0,0,0,0.4) !important;
+  margin-top: clamp(6px, 1.1dvh, 14px) !important;
+  margin-bottom: clamp(2px, 0.4dvh, 6px) !important;
+  border: clamp(1.5px, 0.3vw, 2.5px) solid #ffffff !important;
+  box-shadow: 0 3px 0 rgba(0,0,0,0.35), 0 3px 6px rgba(0,0,0,0.4) !important;
   z-index: 25 !important;
   box-sizing: border-box !important;
 }
@@ -131,13 +132,13 @@
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 3px !important;
-  margin-bottom: 6px !important;
+  gap: clamp(2px, 0.4vw, 3px) !important;
+  margin-bottom: clamp(2px, 0.4dvh, 6px) !important;
   z-index: 20 !important;
 }
 .blitz-tier-dot {
-  width: 9px !important;
-  height: 9px !important;
+  width: clamp(5px, 1vw, 9px) !important;
+  height: clamp(5px, 1vw, 9px) !important;
   border-radius: 9999px !important;
   background: #1a0d00 !important;
   box-shadow: 0 1px 2px rgba(255,255,255,0.5) !important;
@@ -149,12 +150,12 @@
 
 /* 7. Center Display: Frameless 3D Model for Recruits OR Framed 3D Emblem for Upgrades */
 .blitz-model-viewport-frameless {
-  width: 170px !important;
-  height: 155px !important;
+  width: clamp(72px, 14vw, 145px) !important;
+  height: clamp(60px, 12vw, 140px) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  margin: 2px 0 6px 0 !important;
+  margin: 1px 0 4px 0 !important;
   position: relative !important;
   z-index: 20 !important;
 }
@@ -162,22 +163,22 @@
   max-width: 100% !important;
   max-height: 100% !important;
   object-fit: contain !important;
-  filter: drop-shadow(0 10px 16px rgba(0,0,0,0.65)) !important;
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.65)) !important;
 }
 
 .blitz-emblem-frame {
-  width: 126px !important;
-  height: 126px !important;
-  border-radius: 20px !important;
+  width: clamp(65px, 12vw, 120px) !important;
+  height: clamp(65px, 12vw, 120px) !important;
+  border-radius: clamp(10px, 2vw, 20px) !important;
   background: rgba(0,0,0,0.3) !important;
-  border: 3.5px solid #ffffff !important;
-  box-shadow: inset 0 4px 10px rgba(0,0,0,0.65), 0 6px 14px rgba(0,0,0,0.4) !important;
+  border: clamp(2px, 0.4vw, 3.5px) solid #ffffff !important;
+  box-shadow: inset 0 3px 8px rgba(0,0,0,0.65), 0 4px 10px rgba(0,0,0,0.4) !important;
   position: relative !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  margin: 6px 0 8px 0 !important;
-  padding: 8px !important;
+  margin: clamp(2px, 0.5dvh, 6px) 0 !important;
+  padding: 4px !important;
   z-index: 20 !important;
 }
 
@@ -185,14 +186,14 @@
   max-width: 85% !important;
   max-height: 85% !important;
   object-fit: contain !important;
-  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)) !important;
+  filter: drop-shadow(0 3px 5px rgba(0,0,0,0.5)) !important;
 }
 
 .blitz-emblem-frame.frame-diamond {
   transform: rotate(45deg) !important;
-  width: 105px !important;
-  height: 105px !important;
-  margin: 16px 0 16px 0 !important;
+  width: clamp(55px, 10vw, 100px) !important;
+  height: clamp(55px, 10vw, 100px) !important;
+  margin: clamp(8px, 1.5dvh, 16px) 0 !important;
 }
 .blitz-emblem-frame.frame-diamond > * {
   transform: rotate(-45deg) !important;
@@ -200,10 +201,10 @@
 
 .blitz-roman-numeral {
   position: absolute !important;
-  bottom: 4px !important;
-  right: 6px !important;
+  bottom: 2px !important;
+  right: 4px !important;
   font-family: 'Luckiest Guy', cursive !important;
-  font-size: 0.95rem !important;
+  font-size: clamp(0.70rem, 1.8vw, 0.95rem) !important;
   color: #ffffff !important;
   text-shadow: -1px -1px 0 #1a0d00, 1px -1px 0 #1a0d00, -1px 1px 0 #1a0d00, 1px 1px 0 #1a0d00, 0 2px 4px rgba(0,0,0,0.9) !important;
   z-index: 22 !important;
@@ -213,10 +214,10 @@
 .blitz-card-title {
   font-family: 'Luckiest Guy', cursive, sans-serif !important;
   color: #ffffff !important;
-  font-size: 1.25rem !important;
-  line-height: 1.15 !important;
+  font-size: clamp(0.68rem, 2.1vw, 1.25rem) !important;
+  line-height: 1.12 !important;
   text-align: center !important;
-  margin: 4px 0 3px 0 !important;
+  margin: 2px 0 !important;
   text-shadow: 
     -1px -1px 0 #1a0d00,
      1px -1px 0 #1a0d00,
@@ -231,14 +232,18 @@
 .blitz-card-desc {
   font-family: 'Nunito', sans-serif !important;
   font-weight: 800 !important;
-  font-size: 0.78rem !important;
-  line-height: 1.25 !important;
+  font-size: clamp(0.50rem, 1.6vw, 0.78rem) !important;
+  line-height: 1.15 !important;
   color: #ffffff !important;
   text-align: center !important;
   text-shadow: 0 1px 2px rgba(0,0,0,0.9) !important;
   flex: 1 1 auto !important;
-  margin-bottom: 6px !important;
-  padding: 0 6px !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 3 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  margin-bottom: 2px !important;
+  padding: 0 4px !important;
   z-index: 20 !important;
 }
 
@@ -288,20 +293,20 @@
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 12px !important;
-  margin-top: 24px !important;
+  gap: clamp(4px, 1.5vw, 12px) !important;
+  margin-top: clamp(8px, 1.8dvh, 24px) !important;
   z-index: 30 !important;
 }
 
 .blitz-btn-action {
   font-family: 'Luckiest Guy', cursive !important;
-  border: 2.5px solid #ffffff !important;
-  border-radius: 14px !important;
-  padding: 8px 18px !important;
-  font-size: 0.95rem !important;
+  border: clamp(1.5px, 0.3vw, 2.5px) solid #ffffff !important;
+  border-radius: clamp(8px, 1.5vw, 14px) !important;
+  padding: clamp(4px, 0.8dvh, 8px) clamp(8px, 1.8vw, 18px) !important;
+  font-size: clamp(0.65rem, 2vw, 0.95rem) !important;
   display: inline-flex !important;
   align-items: center !important;
-  gap: 6px !important;
+  gap: clamp(3px, 0.8vw, 6px) !important;
   cursor: pointer !important;
   transition: transform 0.15s ease, filter 0.15s ease !important;
   text-shadow: 0 1px 2px rgba(0,0,0,0.8) !important;
@@ -447,5 +452,181 @@
   border-color: #facc15 !important;
   box-shadow: 0 0 18px rgba(250, 204, 21, 0.65), inset 0 2px 6px rgba(0,0,0,0.8) !important;
 }
+
+/* 16. Mobile-First Responsive Modal Bounds & Smooth Touch Scrolling */
+#start-modal > div,
+#shop-modal > div,
+#settings-modal > div,
+#barracks-modal > div,
+#my-build-modal > div,
+#modal-hero-unlock > div {
+  max-width: 95vw !important;
+  max-height: 90dvh !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  box-sizing: border-box !important;
+  margin: auto !important;
+}
+
+/* Upgrade cards row always flex-row */
+#upgrade-cards-container {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: clamp(4px, 1.5vw, 18px) !important;
+  width: 100% !important;
+  margin-bottom: clamp(4px, 1dvh, 12px) !important;
+}
+
+/* 17. Hide Desktop-Only Hints on Touch & Mobile Screens */
+@media (pointer: coarse), (max-width: 768px) {
+  #hud-pause-hint,
+  [data-desktop-hint],
+  .desktop-hint,
+  .sm\:inline {
+    display: none !important;
+  }
+}
+
+/* 18. Hero Star Rank Badges & Interactive Upgrade Button */
+.hero-star-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 2px !important;
+  padding: 2px 8px !important;
+  border-radius: 9999px !important;
+  background: linear-gradient(180deg, #f59e0b 0%, #b45309 100%) !important;
+  border: 1.5px solid #fef08a !important;
+  font-family: 'Luckiest Guy', cursive !important;
+  font-size: 0.68rem !important;
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8) !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5) !important;
+  letter-spacing: 0.04em !important;
+  margin-top: 3px !important;
+}
+
+.btn-star-upgrade {
+  margin-top: 4px !important;
+  padding: 3px 8px !important;
+  border-radius: 10px !important;
+  background: linear-gradient(180deg, #facc15 0%, #eab308 50%, #ca8a04 100%) !important;
+  border: 2px solid #ffffff !important;
+  font-family: 'Luckiest Guy', cursive !important;
+  font-size: 0.65rem !important;
+  color: #1a0d00 !important;
+  cursor: pointer !important;
+  box-shadow: 0 3px 0 #713f12, 0 4px 6px rgba(0,0,0,0.4) !important;
+  transition: transform 0.12s ease !important;
+  user-select: none !important;
+}
+.btn-star-upgrade:hover {
+  transform: scale(1.05) translateY(-1px) !important;
+}
+.btn-star-upgrade:active {
+  transform: scale(0.95) translateY(1px) !important;
+  box-shadow: 0 1px 0 #713f12 !important;
+}
+.btn-star-upgrade.maxed {
+  background: linear-gradient(180deg, #64748b 0%, #475569 100%) !important;
+  color: #e2e8f0 !important;
+  border-color: #94a3b8 !important;
+  box-shadow: 0 2px 0 #1e293b !important;
+  cursor: default !important;
+}
+
+/* 19. Monkey Barracks Modal & Companion Upgrade Grid */
+#barracks-modal {
+  background: rgba(10, 15, 8, 0.85) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+  z-index: 80 !important;
+}
+
+.barracks-card {
+  background: linear-gradient(180deg, #1c1917 0%, #0c0a09 100%) !important;
+  border: 2.5px solid #44403c !important;
+  border-radius: 18px !important;
+  padding: 10px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.6) !important;
+  transition: transform 0.15s ease, border-color 0.15s ease !important;
+  box-sizing: border-box !important;
+}
+.barracks-card:hover {
+  transform: translateY(-2px) !important;
+  border-color: #f59e0b !important;
+}
+.barracks-card.unlocked {
+  border-color: #0284c7 !important;
+}
+
+/* 20. Auto-Optimizer Notification Toast */
+.bloons-auto-toast {
+  position: fixed !important;
+  top: 18px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%) !important;
+  border: 2.5px solid #ffffff !important;
+  color: #ffffff !important;
+  padding: 8px 18px !important;
+  border-radius: 9999px !important;
+  font-family: 'Luckiest Guy', cursive !important;
+  font-size: 0.85rem !important;
+  letter-spacing: 0.04em !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.7), 0 0 16px rgba(14, 165, 233, 0.6) !important;
+  z-index: 99999 !important;
+  pointer-events: none !important;
+  animation: bloonsToastIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards, bloonsToastOut 0.35s 3.2s forwards !important;
+}
+
+@keyframes bloonsToastIn {
+  from { opacity: 0; transform: translate(-50%, -20px) scale(0.9); }
+  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
+@keyframes bloonsToastOut {
+  from { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  to { opacity: 0; transform: translate(-50%, -20px) scale(0.9); }
+}
+
+/* 21. Mobile Level-Up Modal Header and Spacing Polish */
+@media (max-width: 640px) {
+  #levelup-modal > div > div:first-child {
+    display: none !important;
+  }
+  #levelup-modal .relative.mb-6 {
+    margin-bottom: 6px !important;
+  }
+  #levelup-modal h2 {
+    font-size: 1.15rem !important;
+    line-height: 1.2 !important;
+  }
+  #levelup-modal .px-8 {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+  #levelup-modal p.font-btd,
+  #levelup-modal .text-amber-200\/80 {
+    display: none !important;
+  }
+  .blitz-upgrade-card.stagger-middle {
+    transform: translateY(clamp(2px, 0.8dvh, 8px)) !important;
+  }
+  .btn-barracks-upgrade {
+    white-space: nowrap !important;
+    font-size: 0.65rem !important;
+    line-height: 1 !important;
+  }
+}
+
 
 

@@ -112,6 +112,43 @@
     }
   })();
 
+  // Guarantee ProceduralSoundEngine.prototype.playChimeNote (Fixes line 1240:20 chime crash)
+  (function installPlayChimeNote() {
+    function safePlayChimeNote(freq, time, duration = 0.24, volume = 1.0) {
+      try {
+        if (this.muted || (this.musicVolume <= 0.01 && this.sfxVolume <= 0.01)) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = (typeof time === 'number' && Number.isFinite(time)) ? time : this.ctx.currentTime;
+        const f = (typeof freq === 'number' && Number.isFinite(freq) && freq > 20 && freq < 20000) ? freq : 880.0;
+        const dur = (typeof duration === 'number' && Number.isFinite(duration) && duration > 0.01) ? duration : 0.24;
+        const vol = (typeof volume === 'number' && Number.isFinite(volume)) ? Math.max(0, Math.min(1.0, volume)) : 1.0;
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(f, now);
+        osc.frequency.exponentialRampToValueAtTime(f * 1.06, now + dur * 0.4);
+
+        const effectiveVol = 0.14 * vol * (this.musicVolume || 0.8);
+        gain.gain.setValueAtTime(Math.max(0.001, effectiveVol), now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+
+        osc.connect(gain);
+        gain.connect(this.outNode ? this.outNode() : (this.musicGain || this.ctx.destination));
+        osc.start(now);
+        osc.stop(now + dur + 0.02);
+      } catch (err) {}
+    }
+
+    if (typeof ProceduralSoundEngine !== 'undefined' && ProceduralSoundEngine.prototype) {
+      ProceduralSoundEngine.prototype.playChimeNote = safePlayChimeNote;
+    }
+    if (typeof soundFX !== 'undefined' && soundFX) {
+      soundFX.playChimeNote = safePlayChimeNote;
+    }
+  })();
+
   // Ice Monkey Permafrost Throttling & Blop/VFX Capping
   (function setupIceMonkeyAndVFXOptimization() {
     const origRequestAnimationFrame = window.requestAnimationFrame;
@@ -369,6 +406,155 @@
       const dart = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.55, 8).rotateX(Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xdc2626 }));
       dart.position.set(0.48, 0.85, 0.32);
       root.add(dart);
+    } else if (type === 'rosalia') {
+      const goggles = new THREE.Mesh(new THREE.TorusGeometry(0.53, 0.07, 8, 20).rotateX(Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xf97316 }));
+      goggles.position.set(0, 0.18, 0.02);
+      headGroup.add(goggles);
+      const jetL = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.10, 0.6, 8), darkMetalMat);
+      jetL.position.set(-0.28, 0.82, -0.32);
+      root.add(jetL);
+      const jetR = jetL.clone();
+      jetR.position.x = 0.28;
+      root.add(jetR);
+      const blaster = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.18, 0.55), new THREE.MeshStandardMaterial({ color: 0xef4444 }));
+      blaster.position.set(0.45, 0.85, 0.32);
+      root.add(blaster);
+    } else if (type === 'corvus') {
+      const cowl = new THREE.Mesh(new THREE.ConeGeometry(0.54, 0.6, 16), new THREE.MeshStandardMaterial({ color: 0x312e81, roughness: 0.6 }));
+      cowl.position.set(0, 0.52, 0);
+      headGroup.add(cowl);
+      const dagger = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.9, 0.03), new THREE.MeshStandardMaterial({ color: 0x06b6d4, emissive: 0x0891b2 }));
+      dagger.position.set(0.45, 0.82, 0.32);
+      dagger.rotation.z = -0.5;
+      root.add(dagger);
+    } else if (type === 'geraldo') {
+      const stache = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.08, 0.08), new THREE.MeshStandardMaterial({ color: 0x451a03 }));
+      stache.position.set(0, -0.12, 0.55);
+      headGroup.add(stache);
+      const pack = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.70, 0.35), new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.7 }));
+      pack.position.set(0, 0.80, -0.35);
+      root.add(pack);
+    } else if (type === 'silas') {
+      const hood = new THREE.Mesh(new THREE.SphereGeometry(0.56, 16, 14), new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.3 }));
+      hood.position.set(0, 0.12, 0);
+      headGroup.add(hood);
+      const iceBow = new THREE.Mesh(new THREE.TorusGeometry(0.48, 0.06, 6, 16, Math.PI * 0.9).rotateX(Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xbae6fd, emissive: 0x0284c7 }));
+      iceBow.position.set(0.46, 0.85, 0.30);
+      root.add(iceBow);
+    } else if (type === 'mermonkey') {
+      const fin = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.55, 6), new THREE.MeshStandardMaterial({ color: 0x0d9488, roughness: 0.3 }));
+      fin.position.set(0, 0.55, 0);
+      headGroup.add(fin);
+      const trident = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.3, 8), goldMat);
+      trident.position.set(0.46, 0.90, 0.30);
+      trident.rotation.x = -0.2;
+      root.add(trident);
+    } else if (type === 'beasthandler') {
+      const crest = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.35, 0.65), new THREE.MeshStandardMaterial({ color: 0x84cc16 }));
+      crest.position.set(0, 0.45, -0.1);
+      headGroup.add(crest);
+      const club = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.14, 0.9, 8), new THREE.MeshStandardMaterial({ color: 0xfef08a, roughness: 0.8 }));
+      club.position.set(0.46, 0.82, 0.30);
+      root.add(club);
+    } else if (type === 'desperado') {
+      const brim = new THREE.Mesh(new THREE.CylinderGeometry(0.72, 0.72, 0.06, 18), new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.6 }));
+      brim.position.set(0, 0.42, 0);
+      brim.rotation.x = -0.1;
+      headGroup.add(brim);
+      const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.42, 0.38, 16), new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.6 }));
+      crown.position.set(0, 0.62, 0);
+      crown.rotation.x = -0.1;
+      headGroup.add(crown);
+      for (const side of [-0.46, 0.46]) {
+        const gun = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.18, 0.45), darkMetalMat);
+        gun.position.set(side, 0.80, 0.30);
+        root.add(gun);
+      }
+    } else if (type === 'alchemist') {
+      const glasses = new THREE.Mesh(new THREE.TorusGeometry(0.52, 0.05, 6, 16).rotateX(Math.PI / 2), goldMat);
+      glasses.position.set(0, 0.12, 0.05);
+      headGroup.add(glasses);
+      const beaker = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.45, 10), new THREE.MeshStandardMaterial({ color: 0x10b981, transparent: true, opacity: 0.85, roughness: 0.1 }));
+      beaker.position.set(0.46, 0.82, 0.30);
+      root.add(beaker);
+    } else if (type === 'druid') {
+      [-0.24, 0.24].forEach(x => {
+        const horn = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.5, 6), new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.8 }));
+        horn.position.set(x, 0.48, 0);
+        horn.rotation.z = (x > 0 ? -0.4 : 0.4);
+        headGroup.add(horn);
+      });
+      const staff = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.05, 1.25, 8), new THREE.MeshStandardMaterial({ color: 0x78350f }));
+      staff.position.set(0.46, 0.90, 0.30);
+      root.add(staff);
+      const leafOrb = new THREE.Mesh(new THREE.SphereGeometry(0.14, 8, 8), new THREE.MeshBasicMaterial({ color: 0x22c55e }));
+      leafOrb.position.set(0.46, 1.45, 0.30);
+      root.add(leafOrb);
+    }
+
+    return root;
+  }
+
+  function createBossMesh(type) {
+    const root = new THREE.Group();
+    const lk = String(type).toLowerCase();
+    
+    let hullColor = 0x1e293b;
+    let accentColor = 0x38bdf8;
+    if (lk.includes('vortex')) {
+      hullColor = 0x0f172a;
+      accentColor = 0x22d3ee;
+    } else if (lk.includes('dread')) {
+      hullColor = 0x44403c;
+      accentColor = 0xca8a04;
+    } else if (lk.includes('phayze')) {
+      hullColor = 0x3b0764;
+      accentColor = 0xec4899;
+    } else if (lk.includes('blast')) {
+      hullColor = 0x1c1917;
+      accentColor = 0xf97316;
+    }
+
+    const hullMat = new THREE.MeshStandardMaterial({ color: hullColor, roughness: 0.4, metalness: 0.3 });
+    const accentMat = new THREE.MeshStandardMaterial({ color: accentColor, emissive: accentColor, roughness: 0.2 });
+
+    const hullGeo = new THREE.SphereGeometry(1.0, 24, 18);
+    hullGeo.scale(1.2, 1.0, 2.2);
+    const hull = new THREE.Mesh(hullGeo, hullMat);
+    root.add(hull);
+
+    for (let f = 0; f < 4; f++) {
+      const a = (f / 4) * Math.PI * 2;
+      const fin = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.8, 1.1), accentMat);
+      fin.position.set(Math.cos(a) * 0.95, Math.sin(a) * 0.95, -1.2);
+      fin.rotation.z = a;
+      root.add(fin);
+    }
+
+    if (lk.includes('vortex')) {
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(1.25, 0.08, 8, 24), accentMat);
+      ring.position.set(0, 0, 0.2);
+      root.add(ring);
+    } else if (lk.includes('dread')) {
+      for (let r = 0; r < 6; r++) {
+        const plate = new THREE.Mesh(new THREE.DodecahedronGeometry(0.5, 0), new THREE.MeshStandardMaterial({ color: 0x78716c, roughness: 0.9 }));
+        const a = (r / 6) * Math.PI * 2;
+        plate.position.set(Math.cos(a) * 1.1, Math.sin(a) * 0.85, (r % 2 ? 0.4 : -0.4));
+        plate.scale.set(1.2, 0.5, 1.0);
+        root.add(plate);
+      }
+    } else if (lk.includes('phayze')) {
+      for (let s = 0; s < 4; s++) {
+        const shard = new THREE.Mesh(new THREE.OctahedronGeometry(0.4, 0), accentMat);
+        const a = (s / 4) * Math.PI * 2 + 0.3;
+        shard.position.set(Math.cos(a) * 1.4, Math.sin(a) * 1.2, -0.2);
+        root.add(shard);
+      }
+    } else if (lk.includes('blast')) {
+      const horn = new THREE.Mesh(new THREE.ConeGeometry(0.35, 1.1, 8), accentMat);
+      horn.position.set(0, 1.1, 0.6);
+      horn.rotation.x = 0.5;
+      root.add(horn);
     }
 
     return root;
@@ -393,12 +579,25 @@
     ProceduralAssetForge.createGlueMesh = () => createFullMonkeyMesh('wizard');
     ProceduralAssetForge.createSuperMesh = () => (ProceduralAssetForge.createMonkeyHero ? ProceduralAssetForge.createMonkeyHero('supermonkey') : createFullMonkeyMesh('super'));
 
+    // New Companions
+    ProceduralAssetForge.createMermonkeyMesh = () => createFullMonkeyMesh('mermonkey');
+    ProceduralAssetForge.createBeastHandlerMesh = () => createFullMonkeyMesh('beasthandler');
+    ProceduralAssetForge.createDesperadoMesh = () => createFullMonkeyMesh('desperado');
+    ProceduralAssetForge.createAlchemistMesh = () => createFullMonkeyMesh('alchemist');
+    ProceduralAssetForge.createDruidMesh = () => createFullMonkeyMesh('druid');
+
+    // New Bosses
+    ProceduralAssetForge.createVortexMesh = () => createBossMesh('vortex');
+    ProceduralAssetForge.createDreadbloonMesh = () => createBossMesh('dreadbloon');
+    ProceduralAssetForge.createPhayzeMesh = () => createBossMesh('phayze');
+    ProceduralAssetForge.createBlastapopoulosMesh = () => createBossMesh('blastapopoulos');
+
     // Attach hero aliases
-    ['quincy', 'gwendolin', 'sauda', 'obyn', 'benjamin', 'supermonkey'].forEach(hId => {
+    ['quincy', 'gwendolin', 'sauda', 'obyn', 'benjamin', 'supermonkey', 'rosalia', 'corvus', 'geraldo', 'silas'].forEach(hId => {
       const capName = 'create' + hId.charAt(0).toUpperCase() + hId.slice(1) + 'Mesh';
       if (!ProceduralAssetForge[capName]) {
         ProceduralAssetForge[capName] = function() {
-          return ProceduralAssetForge.createMonkeyHero ? ProceduralAssetForge.createMonkeyHero(hId) : createFullMonkeyMesh('dart');
+          return ProceduralAssetForge.createMonkeyHero ? ProceduralAssetForge.createMonkeyHero(hId) : createFullMonkeyMesh(hId);
         };
       }
     });
@@ -503,7 +702,11 @@
 
       let mesh = null;
       const lk = String(key).toLowerCase();
-      if (lk.includes('ninja')) mesh = createFullMonkeyMesh('ninja');
+      if (lk.includes('vortex')) mesh = createBossMesh('vortex');
+      else if (lk.includes('dread')) mesh = createBossMesh('dreadbloon');
+      else if (lk.includes('phayze')) mesh = createBossMesh('phayze');
+      else if (lk.includes('blast')) mesh = createBossMesh('blastapopoulos');
+      else if (lk.includes('ninja')) mesh = createFullMonkeyMesh('ninja');
       else if (lk.includes('wizard')) mesh = createFullMonkeyMesh('wizard');
       else if (lk.includes('boomer')) mesh = createFullMonkeyMesh('boomer');
       else if (lk.includes('sniper')) mesh = createFullMonkeyMesh('sniper');
@@ -511,6 +714,15 @@
       else if (lk.includes('mortar') || lk.includes('bomb')) mesh = createFullMonkeyMesh('mortar');
       else if (lk.includes('ice')) mesh = createFullMonkeyMesh('ice');
       else if (lk.includes('dart')) mesh = createFullMonkeyMesh('dart');
+      else if (lk.includes('mermonkey')) mesh = createFullMonkeyMesh('mermonkey');
+      else if (lk.includes('beasthandler') || lk.includes('beast')) mesh = createFullMonkeyMesh('beasthandler');
+      else if (lk.includes('desperado')) mesh = createFullMonkeyMesh('desperado');
+      else if (lk.includes('alchemist')) mesh = createFullMonkeyMesh('alchemist');
+      else if (lk.includes('druid')) mesh = createFullMonkeyMesh('druid');
+      else if (lk.includes('rosalia')) mesh = createFullMonkeyMesh('rosalia');
+      else if (lk.includes('corvus')) mesh = createFullMonkeyMesh('corvus');
+      else if (lk.includes('geraldo')) mesh = createFullMonkeyMesh('geraldo');
+      else if (lk.includes('silas')) mesh = createFullMonkeyMesh('silas');
       else if (lk.includes('gwendolin') && typeof ProceduralAssetForge !== 'undefined' && ProceduralAssetForge.createMonkeyHero) mesh = ProceduralAssetForge.createMonkeyHero('gwendolin');
       else if (lk.includes('sauda') && typeof ProceduralAssetForge !== 'undefined' && ProceduralAssetForge.createMonkeyHero) mesh = ProceduralAssetForge.createMonkeyHero('sauda');
       else if (lk.includes('obyn') && typeof ProceduralAssetForge !== 'undefined' && ProceduralAssetForge.createMonkeyHero) mesh = ProceduralAssetForge.createMonkeyHero('obyn');
@@ -520,12 +732,18 @@
       else mesh = createFullMonkeyMesh('dart');
 
       if (mesh) {
-        mesh.position.set(0, 0, 0);
         mesh.rotation.set(0.10, -0.32, 0);
-        mesh.scale.set(0.85, 0.85, 0.85);
+        const bbox = new THREE.Box3().setFromObject(mesh);
+        const center = bbox.getCenter(new THREE.Vector3());
+        const size = bbox.getSize(new THREE.Vector3());
+        mesh.position.set(-center.x, -center.y + 0.72, -center.z);
+        const maxD = Math.max(size.x, size.y, size.z, 0.001);
+        mesh.scale.setScalar(2.2 / maxD);
+
         scene.add(mesh);
         renderer.render(scene, camera);
         const dataUrl = canvas.toDataURL('image/png');
+        renderer.dispose();
         snapshotCache.set(key, dataUrl);
         return dataUrl;
       }
@@ -548,9 +766,9 @@
       renderer.setClearColor(0x000000, 0);
 
       const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 50);
-      camera.position.set(0, 1.45, 1.75);
-      camera.lookAt(0, 1.45, 0);
+      const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 50);
+      camera.position.set(0, 1.35, 3.8);
+      camera.lookAt(0, 0.9, 0);
 
       scene.add(new THREE.AmbientLight(0xffffff, 2.0));
       const sun = new THREE.DirectionalLight(0xffedd5, 3.2);
@@ -562,7 +780,11 @@
 
       let mesh = null;
       const lk = String(key).toLowerCase();
-      if (lk.includes('ninja')) mesh = createFullMonkeyMesh('ninja');
+      if (lk.includes('vortex')) mesh = createBossMesh('vortex');
+      else if (lk.includes('dread')) mesh = createBossMesh('dreadbloon');
+      else if (lk.includes('phayze')) mesh = createBossMesh('phayze');
+      else if (lk.includes('blast')) mesh = createBossMesh('blastapopoulos');
+      else if (lk.includes('ninja')) mesh = createFullMonkeyMesh('ninja');
       else if (lk.includes('wizard')) mesh = createFullMonkeyMesh('wizard');
       else if (lk.includes('boomer')) mesh = createFullMonkeyMesh('boomer');
       else if (lk.includes('sniper')) mesh = createFullMonkeyMesh('sniper');
@@ -570,6 +792,15 @@
       else if (lk.includes('mortar') || lk.includes('bomb')) mesh = createFullMonkeyMesh('mortar');
       else if (lk.includes('ice')) mesh = createFullMonkeyMesh('ice');
       else if (lk.includes('dart')) mesh = createFullMonkeyMesh('dart');
+      else if (lk.includes('mermonkey')) mesh = createFullMonkeyMesh('mermonkey');
+      else if (lk.includes('beasthandler') || lk.includes('beast')) mesh = createFullMonkeyMesh('beasthandler');
+      else if (lk.includes('desperado')) mesh = createFullMonkeyMesh('desperado');
+      else if (lk.includes('alchemist')) mesh = createFullMonkeyMesh('alchemist');
+      else if (lk.includes('druid')) mesh = createFullMonkeyMesh('druid');
+      else if (lk.includes('rosalia')) mesh = createFullMonkeyMesh('rosalia');
+      else if (lk.includes('corvus')) mesh = createFullMonkeyMesh('corvus');
+      else if (lk.includes('geraldo')) mesh = createFullMonkeyMesh('geraldo');
+      else if (lk.includes('silas')) mesh = createFullMonkeyMesh('silas');
       else if (lk.includes('gwendolin') && typeof ProceduralAssetForge !== 'undefined' && ProceduralAssetForge.createMonkeyHero) mesh = ProceduralAssetForge.createMonkeyHero('gwendolin');
       else if (lk.includes('sauda') && typeof ProceduralAssetForge !== 'undefined' && ProceduralAssetForge.createMonkeyHero) mesh = ProceduralAssetForge.createMonkeyHero('sauda');
       else if (lk.includes('obyn') && typeof ProceduralAssetForge !== 'undefined' && ProceduralAssetForge.createMonkeyHero) mesh = ProceduralAssetForge.createMonkeyHero('obyn');
@@ -579,11 +810,18 @@
       else mesh = createFullMonkeyMesh('dart');
 
       if (mesh) {
-        mesh.position.set(0, 0, 0);
-        mesh.rotation.set(0.05, -0.25, 0);
+        mesh.rotation.set(0.08, -0.25, 0);
+        const bbox = new THREE.Box3().setFromObject(mesh);
+        const center = bbox.getCenter(new THREE.Vector3());
+        const size = bbox.getSize(new THREE.Vector3());
+        mesh.position.set(-center.x, -center.y + 0.92, -center.z);
+        const maxD = Math.max(size.x, size.y, size.z, 0.001);
+        mesh.scale.setScalar(2.15 / maxD);
+
         scene.add(mesh);
         renderer.render(scene, camera);
         const dataUrl = canvas.toDataURL('image/png');
+        renderer.dispose();
         snapshotCache.set(headKey, dataUrl);
         return dataUrl;
       }
@@ -715,6 +953,7 @@
       scene.add(group);
       renderer.render(scene, camera);
       const dataUrl = canvas.toDataURL('image/png');
+      renderer.dispose();
       snapshotCache.set(key, dataUrl);
       return dataUrl;
     } catch (e) {
@@ -743,9 +982,9 @@
 
     modal.dataset.blitzStyled = 'true';
 
-    // Clear existing raw cards and set flex row
+    // Clear existing raw cards and set flex row (Guaranteed side-by-side on mobile)
     container.innerHTML = '';
-    container.className = 'flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-7 w-full mb-3';
+    container.className = 'flex flex-row items-center justify-center gap-1.5 sm:gap-6 w-full mb-2 max-w-full';
 
     // Top action banner polish
     const bannerEl = modal.querySelector('.relative.mb-6');
@@ -753,8 +992,8 @@
       bannerEl.innerHTML = `
         <div class="absolute -left-6 -top-2 text-yellow-300 text-2xl animate-bounce pointer-events-none">⭐</div>
         <div class="absolute -right-6 -bottom-1 text-cyan-300 text-xl animate-pulse pointer-events-none">✨</div>
-        <div class="px-8 py-2 rounded-full bg-gradient-to-r from-lime-400 via-emerald-400 to-green-600 border-[3.5px] border-white shadow-[0_6px_0_#14532d,0_10px_20px_rgba(0,0,0,0.6)]">
-          <h2 class="font-btd text-2xl sm:text-3xl text-white tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]">
+        <div class="px-5 sm:px-8 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-lime-400 via-emerald-400 to-green-600 border-[3px] sm:border-[3.5px] border-white shadow-[0_6px_0_#14532d,0_10px_20px_rgba(0,0,0,0.6)]">
+          <h2 class="font-btd text-xl sm:text-3xl text-white tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]">
             Choose an Upgrade!
           </h2>
         </div>
@@ -772,7 +1011,16 @@
         tier: 1,
         name: 'Rapid Fire Volley',
         desc: '+25% Bow Attack Speed and +1 Arrow Pierce across all shots.',
-        apply: (st) => { st.hero.fireRate *= 1.25; st.hero.pierce += 1; }
+        apply: (st) => { if (st.hero) { st.hero.fireRate *= 1.25; st.hero.pierce += 1; } }
+      },
+      {
+        id: 'recruit_mermonkey',
+        category: 'companion',
+        path: 'MERMONKEY',
+        tier: 1,
+        name: 'Mermonkey',
+        desc: 'Fires high-velocity sonic waves and piercing water tridents.',
+        apply: (st) => { if (st.squad && st.squad.mermonkey) { st.squad.mermonkey.level = 1; if (!st.recruitedOrder.includes('mermonkey')) st.recruitedOrder.push('mermonkey'); } }
       },
       {
         id: 'recruit_ninja',
@@ -781,7 +1029,16 @@
         tier: 1,
         name: 'Ninja Monkey',
         desc: 'Fires fast homing shurikens that seek and pop Camo Bloons.',
-        apply: (st) => { st.squad.ninja.level = 1; if (!st.recruitedOrder.includes('ninja')) st.recruitedOrder.push('ninja'); }
+        apply: (st) => { if (st.squad && st.squad.ninja) { st.squad.ninja.level = 1; if (!st.recruitedOrder.includes('ninja')) st.recruitedOrder.push('ninja'); } }
+      },
+      {
+        id: 'recruit_alchemist',
+        category: 'companion',
+        path: 'ALCHEMIST',
+        tier: 1,
+        name: 'Alchemist',
+        desc: 'Hurls explosive acid potions that melt Lead Bloons.',
+        apply: (st) => { if (st.squad && st.squad.alchemist) { st.squad.alchemist.level = 1; if (!st.recruitedOrder.includes('alchemist')) st.recruitedOrder.push('alchemist'); } }
       },
       {
         id: 'upgrade_tack_blade',
@@ -790,7 +1047,7 @@
         tier: 2,
         name: 'Blade Shooter',
         desc: 'Fires large, razor-sharp blades that slice through bloon packs.',
-        apply: (st) => { st.squad.tack.level = 2; }
+        apply: (st) => { if (st.squad && st.squad.tack) st.squad.tack.level = 2; }
       },
       {
         id: 'mastery_overdrive',
@@ -799,7 +1056,7 @@
         tier: 5,
         name: 'Overdrive Tuning',
         desc: '+15% Attack Speed, +0.5 Damage, and +5% Crit Chance!',
-        apply: (st) => { st.hero.fireRate *= 1.15; st.hero.damage += 0.5; }
+        apply: (st) => { if (st.hero) { st.hero.fireRate *= 1.15; st.hero.damage += 0.5; } }
       }
     ];
 
@@ -1019,8 +1276,8 @@
       ];
     }
 
-    if (typeof soundFX !== 'undefined' && soundFX.playLevelUpFanfare) {
-      soundFX.playLevelUpFanfare();
+    if (typeof soundFX !== 'undefined' && soundFX.playLevelUpFanfare && !soundFX.muted && !window.chrome) {
+      try { soundFX.playLevelUpFanfare(); } catch (e) {}
     }
     if (typeof gameState !== 'undefined') {
       gameState.paused = true;
@@ -1270,9 +1527,9 @@
           persistentStats.unlockedHeroes = ['quincy', 'gwendolin'];
         }
 
-        // 2. Monkey Money & Lifetime Pops
+        // 2. Monkey Money & Lifetime Pops (Clamped to avoid runaway inflation)
         if (typeof parsed.monkeyMoney === 'number' && Number.isFinite(parsed.monkeyMoney)) {
-          persistentStats.monkeyMoney = Math.max(persistentStats.monkeyMoney || 0, parsed.monkeyMoney);
+          persistentStats.monkeyMoney = Math.min(15000, Math.max(persistentStats.monkeyMoney || 0, parsed.monkeyMoney));
         }
         if (typeof parsed.lifetimePops === 'number' && Number.isFinite(parsed.lifetimePops)) {
           persistentStats.lifetimePops = Math.max(persistentStats.lifetimePops || 0, parsed.lifetimePops);
@@ -1282,14 +1539,27 @@
         if (parsed.upgrades && typeof parsed.upgrades === 'object') {
           persistentStats.upgrades = Object.assign(persistentStats.upgrades || {}, parsed.upgrades);
         }
+
+        // 4. Hero Star Mastery & Companion Mastery
+        if (parsed.heroMastery && typeof parsed.heroMastery === 'object') {
+          persistentStats.heroMastery = Object.assign(persistentStats.heroMastery || {}, parsed.heroMastery);
+        } else if (!persistentStats.heroMastery) {
+          persistentStats.heroMastery = {};
+        }
+
+        if (parsed.companionMastery && typeof parsed.companionMastery === 'object') {
+          persistentStats.companionMastery = Object.assign(persistentStats.companionMastery || {}, parsed.companionMastery);
+        } else if (!persistentStats.companionMastery) {
+          persistentStats.companionMastery = {};
+        }
       }
 
-      // 4. Selected Hero
+      // 5. Selected Hero
       if (parsed.selectedHero && typeof selectedHeroId !== 'undefined') {
         selectedHeroId = parsed.selectedHero;
       }
 
-      // 5. Update DOM elements
+      // 6. Update DOM elements
       if (typeof syncMoneyLabels === 'function') syncMoneyLabels();
       const startMM = document.getElementById('start-monkey-money');
       const startPops = document.getElementById('start-lifetime-pops');
@@ -1311,12 +1581,20 @@
     try {
       if (typeof persistentStats === 'undefined') return;
       if (!persistentStats.unlockedHeroes) persistentStats.unlockedHeroes = ['quincy', 'gwendolin'];
+      if (!persistentStats.heroMastery) persistentStats.heroMastery = {};
+      if (!persistentStats.companionMastery) persistentStats.companionMastery = {};
+
+      // Clamp runaway balances > $15,000
+      persistentStats.monkeyMoney = Math.min(15000, persistentStats.monkeyMoney || 0);
+
       const payload = {
-        monkeyMoney: persistentStats.monkeyMoney || 0,
+        monkeyMoney: persistentStats.monkeyMoney,
         lifetimePops: persistentStats.lifetimePops || 0,
         unlockedHeroes: Array.from(new Set(persistentStats.unlockedHeroes)),
         selectedHero: typeof selectedHeroId !== 'undefined' ? selectedHeroId : 'quincy',
         upgrades: persistentStats.upgrades || {},
+        heroMastery: persistentStats.heroMastery,
+        companionMastery: persistentStats.companionMastery,
         iconStyle: (typeof gameState !== 'undefined' && gameState.iconStyle) || '3d',
         timestamp: Date.now()
       };
@@ -1385,7 +1663,7 @@
   }
 
   // ==========================================================================
-  // 7. MAIN MENU HERO PRICES & LARGE 3D HERO SNAPSHOTS (VISIBLE IMMEDIATELY)
+  // 7. MAIN MENU HERO PRICES, 4 NEW HEROES & HERO STAR MASTERY
   // ==========================================================================
   function renderMainMenuHeroPrices() {
     const heroPrices = {
@@ -1394,7 +1672,11 @@
       sauda: 1500,
       obyn: 2500,
       benjamin: 4000,
-      supermonkey: 5000
+      supermonkey: 5000,
+      rosalia: 3000,
+      corvus: 3500,
+      geraldo: 4500,
+      silas: 3000
     };
 
     const unlocked = (typeof persistentStats !== 'undefined' && persistentStats.unlockedHeroes)
@@ -1402,6 +1684,56 @@
       : ['quincy', 'gwendolin'];
 
     const currentSelected = (typeof selectedHeroId !== 'undefined') ? selectedHeroId : 'quincy';
+
+    // Inject missing new hero cards if not in DOM
+    const firstCard = document.querySelector('.hero-card');
+    const heroGrid = firstCard ? firstCard.parentElement : null;
+    if (heroGrid) {
+      ['rosalia', 'corvus', 'geraldo', 'silas'].forEach(newH => {
+        if (!heroGrid.querySelector(`.hero-card[data-hero="${newH}"]`)) {
+          const card = document.createElement('div');
+          card.id = `hero-card-${newH}`;
+          card.className = 'hero-card relative p-2 sm:p-2.5 rounded-2xl flex flex-col items-center justify-between cursor-pointer transition-all bg-gradient-to-b from-stone-800 to-stone-900 border-2 border-stone-700/80 hover:border-yellow-400 hover:scale-[1.03] active:scale-95 shadow-lg select-none';
+          card.setAttribute('data-hero', newH);
+          card.innerHTML = `
+            <div class="hero-price-tag"></div>
+            <div class="hero-3d-portrait w-12 h-12 sm:w-14 sm:h-14 my-1 flex items-center justify-center"></div>
+            <div class="font-btd text-xs text-white uppercase tracking-wider text-center">${newH}</div>
+          `;
+          heroGrid.appendChild(card);
+
+          card.addEventListener('click', () => {
+            const isUnl = (typeof persistentStats !== 'undefined' && persistentStats.unlockedHeroes && persistentStats.unlockedHeroes.includes(newH));
+            if (isUnl) {
+              if (typeof selectedHeroId !== 'undefined') selectedHeroId = newH;
+              if (typeof gameState !== 'undefined') gameState.heroId = newH;
+              saveMasterState();
+              renderMainMenuHeroPrices();
+            } else {
+              // Open unlock prompt
+              const cost = heroPrices[newH] || 3000;
+              const modalUnlock = document.getElementById('modal-hero-unlock');
+              if (modalUnlock) {
+                const nameEl = document.getElementById('unlock-hero-name');
+                const costEl = document.getElementById('unlock-hero-cost');
+                const balEl = document.getElementById('unlock-user-balance');
+                if (nameEl) nameEl.textContent = newH.toUpperCase();
+                if (costEl) costEl.textContent = `$${cost.toLocaleString()}`;
+                if (balEl && typeof persistentStats !== 'undefined') balEl.textContent = `$${(persistentStats.monkeyMoney || 0).toLocaleString()}`;
+                modalUnlock.dataset.pendingHero = newH;
+                modalUnlock.dataset.pendingCost = cost;
+                modalUnlock.classList.remove('hidden');
+                modalUnlock.classList.add('flex');
+              }
+            }
+          });
+        }
+      });
+    }
+
+    if (typeof persistentStats !== 'undefined' && !persistentStats.heroMastery) {
+      persistentStats.heroMastery = {};
+    }
 
     document.querySelectorAll('.hero-card').forEach(card => {
       const hid = card.getAttribute('data-hero');
@@ -1423,6 +1755,8 @@
         card.classList.remove('opacity-75');
         if (isSelected) {
           card.classList.add('selected');
+        } else {
+          card.classList.remove('selected');
         }
       } else {
         tagEl.className = 'hero-price-tag';
@@ -1431,7 +1765,7 @@
         card.classList.remove('selected');
       }
 
-      // 2. Large 3D Hero Portrait (Replaces tiny 2D squares with rich 3D snapshots)
+      // 2. Large 3D Hero Portrait (Auto-fitted without giant eyeball zoom)
       let portraitContainer = card.querySelector('.hero-3d-portrait');
       if (!portraitContainer) {
         const oldBox = card.querySelector('div.w-11') || card.querySelector('div.text-2xl');
@@ -1447,6 +1781,45 @@
           portraitContainer.innerHTML = `<img src="${imgSnapshot}" alt="${hid}" class="w-full h-full object-contain filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.65)]">`;
         }
       }
+
+      // 3. Hero Star Mastery Badge (★1 to ★10)
+      if (isUnlocked && typeof persistentStats !== 'undefined') {
+        const starLevel = (persistentStats.heroMastery && persistentStats.heroMastery[hid]) || 1;
+        let starBadge = card.querySelector('.hero-star-badge');
+        if (!starBadge) {
+          starBadge = document.createElement('div');
+          starBadge.className = 'hero-star-badge';
+          card.appendChild(starBadge);
+        }
+        starBadge.innerHTML = `★${starLevel} <span class="text-[9px] text-yellow-200">(+${(starLevel - 1) * 10}% DMG)</span>`;
+
+        let starBtn = card.querySelector('.btn-star-upgrade');
+        if (starLevel < 10) {
+          const upgradeCost = starLevel * 250;
+          if (!starBtn) {
+            starBtn = document.createElement('button');
+            starBtn.className = 'btn-star-upgrade';
+            card.appendChild(starBtn);
+          }
+          starBtn.textContent = `★ Upgrade ($${upgradeCost})`;
+          starBtn.onclick = (e) => {
+            e.stopPropagation();
+            if ((persistentStats.monkeyMoney || 0) >= upgradeCost) {
+              persistentStats.monkeyMoney -= upgradeCost;
+              persistentStats.heroMastery[hid] = starLevel + 1;
+              saveMasterState();
+              renderMainMenuHeroPrices();
+            }
+          };
+        } else if (starBtn) {
+          starBtn.remove();
+        }
+      } else {
+        const oldStar = card.querySelector('.hero-star-badge');
+        if (oldStar) oldStar.remove();
+        const oldBtn = card.querySelector('.btn-star-upgrade');
+        if (oldBtn) oldBtn.remove();
+      }
     });
   }
 
@@ -1457,6 +1830,13 @@
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         // Dismiss topmost opened menu
+        const barracksModal = document.getElementById('barracks-modal');
+        if (barracksModal && !barracksModal.classList.contains('hidden')) {
+          barracksModal.classList.add('hidden');
+          barracksModal.classList.remove('flex');
+          return;
+        }
+
         const unlockModal = document.getElementById('modal-hero-unlock');
         if (unlockModal && !unlockModal.classList.contains('hidden')) {
           unlockModal.classList.add('hidden');
@@ -1555,14 +1935,445 @@
   }
 
   // ==========================================================================
-  // 11. INITIALIZATION & TEST AUTOMATION HOOKS
+  // 11. MONKEY BARRACKS MODAL (COMPANION UNLOCKS & MASTERY UPGRADES)
+  // ==========================================================================
+  function setupMonkeyBarracksModal() {
+    if (document.getElementById('barracks-modal')) return;
+
+    // Add button to main menu top bar
+    const startModal = document.getElementById('start-modal');
+    if (startModal) {
+      const topBar = startModal.querySelector('#btn-start-audio')?.parentElement ||
+                     startModal.querySelector('.flex.flex-wrap.items-center.justify-center.gap-2');
+      if (topBar && !document.getElementById('btn-open-barracks')) {
+        const barracksBtn = document.createElement('button');
+        barracksBtn.id = 'btn-open-barracks';
+        barracksBtn.className = 'px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-amber-700 hover:from-amber-400 hover:to-amber-600 text-white font-btd text-xs sm:text-xs shadow-md border-2 border-yellow-300 flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer';
+        barracksBtn.innerHTML = `<span>🏛️</span><span>BARRACKS</span>`;
+        barracksBtn.onclick = () => openBarracksModal();
+        topBar.appendChild(barracksBtn);
+      }
+    }
+
+    const modal = document.createElement('div');
+    modal.id = 'barracks-modal';
+    modal.className = 'fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-3 select-none';
+    modal.innerHTML = `
+      <div class="relative w-full max-w-2xl bg-gradient-to-b from-[#2a1306] via-[#1a0c04] to-[#0d0602] border-[3.5px] border-[#facc15] rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col max-h-[90dvh]">
+        <div class="flex items-center justify-between border-b-2 border-amber-800/80 pb-3 mb-3">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl sm:text-3xl">🏛️</span>
+            <div>
+              <h2 class="font-btd text-lg sm:text-2xl text-yellow-400 tracking-wide">MONKEY BARRACKS</h2>
+              <p class="text-[10px] sm:text-xs text-amber-200/80 font-sans">Tactical Companion Unlocks & Permanent Mastery</p>
+            </div>
+          </div>
+          <button id="btn-close-barracks" class="w-8 h-8 rounded-full bg-red-600 hover:bg-red-500 text-white font-btd flex items-center justify-center border-2 border-white shadow">✕</button>
+        </div>
+        <div id="barracks-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3 overflow-y-auto pr-1 flex-1"></div>
+        <div class="mt-3 pt-2 border-t border-amber-900/60 flex items-center justify-between text-xs text-amber-300">
+          <span>Balance: <strong id="barracks-mm-bal" class="text-yellow-400 font-btd text-sm">$0</strong></span>
+          <span class="text-[10px] text-amber-400/80">+15% DMG, +8% Rate, +1 Pierce/lvl</span>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    modal.querySelector('#btn-close-barracks').onclick = () => {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    };
+    modal.onclick = (e) => {
+      if (e.target === modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    };
+  }
+
+  function openBarracksModal() {
+    setupMonkeyBarracksModal();
+    const modal = document.getElementById('barracks-modal');
+    if (!modal) return;
+    const grid = document.getElementById('barracks-grid');
+    const balEl = document.getElementById('barracks-mm-bal');
+    if (balEl && typeof persistentStats !== 'undefined') {
+      balEl.textContent = `$${(persistentStats.monkeyMoney || 0).toLocaleString()}`;
+    }
+
+    const companions = [
+      { key: 'dart', name: 'Dart Monkey', cost: 600, role: 'Base Piercing Volley' },
+      { key: 'boomer', name: 'Boomerang', cost: 900, role: 'Orbital Ricochet' },
+      { key: 'tack', name: 'Tack Shooter', cost: 1200, role: 'Radial Sawblades' },
+      { key: 'sniper', name: 'Sniper Monkey', cost: 1500, role: 'Hitscan High-Caliber' },
+      { key: 'ninja', name: 'Ninja Monkey', cost: 1800, role: 'Homing Shurikens' },
+      { key: 'wizard', name: 'Wizard Monkey', cost: 2000, role: 'Arcane Bolts' },
+      { key: 'mortar', name: 'Mortar Monkey', cost: 2200, role: 'AOE Shell Explosions' },
+      { key: 'ice', name: 'Ice Monkey', cost: 2400, role: 'Permafrost Chill Aura' },
+      { key: 'super', name: 'Super Monkey', cost: 3500, role: 'Sun Avatar Laser' },
+      { key: 'mermonkey', name: 'Mermonkey', cost: 2500, role: 'Sonar Waves & Trident' },
+      { key: 'beasthandler', name: 'Beast Handler', cost: 2600, role: 'Raptor Lunge Bite' },
+      { key: 'desperado', name: 'Desperado', cost: 2800, role: 'Dual Revolver Ricochet' },
+      { key: 'alchemist', name: 'Alchemist', cost: 2900, role: 'Acid Pools & Brews' },
+      { key: 'druid', name: 'Druid', cost: 2700, role: 'Thorn Storm & Lightning' }
+    ];
+
+    if (typeof persistentStats !== 'undefined' && !persistentStats.companionMastery) {
+      persistentStats.companionMastery = {};
+    }
+
+    grid.innerHTML = '';
+    companions.forEach(c => {
+      const mastery = (persistentStats && persistentStats.companionMastery && persistentStats.companionMastery[c.key]) || 1;
+      const upgradeCost = mastery * 350;
+      const card = document.createElement('div');
+      card.className = 'barracks-card bg-gradient-to-b from-stone-800 to-stone-900 border-2 border-stone-700/80 rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-between text-center shadow-md';
+      
+      const snap = safeGet3DHeadSnapshot(c.key) || safeGet3DModelSnapshot(c.key);
+
+      card.innerHTML = `
+        <div class="w-10 h-10 sm:w-12 sm:h-12 mb-1 flex items-center justify-center">
+          ${snap ? `<img src="${snap}" class="w-full h-full object-contain filter drop-shadow">` : `<span>🐵</span>`}
+        </div>
+        <div class="font-btd text-xs text-white uppercase tracking-wide">${c.name}</div>
+        <div class="text-[9px] text-amber-200/70 mb-1 leading-tight">${c.role}</div>
+        <div class="text-[10px] font-btd text-cyan-300">Level ${mastery} / 5</div>
+        <div class="text-[9px] text-emerald-400 mb-1.5">+${(mastery - 1) * 15}% DMG</div>
+        <button class="btn-barracks-upgrade w-full py-1 rounded-xl font-btd text-[10px] sm:text-xs text-white ${mastery >= 5 ? 'bg-stone-700 cursor-not-allowed' : 'bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 border border-yellow-200'} shadow active:scale-95 transition-all">
+          ${mastery >= 5 ? 'MAXED' : `Upgrade $${upgradeCost}`}
+        </button>
+      `;
+
+      const btn = card.querySelector('.btn-barracks-upgrade');
+      if (mastery < 5) {
+        btn.onclick = () => {
+          if (typeof persistentStats !== 'undefined' && (persistentStats.monkeyMoney || 0) >= upgradeCost) {
+            persistentStats.monkeyMoney -= upgradeCost;
+            persistentStats.companionMastery[c.key] = mastery + 1;
+            saveMasterState();
+            openBarracksModal();
+          }
+        };
+      }
+
+      grid.appendChild(card);
+    });
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  // ==========================================================================
+  // 12. SETTINGS PERSISTENCE & LOW-FPS AUTO-OPTIMIZER
+  // ==========================================================================
+  const SETTINGS_KEY_V11 = 'bloons_blitz_settings_v11';
+  let hasAutoOptimized = false;
+
+  function initSettingsPersistenceAndOptimizer() {
+    let settings = null;
+    try {
+      const raw = localStorage.getItem(SETTINGS_KEY_V11);
+      if (raw) settings = JSON.parse(raw);
+    } catch (e) {}
+
+    // First-launch default: 1x DPI & 60 FPS Native
+    if (!settings) {
+      settings = {
+        dpi: 1.0,
+        fps: 60,
+        lowParticles: false,
+        iconStyle: '3d'
+      };
+      try {
+        localStorage.setItem(SETTINGS_KEY_V11, JSON.stringify(settings));
+      } catch (e) {}
+    }
+
+    if (typeof renderer !== 'undefined' && renderer && typeof renderer.setPixelRatio === 'function') {
+      renderer.setPixelRatio(settings.dpi || 1.0);
+    }
+
+    // Rolling FPS monitor (< 28 FPS for 3s triggers auto-optimizer)
+    let lowFpsTime = 0;
+    let lastTime = performance.now();
+    let frameCount = 0;
+    let currentFps = 60;
+
+    setInterval(() => {
+      const now = performance.now();
+      const delta = (now - lastTime) / 1000;
+      if (delta > 0.05) {
+        currentFps = frameCount / delta;
+        frameCount = 0;
+        lastTime = now;
+
+        if (typeof gameState !== 'undefined' && gameState && !gameState.inStartMenu && !gameState.paused && !gameState.gameOver) {
+          if (currentFps < 28) {
+            lowFpsTime += 1.0;
+            if (lowFpsTime >= 3.0 && !hasAutoOptimized) {
+              triggerLowFpsAutoOptimize();
+            }
+          } else {
+            lowFpsTime = Math.max(0, lowFpsTime - 0.5);
+          }
+        }
+      }
+    }, 1000);
+
+    const origRaf = window.requestAnimationFrame;
+    window.requestAnimationFrame = function(cb) {
+      frameCount++;
+      return origRaf.call(window, cb);
+    };
+  }
+
+  function triggerLowFpsAutoOptimize() {
+    hasAutoOptimized = true;
+    if (typeof renderer !== 'undefined' && renderer && typeof renderer.setPixelRatio === 'function') {
+      renderer.setPixelRatio(1.0);
+    }
+    if (typeof targetFPS !== 'undefined') {
+      targetFPS = 60;
+    }
+
+    showAutoOptimizerToast("⚡ Auto-Optimized to 1x DPI & 1x Refresh Rate for smooth FPS");
+
+    try {
+      const s = { dpi: 1.0, fps: 60, lowParticles: true };
+      localStorage.setItem(SETTINGS_KEY_V11, JSON.stringify(s));
+    } catch (e) {}
+  }
+
+  function showAutoOptimizerToast(msg) {
+    let toast = document.querySelector('.bloons-auto-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.className = 'bloons-auto-toast';
+      document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.style.display = 'block';
+    toast.style.opacity = '1';
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      setTimeout(() => { toast.style.display = 'none'; }, 400);
+    }, 3500);
+  }
+
+  // ==========================================================================
+  // 13. ROSTER & BTD6 BOSS EXPANSION
+  // ==========================================================================
+  function initRosterAndBossExpansion() {
+    if (typeof HERO_CONFIGS !== 'undefined') {
+      HERO_CONFIGS.rosalia = {
+        id: 'rosalia',
+        name: 'ROSALIA',
+        title: 'ROSALIA • TINKERER',
+        skillName: 'CLUSTER GRENADES',
+        skillIcon: '🚀',
+        moveSpeed: 10.4,
+        fireRate: 1.60,
+        projectiles: 1,
+        pierce: 3,
+        damage: 1.2,
+        projColor: 0xf97316,
+        canPopLead: true,
+        canSeeCamo: false,
+        explosiveShots: true,
+        isEnergyAttack: false
+      };
+      HERO_CONFIGS.corvus = {
+        id: 'corvus',
+        name: 'CORVUS',
+        title: 'CORVUS • SPIRIT WALKER',
+        skillName: 'SOUL HARVEST',
+        skillIcon: '🔮',
+        moveSpeed: 9.6,
+        fireRate: 1.30,
+        projectiles: 1,
+        pierce: 4,
+        damage: 1.5,
+        projColor: 0x8b5cf6,
+        canPopLead: true,
+        canSeeCamo: true,
+        explosiveShots: false,
+        isEnergyAttack: true
+      };
+      HERO_CONFIGS.geraldo = {
+        id: 'geraldo',
+        name: 'GERALDO',
+        title: 'GERALDO • SHOPKEEPER',
+        skillName: 'FERTILITY TOTEM',
+        skillIcon: '🏺',
+        moveSpeed: 9.5,
+        fireRate: 1.40,
+        projectiles: 1,
+        pierce: 3,
+        damage: 1.1,
+        projColor: 0xd97706,
+        canPopLead: true,
+        canSeeCamo: true,
+        explosiveShots: false,
+        isEnergyAttack: false
+      };
+      HERO_CONFIGS.silas = {
+        id: 'silas',
+        name: 'SILAS',
+        title: 'SILAS • FROST ARCHER',
+        skillName: 'GLACIAL STORM',
+        skillIcon: '❄️',
+        moveSpeed: 9.8,
+        fireRate: 1.50,
+        projectiles: 1,
+        pierce: 3,
+        damage: 1.3,
+        projColor: 0x38bdf8,
+        canPopLead: false,
+        canSeeCamo: true,
+        explosiveShots: false,
+        isEnergyAttack: false
+      };
+    }
+
+    if (typeof COMPANION_CATALOG !== 'undefined') {
+      const extraCompanions = [
+        {
+          key: 'mermonkey',
+          shortName: 'MERMONKEY',
+          icon: '🧜‍♂️',
+          titles: ['Recruit Mermonkey', 'Tier 2: Abyssal Echo', 'Tier 3: Trident Flurry', 'Tier 4: Lord of Abyss'],
+          descs: [
+            'Deploys an aquatic companion firing sonic wave bursts with 3 Pierce.',
+            '+25% Wave Velocity and +2 Pierce.',
+            'Weapon Evolution! Thrusts three piercing water tridents.',
+            'Tidal whirlpools pulling in and popping bloons!'
+          ]
+        },
+        {
+          key: 'beasthandler',
+          shortName: 'BEAST HANDLER',
+          icon: '🦖',
+          titles: ['Recruit Beast Handler', 'Tier 2: Raptor Claws', 'Tier 3: Megalodon Chomp', 'Tier 4: Giganotosaurus'],
+          descs: [
+            'Commands a trained raptor companion lunging at bloons.',
+            '+30% Lunge Speed and causes bleed to bloon layers.',
+            'Weapon Evolution! Summons an apex predator biting Blimps.',
+            'Giganotosaurus stomps the battlefield stunning bloons!'
+          ]
+        },
+        {
+          key: 'desperado',
+          shortName: 'DESPERADO',
+          icon: '🤠',
+          titles: ['Recruit Desperado', 'Tier 2: High Noon', 'Tier 3: Ricochet Rounds', 'Tier 4: Quickdraw Fan'],
+          descs: [
+            'Sharp-shooting gunslinger firing twin heavy revolvers.',
+            '+35% Critical Hit Chance and instant reload.',
+            'Weapon Evolution! Bullets ricochet between bloons.',
+            'Fans both hammers in a 360-degree storm of lead!'
+          ]
+        },
+        {
+          key: 'alchemist',
+          shortName: 'ALCHEMIST',
+          icon: '🧪',
+          titles: ['Recruit Alchemist', 'Tier 2: Acidic Mixture', 'Tier 3: Berserker Brew', 'Tier 4: Transformation'],
+          descs: [
+            'Hurls explosive potion vials melting Lead Bloons.',
+            'Acid pools strip fortifications and camo.',
+            'Regularly brews a potion boosting squad damage by +35%!',
+            'Transforms squad into laser monsters for 8s!'
+          ]
+        },
+        {
+          key: 'druid',
+          shortName: 'DRUID',
+          icon: '🌿',
+          titles: ['Recruit Druid', 'Tier 2: Thorn Volley', 'Tier 3: Heart of Oak', 'Tier 4: Ball of Lightning'],
+          descs: [
+            'Channels nature energy firing bursts of 5 sharp wooden thorns.',
+            '+40% Attack Speed in dense swarms.',
+            'Summons lightning strikes leaping across 6 bloons.',
+            'Supercharged plasma ball disintegrating blimps!'
+          ]
+        }
+      ];
+
+      extraCompanions.forEach(ec => {
+        if (!COMPANION_CATALOG.find(c => c.key === ec.key)) {
+          COMPANION_CATALOG.push(ec);
+        }
+      });
+    }
+
+    if (typeof BLOON_TYPES !== 'undefined') {
+      const baseSpeed = (typeof BASE_RED_SPEED !== 'undefined') ? BASE_RED_SPEED : 2.5;
+      BLOON_TYPES.GLASS = { id: 12, name: 'Glass', hp: 2, speed: baseSpeed * 2.8, scale: 1.05, color: 0xbae6fd, livery: 0, blopType: 1, xp: 12, children: ['BLUE', 'BLUE'], isLead: false, isCeramic: false, isPurple: false, isGlass: true };
+      BLOON_TYPES.DYNAMITE = { id: 13, name: 'Dynamite', hp: 2, speed: baseSpeed * 2.0, scale: 1.10, color: 0xf97316, livery: 0, blopType: 2, xp: 18, children: ['PINK', 'PINK'], isLead: false, isCeramic: false, isPurple: false, isDynamite: true };
+      BLOON_TYPES.DIAMOND = { id: 14, name: 'Diamond', hp: 20, speed: baseSpeed * 1.5, scale: 1.25, color: 0xe0f2fe, livery: 4, blopType: 2, xp: 50, children: ['RAINBOW', 'RAINBOW'], isLead: true, isCeramic: true, isPurple: false, isDiamond: true };
+      BLOON_TYPES.GOLDEN = { id: 15, name: 'Golden', hp: 4, speed: baseSpeed * 5.0, scale: 0.95, color: 0xfacc15, livery: 0, blopType: 2, xp: 30, children: ['YELLOW'], isLead: false, isCeramic: false, isPurple: false, isGolden: true };
+    }
+
+    if (typeof BLIMP_TYPES !== 'undefined') {
+      BLIMP_TYPES.VORTEX = { key: 'VORTEX', title: 'VORTEX — DEADLY QUIET', icon: '⚡', hp: 2800, speed: 2.85, scale: 1.55, isCamo: true, isLead: false, moneyReward: 45, xpReward: 450, childBloons: ['CERAMIC', 'CERAMIC'], childBlimps: ['MOAB', 'MOAB'] };
+      BLIMP_TYPES.DREADBLOON = { key: 'DREADBLOON', title: 'DREADBLOON — ARMORED BEHEMOTH', icon: '🪨', hp: 4200, speed: 1.05, scale: 1.70, isCamo: false, isLead: true, moneyReward: 55, xpReward: 600, childBloons: ['LEAD', 'LEAD'], childBlimps: ['BFB'] };
+      BLIMP_TYPES.PHAYZE = { key: 'PHAYZE', title: 'PHAYZE — REALITY WARPER', icon: '🌀', hp: 3400, speed: 2.20, scale: 1.60, isCamo: true, isLead: false, moneyReward: 50, xpReward: 550, childBloons: ['PURPLE', 'PURPLE'], childBlimps: ['DDT'] };
+      BLIMP_TYPES.BLASTAPOPOULOS = { key: 'BLASTAPOPOULOS', title: 'BLASTAPOPOULOS — DEMON OF CORE', icon: '🌋', hp: 5500, speed: 0.95, scale: 1.85, isCamo: false, isLead: true, moneyReward: 70, xpReward: 800, childBloons: ['CERAMIC', 'LEAD'], childBlimps: ['ZOMG'] };
+    }
+
+    // Hero Star Mastery & Simulation Stat Application
+    let lastHeroMasteryApplied = null;
+    setInterval(() => {
+      if (typeof gameState !== 'undefined' && gameState && gameState.hero && typeof persistentStats !== 'undefined') {
+        const hid = gameState.hero.id || selectedHeroId || 'quincy';
+        const star = (persistentStats.heroMastery && persistentStats.heroMastery[hid]) || 1;
+        if (lastHeroMasteryApplied !== star) {
+          lastHeroMasteryApplied = star;
+          const dmgMult = 1.0 + (star - 1) * 0.10;
+          const rateMult = 1.0 + (star - 1) * 0.06;
+          gameState.hero.damage = (gameState.hero.damage || 1.0) * dmgMult;
+          gameState.hero.fireRate = (gameState.hero.fireRate || 1.0) * rateMult;
+        }
+
+        // Periodic special bloon spawner (every 12s)
+        if (!gameState.paused && !gameState.gameOver && typeof spawnBloon === 'function') {
+          if (Math.random() < 0.20) {
+            const specials = ['GLASS', 'DYNAMITE', 'DIAMOND', 'GOLDEN'];
+            const chosen = specials[Math.floor(Math.random() * specials.length)];
+            const a = Math.random() * Math.PI * 2;
+            const r = 9 + Math.random() * 6;
+            spawnBloon(chosen, Math.cos(a) * r, Math.sin(a) * r);
+          }
+        }
+      }
+    }, 2000);
+  }
+
+  // ==========================================================================
+  // 14. INITIALIZATION & TEST AUTOMATION HOOKS
   // ==========================================================================
   function init() {
+    if (typeof THREE !== 'undefined' && THREE.WebGLRenderer && !THREE.WebGLRenderer.prototype.__origRender) {
+      THREE.WebGLRenderer.prototype.__origRender = THREE.WebGLRenderer.prototype.render;
+      THREE.WebGLRenderer.prototype.render = function(s, c) {
+        if (s && s.isScene && !window.__ACTIVE_GAME_SCENE__) {
+          if (s.background && s.background.isColor) {
+            window.__ACTIVE_GAME_SCENE__ = s;
+            window.__ACTIVE_GAME_CAMERA__ = c;
+          }
+        }
+        return this.__origRender.apply(this, arguments);
+      };
+    }
+
     polyfillAssetForge();
     patchPersistence();
     setupModalObserver();
     runGlobalEmojiReplacement();
     renderMainMenuHeroPrices();
+    setupMonkeyBarracksModal();
+    initSettingsPersistenceAndOptimizer();
+    initRosterAndBossExpansion();
     setupEscapeKeyHandler();
     setupMatrixGreenTextObserver();
     initBenjaminWirelessHack();
@@ -1585,7 +2396,86 @@
     }
 
     // Hash Test Automation Hooks
-    if (location.hash === '#test-levelup') {
+    if (location.hash === '#test-mobile-menu') {
+      setTimeout(() => {
+        runGlobalEmojiReplacement();
+        renderMainMenuHeroPrices();
+        setupMonkeyBarracksModal();
+        openBarracksModal();
+        window.__MOBILE_MENU_TEST_READY = true;
+      }, 400);
+    } else if (location.hash === '#test-mobile-levelup') {
+      setTimeout(() => {
+        const startModal = document.getElementById('start-modal');
+        if (startModal) {
+          startModal.classList.add('hidden');
+          startModal.style.display = 'none';
+        }
+        const testPool = [
+          {
+            id: 'hero_quincy_storm',
+            category: 'hero',
+            path: 'QUINCY',
+            tier: 1,
+            name: 'Storm Of Arrows',
+            desc: 'Rains arrows down onto Bloon clusters.',
+            apply: () => {}
+          },
+          {
+            id: 'recruit_mermonkey',
+            category: 'companion',
+            path: 'MERMONKEY',
+            tier: 1,
+            name: 'Mermonkey',
+            desc: 'Fires high-velocity sonic waves and water tridents.',
+            apply: () => {}
+          },
+          {
+            id: 'recruit_ninja',
+            category: 'companion',
+            path: 'NINJA MONKEY',
+            tier: 1,
+            name: 'Ninja Monkey',
+            desc: 'Fires fast homing shurikens that seek and pop Camo Bloons.',
+            apply: () => {}
+          }
+        ];
+        window.openBloonsBlitzUpgradeModal(testPool);
+        window.__MOBILE_LEVELUP_TEST_READY = true;
+      }, 300);
+    } else if (location.hash === '#test-new-heroes-bosses') {
+      setTimeout(() => {
+        if (typeof persistentStats !== 'undefined') {
+          if (!persistentStats.unlockedHeroes) persistentStats.unlockedHeroes = ['quincy', 'gwendolin'];
+          if (!persistentStats.unlockedHeroes.includes('rosalia')) persistentStats.unlockedHeroes.push('rosalia');
+          persistentStats.heroMastery = { rosalia: 5, quincy: 3 };
+        }
+        if (typeof selectedHeroId !== 'undefined') selectedHeroId = 'rosalia';
+
+        const btnStart = document.getElementById('btn-start-run');
+        if (btnStart) btnStart.click();
+
+        if (typeof gameState !== 'undefined') {
+          if (gameState.hero) {
+            gameState.hero.hp = 99999;
+            gameState.hero.maxHp = 99999;
+            gameState.hero.id = 'rosalia';
+          }
+        }
+
+        // Spawn new boss blimp into active scene
+        setTimeout(() => {
+          const mainScene = window.__ACTIVE_GAME_SCENE__;
+          if (mainScene && typeof ProceduralAssetForge !== 'undefined' && ProceduralAssetForge.createMOABBlimp) {
+            const vortexMesh = ProceduralAssetForge.createMOABBlimp('VORTEX');
+            vortexMesh.position.set(0, 1.2, 6.5);
+            vortexMesh.rotation.y = Math.PI;
+            mainScene.add(vortexMesh);
+          }
+          window.__NEW_HEROES_BOSSES_TEST_READY = true;
+        }, 400);
+      }, 250);
+    } else if (location.hash === '#test-levelup') {
       setTimeout(() => {
         const btnStart = document.getElementById('btn-start-run');
         if (btnStart) btnStart.click();
@@ -1645,7 +2535,6 @@
           gameState.hero.maxHp = 99999;
         }
 
-        // Spawn bloon swarm and trigger wireless hack attack
         setTimeout(() => {
           if (typeof spawnBloon === 'function') {
             for (let i = 0; i < 14; i++) {
@@ -1682,10 +2571,11 @@
       setTimeout(() => {
         const testSave = {
           unlockedHeroes: ['quincy', 'gwendolin', 'sauda', 'obyn', 'benjamin'],
-          monkeyMoney: 28500,
+          monkeyMoney: 14500,
           lifetimePops: 14200,
           selectedHero: 'sauda',
           upgrades: { hp: 4, speed: 3, magnet: 2, damage: 3 },
+          heroMastery: { sauda: 4, quincy: 2 },
           iconStyle: '3d'
         };
         window.__INTERNAL_MASTER_SAVE = true;
@@ -1712,7 +2602,7 @@
             gameState.hero.maxHp = 99999;
           }
           if (gameState.squad && gameState.squad.ice) {
-            gameState.squad.ice.level = 2; // PERMAFROST
+            gameState.squad.ice.level = 2;
             if (!gameState.recruitedOrder.includes('ice')) {
               gameState.recruitedOrder.push('ice');
             }
@@ -1722,7 +2612,6 @@
           }
         }
 
-        // Spawn rapid bloons for Ice Monkey to freeze and pop
         let spawnCount = 0;
         const spawnerInterval = setInterval(() => {
           spawnCount++;
