@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Bloons Blitz 3D (Build 12) — Monkey Hero Survivor</title>
+  <title>Bloons Blitz 3D (Build 13) — Monkey Hero Survivor</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Three.js r128 CDN -->
@@ -7539,6 +7539,10 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
       get projVZ() { return projVZ; },
       get projScale() { return projScale; },
       get projInstancedMesh() { return projInstancedMesh; },
+      get projIsEnergy() { return projIsEnergy; },
+      get projExplosive() { return projExplosive; },
+      get projIsBoomerang() { return projIsBoomerang; },
+      get projIsHoming() { return projIsHoming; },
       get MAX_BLOONS() { return MAX_BLOONS; },
       get MAX_BLOPS() { return MAX_BLOPS; },
       get MAX_PROJECTILES() { return MAX_PROJECTILES; },
@@ -7588,8 +7592,7 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
   </script>
 
   <!-- Non-Destructive Bloons Blitz UI Overrides -->
-  <link rel="stylesheet" href="src/bloons_update12.css">
-  <script src="src/bloons_update12.js"></script>
-  <script src="src/bloons_build13_engine.js"></script>
-</body>
+  <link rel="stylesheet" href="src/bloons_build13.css">
+  <script src="src/bloons_build13.js"></script>
+  </body>
 </html>
