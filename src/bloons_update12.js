@@ -4782,67 +4782,167 @@
 
 
 // ============================================================================
-// BLOONS BLITZ 3D — 1:1 WORLD-STATIONARY GROUND LOCK, 3D STONE RUINS & BEASTS
+
 // ============================================================================
-(function initWorldLockAndBeasts() {
+// BLOONS BLITZ 3D — STATIC WORLD GROUND (ZERO PARALLAX DRIFT), BEAST HANDLER
+// ANIMALS & DEDICATED CLICKABLE HERO SELECTION MODAL FOR MOBILE/DESKTOP
+// ============================================================================
+(function initStaticGroundAndHeroModal() {
   'use strict';
 
-  function bootWorldLock() {
+  function bootStaticGroundAndMenu() {
     const G = window.__GAME;
     if (!G || !G.scene || !G.gameState) {
-      setTimeout(bootWorldLock, 50);
+      setTimeout(bootStaticGroundAndMenu, 50);
       return;
     }
 
-    // 1. Replace green octagon bushes in envPropsGroup with 3D Gray Stone Ruins & Cobbles
-    function upgradeArenaStoneRuins() {
-      const grp = G.envPropsGroup;
-      if (!grp || grp.userData.hasStoneRuins) return;
-      while (grp.children.length > 0) {
-        grp.remove(grp.children[0]);
+    // ------------------------------------------------------------------------
+    // 1. LOCK GROUND AS A GIANT STATIONARY 3D WORLD PLANE AT (0, 0, 0)
+    //    Because the mesh never translates or shifts UVs, parallax with all
+    //    3D monkeys, bloons, and pickups is 100% mathematically locked!
+    // ------------------------------------------------------------------------
+    function lockStaticWorldGround() {
+      if (!G.meadowMesh || !G.groundMat || !G.groundMat.map) return;
+      if (!G.meadowMesh.userData._staticWorldConfigured) {
+        G.meadowMesh.userData._staticWorldConfigured = true;
+        G.meadowMesh.scale.set(10, 10, 1); // 2400m x 2400m static world arena
       }
-      const stoneMat = new THREE.MeshStandardMaterial({ color: 0x8d9096, roughness: 0.82, flatShading: true });
-      const darkStoneMat = new THREE.MeshStandardMaterial({ color: 0x6b6e75, roughness: 0.88, flatShading: true });
-      const fernMat = new THREE.MeshStandardMaterial({ color: 0x3b7a1e, roughness: 0.75, flatShading: true });
+      if (G.groundMat.map.repeat.x !== 120) {
+        G.groundMat.map.repeat.set(120, 120); // Exact 20m tile density across 2400m
+        G.groundMat.map.offset.set(0, 0);
+        G.groundMat.map.needsUpdate = true;
+      }
+      G.meadowMesh.position.set(0, 0, 0);
+      G.groundMat.map.offset.set(0, 0);
+    }
+    lockStaticWorldGround();
 
-      for (let i = 0; i < 45; i++) {
-        const a = (i / 45) * Math.PI * 2 + (i % 5) * 0.45;
-        const r = 11 + (i % 8) * 10.5;
-        const propGrp = new THREE.Group();
-        if (i % 3 === 0) {
-          const pillar = new THREE.Mesh(new THREE.BoxGeometry(1.15, 1.25, 0.85), stoneMat);
-          pillar.position.y = 0.62;
-          pillar.rotation.set(0.08, a, -0.06);
-          propGrp.add(pillar);
-          const slab = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.4, 0.65), darkStoneMat);
-          slab.position.set(0.65, 0.2, 0.3);
-          propGrp.add(slab);
-        } else if (i % 3 === 1) {
-          for (let s = 0; s < 4; s++) {
-            const sa = (s / 4) * Math.PI * 2;
-            const stn = new THREE.Mesh(new THREE.DodecahedronGeometry(0.36, 0), s % 2 === 0 ? stoneMat : darkStoneMat);
-            stn.scale.set(1.2, 0.42, 1.0);
-            stn.position.set(Math.cos(sa) * 0.7, 0.12, Math.sin(sa) * 0.7);
-            propGrp.add(stn);
-          }
-        } else {
-          for (let b = 0; b < 5; b++) {
-            const ba = (b / 5) * Math.PI * 2;
-            const blade = new THREE.Mesh(new THREE.ConeGeometry(0.32, 0.85, 4), fernMat);
-            blade.position.set(Math.cos(ba) * 0.24, 0.38, Math.sin(ba) * 0.24);
-            blade.rotation.x = Math.cos(ba) * 0.38;
-            blade.rotation.z = -Math.sin(ba) * 0.38;
-            propGrp.add(blade);
+    // ------------------------------------------------------------------------
+    // 2. MOVE THE 10-HERO GRID INTO A DEDICATED CLICKABLE HERO SELECTION MODAL
+    //    So the Main Menu fits 100% on a single Mobile screen without scrolling!
+    // ------------------------------------------------------------------------
+    function setupDedicatedHeroPickerModal() {
+      const heroGrid = document.getElementById('hero-select-grid');
+      const startModal = document.getElementById('start-modal');
+      if (!heroGrid || !startModal || document.getElementById('hero-picker-modal')) return;
+
+      // Create the compact Active Hero Spotlight Bar on the Main Menu
+      const spotlightBar = document.createElement('div');
+      spotlightBar.id = 'active-hero-spotlight-bar';
+      spotlightBar.innerHTML = `
+        <div class="flex items-center gap-3 text-left min-w-0">
+          <div id="spotlight-hero-portrait" class="hero-3d-portrait !w-14 !h-14 !min-w-[56px] !min-h-[56px] !m-0"></div>
+          <div class="flex flex-col min-w-0">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500 text-stone-950 uppercase">ACTIVE HERO</span>
+              <span id="spotlight-hero-star" class="hero-star-badge">★1</span>
+            </div>
+            <h3 id="spotlight-hero-name" class="font-btd text-lg sm:text-xl text-yellow-300 truncate leading-tight mt-0.5">QUINCY</h3>
+            <p id="spotlight-hero-desc" class="text-[10px] text-amber-100/90 font-bold truncate">Tap to switch or upgrade your 10 Monkey Heroes!</p>
+          </div>
+        </div>
+        <button id="btn-open-hero-picker" class="btd-btn-gold py-2.5 px-3.5 rounded-xl font-btd text-xs sm:text-sm text-white shrink-0 cursor-pointer shadow-lg">
+          🐒 CHANGE HERO (10)
+        </button>
+      `;
+
+      // Insert spotlight bar right where hero-select-grid used to sit
+      heroGrid.parentNode.insertBefore(spotlightBar, heroGrid);
+
+      // Hide the old "CHOOSE YOUR MONKEY HERO & STAGE" long subtitle on mobile to save vertical space
+      const chooseHeader = spotlightBar.previousElementSibling;
+      if (chooseHeader && chooseHeader.tagName === 'P') {
+        chooseHeader.className = 'hidden sm:block text-[11px] font-bold text-amber-100/90 mb-1.5 max-w-xl';
+      }
+
+      // Create the Dedicated Hero Picker Modal & move #hero-select-grid inside it
+      const pickerModal = document.createElement('div');
+      pickerModal.id = 'hero-picker-modal';
+      pickerModal.innerHTML = `
+        <div class="btd-panel rounded-3xl p-4 sm:p-5 max-w-4xl w-full max-h-[90dvh] flex flex-col items-center text-center shadow-2xl overflow-hidden">
+          <div class="w-full flex items-center justify-between border-b-2 border-amber-900/60 pb-2.5 mb-3">
+            <div class="flex flex-col text-left">
+              <h2 class="font-btd text-xl sm:text-2xl text-yellow-300">🐒 SELECT & UPGRADE YOUR HERO</h2>
+              <span class="text-[11px] font-bold text-amber-200/90">Tap any unlocked Hero to equip, or spend Monkey Money to unlock & upgrade ★ Star Rank!</span>
+            </div>
+            <button id="btn-close-hero-picker-top" class="w-9 h-9 rounded-xl bg-rose-600 hover:bg-rose-500 border-2 border-black font-btd text-base text-white cursor-pointer">✕</button>
+          </div>
+          <div id="hero-picker-grid-host" class="w-full overflow-y-auto pr-1 flex-1" style="-webkit-overflow-scrolling: touch;"></div>
+          <button id="btn-confirm-hero-picker" class="w-full mt-3 py-2.5 rounded-2xl btd-btn-green font-btd text-lg text-white tracking-wider cursor-pointer">
+            ✓ CONFIRM SELECTED HERO
+          </button>
+        </div>
+      `;
+      document.body.appendChild(pickerModal);
+      pickerModal.querySelector('#hero-picker-grid-host').appendChild(heroGrid);
+
+      function syncActiveHeroSpotlight() {
+        const curId = G.selectedHeroId || 'quincy';
+        const cfg = (G.HERO_CONFIGS && G.HERO_CONFIGS[curId]) || { name: curId.toUpperCase(), title: 'Monkey Hero' };
+        const selectedCard = heroGrid.querySelector(`.hero-card[data-hero="${curId}"]`);
+        const nameEl = document.getElementById('spotlight-hero-name');
+        const descEl = document.getElementById('spotlight-hero-desc');
+        const portEl = document.getElementById('spotlight-hero-portrait');
+        const starEl = document.getElementById('spotlight-hero-star');
+
+        if (nameEl) nameEl.textContent = cfg.name || curId.toUpperCase();
+        if (descEl) {
+          const p = selectedCard ? selectedCard.querySelector('p') : null;
+          descEl.textContent = p ? p.textContent : (cfg.title || 'Ready for battle!');
+        }
+        if (portEl && selectedCard) {
+          const img = selectedCard.querySelector('.hero-3d-portrait img');
+          if (img && img.src) {
+            portEl.innerHTML = `<img src="${img.src}" alt="${curId}" class="w-full h-full object-contain">`;
           }
         }
-        propGrp.position.set(Math.cos(a) * r, 0, Math.sin(a) * r);
-        grp.add(propGrp);
+        if (starEl && G.persistentStats && G.persistentStats.heroMastery) {
+          const sLvl = G.persistentStats.heroMastery[curId] || 1;
+          starEl.textContent = `★${sLvl} (+${(sLvl - 1) * 10}% DMG)`;
+        }
       }
-      grp.userData.hasStoneRuins = true;
-    }
-    upgradeArenaStoneRuins();
 
-    // 2. White Hero Ground Ring & Shield HP Icon
+      const openPicker = () => {
+        if (G.soundFX) G.soundFX.playBlopOrbChime(1);
+        pickerModal.classList.add('open');
+        syncActiveHeroSpotlight();
+      };
+      const closePicker = () => {
+        if (G.soundFX) G.soundFX.playBlopOrbChime(2);
+        pickerModal.classList.remove('open');
+        syncActiveHeroSpotlight();
+      };
+
+      spotlightBar.addEventListener('click', openPicker);
+      pickerModal.querySelector('#btn-close-hero-picker-top').addEventListener('click', closePicker);
+      pickerModal.querySelector('#btn-confirm-hero-picker').addEventListener('click', closePicker);
+
+      // Update spotlight whenever any hero card inside the modal is clicked
+      heroGrid.addEventListener('click', (e) => {
+        const card = e.target.closest('.hero-card');
+        const isStarBtn = e.target.closest('.btn-star-upgrade');
+        setTimeout(() => {
+          syncActiveHeroSpotlight();
+          // If the user clicked an unlocked hero card (not the star upgrade button), auto-confirm after a brief beat
+          if (card && !isStarBtn) {
+            const hid = card.getAttribute('data-hero');
+            const unl = (G.persistentStats && G.persistentStats.unlockedHeroes) || ['quincy', 'gwendolin'];
+            if (hid && unl.includes(hid)) {
+              syncActiveHeroSpotlight();
+            }
+          }
+        }, 50);
+      });
+
+      setTimeout(syncActiveHeroSpotlight, 250);
+      setInterval(syncActiveHeroSpotlight, 800);
+    }
+    setupDedicatedHeroPickerModal();
+
+    // ------------------------------------------------------------------------
+    // 3. WHITE HERO GROUND RING, SHIELD HP BADGE & BEAST HANDLER 3D ANIMALS
+    // ------------------------------------------------------------------------
     const heroWhiteRing = new THREE.Mesh(
       new THREE.RingGeometry(0.68, 0.82, 32).rotateX(-Math.PI / 2),
       new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, transparent: true, opacity: 0.88 })
@@ -4865,7 +4965,6 @@
       }
     }
 
-    // 3. Beast Handler 3D Animals (Velociraptor, Gyrfalcon, Megalodon)
     function create3DRaptorMesh() {
       const grp = new THREE.Group();
       const skinMat = new THREE.MeshStandardMaterial({ color: 0x65a30d, roughness: 0.45 });
@@ -4936,22 +5035,9 @@
       const h = st.hero;
       if (!h) return;
 
-      // CRITICAL PARALLAX FIX: Keep meadowMesh physically stationary in 3D world space (offset 0,0)
-      // and snap only by exact repeating tile size (groundW / repeat = 20.0m)!
-      if (G.meadowMesh && G.groundMat && G.groundMat.map) {
-        const groundW = (G.meadowMesh.geometry && G.meadowMesh.geometry.parameters && G.meadowMesh.geometry.parameters.width) || 240;
-        const repX = G.groundMat.map.repeat.x || 12;
-        const exactTileStep = groundW / repX;
-        G.meadowMesh.position.set(
-          Math.round(h.x / exactTileStep) * exactTileStep,
-          0,
-          Math.round(h.z / exactTileStep) * exactTileStep
-        );
-        G.groundMat.map.offset.set(0, 0);
-      }
-
+      // Keep ground 100% locked at world (0,0,0) with zero UV scrolling every frame!
+      lockStaticWorldGround();
       heroWhiteRing.position.set(h.x, 0.03, h.z);
-      upgradeArenaStoneRuins();
 
       if (st.paused || st.gameOver || st.inStartMenu) return;
 
@@ -5007,8 +5093,8 @@
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bootWorldLock);
+    document.addEventListener('DOMContentLoaded', bootStaticGroundAndMenu);
   } else {
-    bootWorldLock();
+    bootStaticGroundAndMenu();
   }
 })();

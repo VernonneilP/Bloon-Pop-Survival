@@ -2395,7 +2395,7 @@
 
         const hoodColors = {
           quincy: 0x16a34a,
-          gwendolin: 0xea580c,
+          gwendolin: 0xff7700,
           obyn: 0x0f766e,
           sauda: 0xbe123c,
           benjamin: 0x0284c7,
@@ -6334,7 +6334,7 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
       dirLight.target.updateMatrixWorld();
 
       const halfSpan = MEADOW_TILE_SPAN * 0.5;
-      meadowMesh.position.set(h.x, 0, h.z);
+      meadowMesh.position.set(0, 0, 0);
       if (meadowMat.map) {
         meadowMat.map.offset.set(h.x / TILE_WORLD_STEP, -h.z / TILE_WORLD_STEP);
       }
@@ -7494,7 +7494,7 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
       get scene() { return scene; },
       get meadowMesh() { return meadowMesh; },
       get groundMat() { return groundMat; },
-      get envPropsGroup() { return envPropsGroup; },
+      get envPropsGroup() { return typeof envPropsGroup !== 'undefined' ? envPropsGroup : null; },
       get bloonInstancedMesh() { return bloonInstancedMesh; },
       get bloonOutlineInstancedMesh() { return bloonOutlineInstancedMesh; },
       get camera() { return camera; },

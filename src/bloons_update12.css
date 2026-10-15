@@ -675,3 +675,45 @@
   #hud-pops { font-size: 0.85rem !important; }
   #btn-hud-build, #btn-settings-toggle, #btn-audio-toggle { width: 34px !important; height: 34px !important; min-width: 34px !important; border-radius: 10px !important; font-size: 0.95rem !important; }
 }
+
+
+/* ========================================================================
+   UPDATE 12.4: DEDICATED HERO SELECTION MODAL & 1-SCREEN MOBILE MAIN MENU
+   ======================================================================== */
+#hero-picker-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 85;
+  background: rgba(10, 18, 8, 0.86);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+
+#hero-picker-modal.open {
+  display: flex !important;
+}
+
+#active-hero-spotlight-bar {
+  background: linear-gradient(180deg, #3a2614 0%, #24160b 100%);
+  border: 3px solid #f59e0b;
+  box-shadow: 0 5px 0 #140b05, 0 0 16px rgba(245, 158, 11, 0.35);
+  border-radius: 18px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+#active-hero-spotlight-bar:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+}
