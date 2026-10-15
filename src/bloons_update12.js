@@ -4785,8 +4785,9 @@
 
 // ============================================================================
 
-// BLOONS BLITZ 3D — STATIC WORLD GROUND (ZERO PARALLAX DRIFT), BEAST HANDLER
-// ANIMALS & DEDICATED CLICKABLE HERO SELECTION MODAL FOR MOBILE/DESKTOP
+
+// BLOONS BLITZ 3D — STATIC WORLD GROUND (ZERO PARALLAX DRIFT), CRISP GRASS SCALE,
+// COMFORTABLE MOBILE ZOOM & 1-SCREEN MAIN MENU WITH VISIBLE START BUTTON
 (function initStaticGroundAndHeroModal() {
   'use strict';
 
@@ -4798,7 +4799,33 @@
     }
 
     // ------------------------------------------------------------------------
-    // 1. LOCK GROUND 1:1 IN 3D WORLD SPACE (ZERO UV SCROLLING / ZERO PARALLAX)
+    // 1. ENFORCE COMFORTABLE MOBILE CAMERA ZOOM & COMPACT BLOON SWARM SPACING
+    // ------------------------------------------------------------------------
+    function enforceComfortableZoom() {
+      if (!G.camera || !G.renderer) return;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      G.camera.aspect = w / h;
+      if (w < h) {
+        const aspectFactor = Math.max(1.0, (0.62 / Math.max(0.38, G.camera.aspect)));
+        G.camera.fov = 54;
+        if (G.cameraOffset) {
+          G.cameraOffset.set(0, 42 * aspectFactor, 30 * aspectFactor);
+        }
+      } else {
+        G.camera.fov = 46;
+        if (G.cameraOffset) {
+          G.cameraOffset.set(0, 34, 24);
+        }
+      }
+      G.camera.updateProjectionMatrix();
+    }
+    enforceComfortableZoom();
+    window.addEventListener('resize', enforceComfortableZoom);
+
+    // ------------------------------------------------------------------------
+    // 2. LOCK GROUND AT (0,0,0) WITH CRISP 72x72 TEXTURE SCALE ON 4x WORLD PLANE
+    //    (960m / 72 = 13.3m per 1024px tile -> small, crisp ankle-high grass tufts!)
     // ------------------------------------------------------------------------
     function lockStaticWorldGround() {
       const mesh = G.meadowMesh;
@@ -4806,56 +4833,52 @@
       const mat = mesh.material;
       const tex = mat ? mat.map : null;
 
-      if (!mesh.userData._worldLocked12) {
-        mesh.userData._worldLocked12 = true;
-        mesh.scale.set(12, 12, 1); // Expand ground plane across 2880m x 2880m world
-        if (tex) {
-          tex.wrapS = THREE.RepeatWrapping;
-          tex.wrapT = THREE.RepeatWrapping;
-          tex.repeat.set(144, 144);
-          tex.offset.set(0, 0);
-          // Lock offset.set so nothing can ever scroll the ground texture again
-          tex.offset.set = function() { this.x = 0; this.y = 0; return this; };
+      mesh.scale.set(4, 4, 1); // 960m x 960m arena
+      mesh.position.set(0, 0, 0);
+
+      if (mat && mat.color && (!G.gameState.stageId || G.gameState.stageId === 'meadow')) {
+        mat.color.setHex(0xb5d69c); // Soft natural Bloons Blitz meadow tint (never neon!)
+      }
+
+      if (tex) {
+        tex.wrapS = THREE.RepeatWrapping;
+        tex.wrapT = THREE.RepeatWrapping;
+        if (tex.repeat.x !== 72 || tex.repeat.y !== 72) {
+          tex.repeat.set(72, 72);
           tex.needsUpdate = true;
         }
-        // Remove the 6 ugly flat brown dirt circles around (0,0) and replace with 3D gray stone ruins
-        const stoneMat = new THREE.MeshStandardMaterial({ color: 0x8d9096, roughness: 0.82, flatShading: true });
-        const darkStoneMat = new THREE.MeshStandardMaterial({ color: 0x686b72, roughness: 0.88, flatShading: true });
-        G.scene.traverse(obj => {
-          if (obj.isMesh && obj !== mesh && obj.geometry && obj.geometry.type === 'CylinderGeometry' && obj.position.y < 0.15) {
-            obj.visible = false;
-          }
-          if (obj.isMesh && obj !== mesh && obj.geometry && obj.geometry.type === 'CircleGeometry' && obj.position.y < 0.15 && obj.material && obj.material.color && obj.material.color.r > 0.5 && obj.material.color.g < 0.45) {
-            obj.visible = false;
-          }
-        });
-        for (let i = 0; i < 36; i++) {
-          const a = (i / 36) * Math.PI * 2 + (i % 4) * 0.4;
-          const r = 14 + (i % 6) * 14;
-          const ruin = new THREE.Group();
-          const block = new THREE.Mesh(new THREE.BoxGeometry(1.1, 1.15, 0.8), i % 2 === 0 ? stoneMat : darkStoneMat);
-          block.position.y = 0.58;
-          block.rotation.set(0.08, a, -0.06);
-          ruin.add(block);
-          const step = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.35, 0.6), darkStoneMat);
-          step.position.set(0.6, 0.18, 0.25);
-          ruin.add(step);
-          ruin.position.set(Math.cos(a) * r, 0, Math.sin(a) * r);
-          G.scene.add(ruin);
-        }
-      }
-      mesh.position.set(0, 0, 0);
-      if (tex) {
         tex.offset.x = 0;
         tex.offset.y = 0;
+        tex.offset.set = function() { this.x = 0; this.y = 0; return this; };
       }
+
+      // Hide any giant opaque green circle under Benjamin or flat Cylinder pancakes
+      G.scene.traverse(obj => {
+        if (obj.isMesh && obj !== mesh) {
+          const gType = obj.geometry ? obj.geometry.type : '';
+          if ((gType === 'CircleGeometry' || gType === 'RingGeometry') && obj.position.y < 0.25) {
+            const p = obj.geometry.parameters || {};
+            if ((p.radius && p.radius > 1.5) || (p.outerRadius && p.outerRadius > 1.5)) {
+              obj.visible = false;
+            }
+          }
+          if (gType === 'CylinderGeometry' && obj.position.y < 0.15) {
+            obj.visible = false;
+          }
+        }
+      });
     }
     lockStaticWorldGround();
 
     // ------------------------------------------------------------------------
-    // 2. DEDICATED CLICKABLE HERO SELECTION MODAL (USING .hero-card.parentElement)
+    // 3. DEDICATED HERO MODAL + 1-SCREEN MOBILE MAIN MENU (START BUTTON VISIBLE)
     // ------------------------------------------------------------------------
     function setupDedicatedHeroPickerModal() {
+      const firstMapCard = document.querySelector('.map-card');
+      if (firstMapCard && firstMapCard.parentElement) {
+        firstMapCard.parentElement.classList.add('mobile-stage-grid-3col');
+      }
+
       const firstHeroCard = document.querySelector('.hero-card');
       const heroGrid = firstHeroCard ? firstHeroCard.parentElement : null;
       if (!heroGrid || document.getElementById('hero-picker-modal')) return;
@@ -4864,17 +4887,17 @@
       spotlightBar.id = 'active-hero-spotlight-bar';
       spotlightBar.innerHTML = `
         <div class="flex items-center gap-3 text-left min-w-0">
-          <div id="spotlight-hero-portrait" class="hero-3d-portrait !w-14 !h-14 !min-w-[56px] !min-h-[56px] !m-0"></div>
+          <div id="spotlight-hero-portrait" class="hero-3d-portrait !w-12 !h-12 !min-w-[48px] !min-h-[48px] !m-0"></div>
           <div class="flex flex-col min-w-0">
             <div class="flex items-center gap-1.5 flex-wrap">
-              <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500 text-stone-950 uppercase">ACTIVE HERO</span>
+              <span class="text-[9px] font-black px-2 py-0.5 rounded-full bg-amber-500 text-stone-950 uppercase">ACTIVE HERO</span>
               <span id="spotlight-hero-star" class="hero-star-badge">★1</span>
             </div>
-            <h3 id="spotlight-hero-name" class="font-btd text-lg sm:text-xl text-yellow-300 truncate leading-tight mt-0.5">QUINCY</h3>
-            <p id="spotlight-hero-desc" class="text-[10px] text-amber-100/90 font-bold truncate">Tap to switch or upgrade your 10 Monkey Heroes!</p>
+            <h3 id="spotlight-hero-name" class="font-btd text-base sm:text-xl text-yellow-300 truncate leading-tight mt-0.5">QUINCY</h3>
+            <p id="spotlight-hero-desc" class="text-[10px] text-amber-100/90 font-bold truncate">Tap to switch or upgrade Heroes</p>
           </div>
         </div>
-        <button id="btn-open-hero-picker" type="button" class="btd-btn-gold py-2.5 px-3.5 rounded-xl font-btd text-xs sm:text-sm text-white shrink-0 cursor-pointer shadow-lg">
+        <button id="btn-open-hero-picker" type="button" class="btd-btn-gold py-2 px-3 rounded-xl font-btd text-xs sm:text-sm text-white shrink-0 cursor-pointer shadow-lg">
           🐒 HEROES (10)
         </button>
       `;
@@ -4941,10 +4964,7 @@
       spotlightBar.addEventListener('click', openPicker);
       pickerModal.querySelector('#btn-close-hero-picker-top').addEventListener('click', closePicker);
       pickerModal.querySelector('#btn-confirm-hero-picker').addEventListener('click', closePicker);
-
-      heroGrid.addEventListener('click', () => {
-        setTimeout(syncActiveHeroSpotlight, 60);
-      });
+      heroGrid.addEventListener('click', () => setTimeout(syncActiveHeroSpotlight, 60));
 
       setTimeout(syncActiveHeroSpotlight, 200);
       setInterval(syncActiveHeroSpotlight, 700);
@@ -4952,11 +4972,11 @@
     setupDedicatedHeroPickerModal();
 
     // ------------------------------------------------------------------------
-    // 3. WHITE HERO RING, SHIELD ICON & BEAST HANDLER 3D ANIMALS
+    // 4. WHITE HERO FOOT RING, SHIELD ICON & BEAST HANDLER 3D ANIMALS
     // ------------------------------------------------------------------------
     const heroWhiteRing = new THREE.Mesh(
       new THREE.RingGeometry(0.68, 0.82, 32).rotateX(-Math.PI / 2),
-      new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, transparent: true, opacity: 0.88 })
+      new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, transparent: true, opacity: 0.90 })
     );
     heroWhiteRing.position.y = 0.03;
     G.scene.add(heroWhiteRing);
@@ -5051,11 +5071,10 @@
 
       if (st.paused || st.gameOver || st.inStartMenu) return;
 
-      // Hide screen-edge Boss Pointer Pill when the Boss is already visible on screen (< 14m)
       if (G.activeMOABs.length > 0) {
         const mb = G.activeMOABs[0];
         const ptr = document.getElementById('boss-screen-pointer');
-        if (ptr && Math.hypot(mb.x - h.x, mb.z - h.z) < 14.0) {
+        if (ptr && Math.hypot(mb.x - h.x, mb.z - h.z) < 16.0) {
           ptr.style.display = 'none';
         }
       }

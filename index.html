@@ -2902,7 +2902,7 @@
       }
 
       static createBloonGeometry() {
-        return new THREE.PlaneGeometry(1.85, 2.25, 1, 1);
+        return new THREE.PlaneGeometry(1.18, 1.42, 1, 1);
       }
 
       static createCrescentSlashGeometry() {
@@ -6026,11 +6026,14 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
       renderer.setSize(w, h);
       camera.aspect = w / h;
       if (w < h) {
-        camera.fov = 46;
-        cameraOffset.set(0, 21.5, 15.5);
+        // Mobile Portrait: Wide comfortable Bloons Blitz overview (fits 18-22 bloons across)
+        const aspectFactor = Math.max(1.0, (0.62 / Math.max(0.38, camera.aspect)));
+        camera.fov = 54;
+        cameraOffset.set(0, 42 * aspectFactor, 30 * aspectFactor);
       } else {
-        camera.fov = 44;
-        cameraOffset.set(0, 23, 18);
+        // Desktop / Landscape: Comfortable wide arena view
+        camera.fov = 46;
+        cameraOffset.set(0, 34, 24);
       }
       camera.updateProjectionMatrix();
       camera.position.copy(cameraOffset);
