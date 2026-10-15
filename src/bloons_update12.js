@@ -2814,7 +2814,7 @@
 
         const offsetA = (idx / Math.max(1, totalRecruited)) * Math.PI * 2;
         const a = customOrbitAngle + offsetA;
-        const orbitRadius = 3.1;
+        const orbitRadius = 2.0;
         const tx = h.x + Math.cos(a) * orbitRadius;
         const tz = h.z + Math.sin(a) * orbitRadius;
         const bobY = Math.abs(Math.sin((gameState.heroWalkPhase || 0) + idx * 1.3)) * 0.12;
@@ -4832,5 +4832,230 @@
     document.addEventListener('DOMContentLoaded', bootPolish);
   } else {
     bootPolish();
+  }
+})();
+
+
+// ============================================================================
+// BLOONS BLITZ 3D — UPDATE 12.3: BEAST HANDLER 3D ANIMALS (RAPTOR, FALCON,
+// MEGALODON), WHITE HERO GROUND RING, SHIELD HP ICON & CARVED RUIN STONES
+// ============================================================================
+(function initBeastHandlerAnimalsAndArenaRefinements() {
+  'use strict';
+
+  function bootRefinements() {
+    const G = window.__GAME;
+    if (!G || !G.scene || !G.gameState) {
+      setTimeout(bootRefinements, 60);
+      return;
+    }
+
+    // 1. Add Green Shield Icon next to Under-Feet Health Bar (Matches unnamed.jpg!)
+    const feetHud = document.getElementById('hero-feet-hud');
+    if (feetHud && !document.getElementById('hero-feet-shield-icon')) {
+      const hpBarRow = feetHud.firstElementChild;
+      if (hpBarRow) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'flex items-center justify-center';
+        hpBarRow.parentNode.insertBefore(wrapper, hpBarRow);
+        wrapper.appendChild(hpBarRow);
+        const shieldBadge = document.createElement('div');
+        shieldBadge.id = 'hero-feet-shield-icon';
+        shieldBadge.textContent = '+';
+        wrapper.appendChild(shieldBadge);
+      }
+    }
+
+    // 2. Crisp White Team Ring Under Hero's Feet (Matches unnamed (1).jpg)
+    const heroWhiteRing = new THREE.Mesh(
+      new THREE.RingGeometry(0.68, 0.82, 32).rotateX(-Math.PI / 2),
+      new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, transparent: true, opacity: 0.88 })
+    );
+    heroWhiteRing.position.y = 0.03;
+    G.scene.add(heroWhiteRing);
+
+    // 3. Build Beast Handler's 3D Companion Animals!
+    // (A) Tier 1+: 3D Velociraptor (Dashes & Chomps Bloons!)
+    function create3DRaptorMesh() {
+      const grp = new THREE.Group();
+      const skinMat = new THREE.MeshStandardMaterial({ color: 0x65a30d, roughness: 0.45 });
+      const stripeMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.4 });
+      const bellyMat = new THREE.MeshStandardMaterial({ color: 0xfde047, roughness: 0.5 });
+
+      // Dinosaur Torso
+      const body = new THREE.Mesh(new THREE.SphereGeometry(0.32, 14, 12), skinMat);
+      body.scale.set(0.85, 0.85, 1.45);
+      body.position.set(0, 0.48, 0);
+      grp.add(body);
+
+      // Raptor Head & Snout
+      const head = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.26, 0.48), skinMat);
+      head.position.set(0, 0.72, 0.36);
+      grp.add(head);
+
+      // Feathered Orange Crest
+      const crest = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.18, 0.36), stripeMat);
+      crest.position.set(0, 0.88, 0.32);
+      grp.add(crest);
+
+      // Eyes
+      [-0.14, 0.14].forEach(x => {
+        const eye = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
+        eye.position.set(x, 0.76, 0.48);
+        grp.add(eye);
+      });
+
+      // Long Balancing Tail
+      const tail = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.75, 10).rotateX(-Math.PI / 2), stripeMat);
+      tail.position.set(0, 0.48, -0.58);
+      grp.add(tail);
+
+      // Legs
+      [-0.16, 0.16].forEach(x => {
+        const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.05, 0.42, 8), bellyMat);
+        leg.position.set(x, 0.22, 0.05);
+        grp.add(leg);
+      });
+      return grp;
+    }
+
+    // (B) Tier 2+: 3D Gyrfalcon / Giant Bird of Prey (Swoops Overhead!)
+    function create3DFalconMesh() {
+      const grp = new THREE.Group();
+      const featherMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.4 });
+      const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.3 });
+
+      const body = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.65, 10).rotateX(Math.PI / 2), featherMat);
+      grp.add(body);
+      const beak = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.22, 6).rotateX(Math.PI / 2), goldMat);
+      beak.position.set(0, 0, 0.42);
+      grp.add(beak);
+
+      const leftWing = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.04, 0.28), featherMat);
+      leftWing.position.set(-0.42, 0.04, 0);
+      grp.add(leftWing);
+      const rightWing = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.04, 0.28), featherMat);
+      rightWing.position.set(0.42, 0.04, 0);
+      grp.add(rightWing);
+
+      grp.userData = { leftWing, rightWing };
+      return grp;
+    }
+
+    // (C) Tier 3+: 3D Megalodon Shark (Dorsal Fin + Jaws + Aqua Vortex Ring!)
+    function create3DMegalodonMesh() {
+      const grp = new THREE.Group();
+      const sharkMat = new THREE.MeshStandardMaterial({ color: 0x0369a1, roughness: 0.3, metalness: 0.1 });
+      const waterRing = new THREE.Mesh(
+        new THREE.RingGeometry(0.45, 0.78, 20).rotateX(-Math.PI / 2),
+        new THREE.MeshBasicMaterial({ color: 0x22d3ee, side: THREE.DoubleSide, transparent: true, opacity: 0.75 })
+      );
+      waterRing.position.y = 0.05;
+      grp.add(waterRing);
+
+      const snout = new THREE.Mesh(new THREE.ConeGeometry(0.38, 0.85, 12), sharkMat);
+      snout.position.y = 0.35;
+      grp.add(snout);
+
+      const dorsal = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.45, 0.35), sharkMat);
+      dorsal.position.set(0, 0.35, -0.25);
+      dorsal.rotation.x = -0.35;
+      grp.add(dorsal);
+      return grp;
+    }
+
+    const raptorMesh = create3DRaptorMesh();
+    const falconMesh = create3DFalconMesh();
+    const sharkMesh = create3DMegalodonMesh();
+    raptorMesh.visible = false;
+    falconMesh.visible = false;
+    sharkMesh.visible = false;
+    G.scene.add(raptorMesh);
+    G.scene.add(falconMesh);
+    G.scene.add(sharkMesh);
+
+    let raptorX = 0, raptorZ = 0;
+    let falconAngle = 0;
+    let sharkX = 0, sharkZ = 0;
+
+    // 4. Hook Simulation for White Hero Ring, On-Screen Boss Pointer Hide & Beast Handler Animals
+    const prevUpdateSim = G.updateSimulation;
+    G.updateSimulation = function(dt) {
+      prevUpdateSim(dt);
+
+      const st = G.gameState;
+      const h = st.hero;
+      if (!h || st.paused || st.gameOver || st.inStartMenu) return;
+
+      // Update Hero White Ground Ring
+      heroWhiteRing.position.set(h.x, 0.03, h.z);
+
+      // Only show the red screen-edge Boss Pointer Pill when the boss is > 11m away (so it never covers the boss right in front of you!)
+      if (G.activeMOABs.length > 0) {
+        const mb = G.activeMOABs[0];
+        const distBoss = Math.hypot(mb.x - h.x, mb.z - h.z);
+        const ptr = document.getElementById('boss-screen-pointer');
+        if (ptr && distBoss < 11.5) {
+          ptr.style.display = 'none';
+        }
+      }
+
+      // Animate Beast Handler's 3D Animals when Beast Handler is Recruited!
+      const bhLvl = (st.squad && st.squad.beasthandler) ? st.squad.beasthandler.level : 0;
+      const bhMesh = G.squadMeshes ? G.squadMeshes.beasthandler : null;
+
+      if (bhLvl > 0 && bhMesh && bhMesh.visible) {
+        // 1. Velociraptor (Tier 1+): Dashes toward nearest enemy and chomps!
+        raptorMesh.visible = true;
+        const target = G.findNearestEnemy(bhMesh.position.x, bhMesh.position.z, 18, true);
+        const destX = target ? target.x : (bhMesh.position.x + Math.cos(st.elapsedTime * 3) * 1.6);
+        const destZ = target ? target.z : (bhMesh.position.z + Math.sin(st.elapsedTime * 3) * 1.6);
+        raptorX = THREE.MathUtils.lerp(raptorX || bhMesh.position.x, destX, Math.min(1, dt * 8.5));
+        raptorZ = THREE.MathUtils.lerp(raptorZ || bhMesh.position.z, destZ, Math.min(1, dt * 8.5));
+        const hopY = Math.abs(Math.sin(st.elapsedTime * 16)) * 0.18;
+        raptorMesh.position.set(raptorX, hopY, raptorZ);
+        raptorMesh.rotation.y = Math.atan2(destX - raptorX, destZ - raptorZ);
+
+        // 2. Gyrfalcon (Tier 2+): Swoops in figure-8 overhead!
+        if (bhLvl >= 2) {
+          falconMesh.visible = true;
+          falconAngle += dt * 3.8;
+          const fx = h.x + Math.cos(falconAngle) * 3.6;
+          const fz = h.z + Math.sin(falconAngle * 2) * 2.8;
+          falconMesh.position.set(fx, 2.2 + Math.sin(falconAngle * 3) * 0.35, fz);
+          falconMesh.rotation.y = falconAngle + Math.PI / 2;
+          if (falconMesh.userData.leftWing) {
+            const flap = Math.sin(st.elapsedTime * 22) * 0.45;
+            falconMesh.userData.leftWing.rotation.z = flap;
+            falconMesh.userData.rightWing.rotation.z = -flap;
+          }
+        } else {
+          falconMesh.visible = false;
+        }
+
+        // 3. Megalodon Shark (Tier 3+): Patrols & lunges from water vortex!
+        if (bhLvl >= 3) {
+          sharkMesh.visible = true;
+          sharkX = THREE.MathUtils.lerp(sharkX || h.x, destX, Math.min(1, dt * 5.0));
+          sharkZ = THREE.MathUtils.lerp(sharkZ || h.z, destZ, Math.min(1, dt * 5.0));
+          sharkMesh.position.set(sharkX, Math.sin(st.elapsedTime * 8) * 0.15, sharkZ);
+          sharkMesh.rotation.y += dt * 4.0;
+        } else {
+          sharkMesh.visible = false;
+        }
+      } else {
+        raptorMesh.visible = false;
+        falconMesh.visible = false;
+        sharkMesh.visible = false;
+      }
+    };
+
+    console.log("Update 12.3 (2D Bloon Billboards, Beast Handler Animals & Mobile Fit) Active!");
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootRefinements);
+  } else {
+    bootRefinements();
   }
 })();

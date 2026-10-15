@@ -2902,45 +2902,8 @@
       }
 
       static createBloonGeometry() {
-        const points = [];
-        // 1. Knot base: closes at central axis, flares out to knot rim, cinches at neck
-        points.push(new THREE.Vector2(0.0, -1.08));
-        points.push(new THREE.Vector2(0.14, -1.04)); // knot flare lip
-        points.push(new THREE.Vector2(0.16, -0.99)); // knot widest rim
-        points.push(new THREE.Vector2(0.08, -0.93)); // knot constriction / cinch neck
-        points.push(new THREE.Vector2(0.10, -0.86)); // balloon bottom body start
-
-        // 2. Lower body: smooth easing curve up to equator
-        const stepsLower = 28;
-        const yNeck = -0.86;
-        const yEq = 0.22;
-        const rNeck = 0.10;
-        const rMax = 0.88;
-        for (let i = 1; i < stepsLower; i++) {
-          const u = i / stepsLower;
-          const ease = Math.sin(u * Math.PI * 0.5);
-          const r = rNeck + (rMax - rNeck) * Math.pow(ease, 1.25);
-          const y = yNeck + (yEq - yNeck) * u;
-          points.push(new THREE.Vector2(r, y));
-        }
-
-        // 3. Equator point: perfectly vertical tangent (dr/dy = 0)
-        points.push(new THREE.Vector2(rMax, yEq));
-
-        // 4. Upper dome: pure true elliptical arc from equator to apex
-        // At theta = 0: r = rMax, y = yEq (vertical tangent)
-        // At theta = pi/2: r = 0, y = yEq + hTop (perfectly horizontal tangent dy/dr = 0, ZERO cone apex!)
-        const stepsTop = 28;
-        const hTop = 0.82; // top apex at y = 0.22 + 0.82 = 1.04
-        for (let i = 1; i <= stepsTop; i++) {
-          const theta = (i / stepsTop) * (Math.PI * 0.5);
-          const r = rMax * Math.cos(theta);
-          const y = yEq + hTop * Math.sin(theta);
-          points.push(new THREE.Vector2(Math.max(0.0, r), y));
-        }
-
-        const geo = new THREE.LatheGeometry(points, 32);
-        geo.computeVertexNormals();
+        // 2D Billboard Quad in 3D Space (Only 2 triangles instead of 3,840 -> Zero Lag!)
+        const geo = new THREE.PlaneGeometry(1.85, 2.25, 1, 1);
         return geo;
       }
 
@@ -3402,28 +3365,75 @@
     const TILE_WORLD_STEP = MEADOW_PLANE_SIZE / MEADOW_TEX_REPEAT;
 
     const createMeadowCanvasTexture = (stageId = 'meadow') => {
-      const cfg = STAGE_CONFIGS[stageId] || STAGE_CONFIGS.meadow;
       const c = document.createElement('canvas');
-      c.width = 512;
-      c.height = 512;
+      c.width = 1024;
+      c.height = 1024;
       const ctx = c.getContext('2d');
-      ctx.fillStyle = cfg.tileA;
-      ctx.fillRect(0, 0, 512, 512);
 
-      ctx.fillStyle = cfg.tileB;
-      ctx.fillRect(0, 0, 256, 256);
-      ctx.fillRect(256, 256, 256, 256);
+      const palettes = {
+        meadow: { base: '#68b030', mid: '#5ea328', light: '#76bf3b', tuftDark: '#47821b', tuftLight: '#88d14a' },
+        frozen: { base: '#4a8db7', mid: '#3f7fa8', light: '#5ba0cb', tuftDark: '#2f668a', tuftLight: '#bae6fd' },
+        castle: { base: '#333846', mid: '#2b303c', light: '#3d4354', tuftDark: '#1e222b', tuftLight: '#525b70' }
+      };
+      const pal = palettes[stageId] || palettes.meadow;
 
-      for (let i = 0; i < 240; i++) {
-        ctx.fillStyle = i % 2 === 0 ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+      // 1. Smooth Painterly Base (Zero Checkerboard Squares!)
+      ctx.fillStyle = pal.base;
+      ctx.fillRect(0, 0, 1024, 1024);
+
+      // Soft organic rolling grass patches
+      for (let i = 0; i < 90; i++) {
+        const x = Math.random() * 1024;
+        const y = Math.random() * 1024;
+        const r = 60 + Math.random() * 110;
+        const grad = ctx.createRadialGradient(x, y, r * 0.1, x, y, r);
+        grad.addColorStop(0, i % 2 === 0 ? pal.light : pal.mid);
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = grad;
         ctx.beginPath();
-        ctx.arc(Math.random() * 512, Math.random() * 512, 6 + Math.random() * 14, 0, Math.PI * 2);
+        ctx.arc(x, y, r, 0, Math.PI * 2);
         ctx.fill();
       }
+
+      // 2. Hand-Painted 3-Blade Grass Tufts (Matches unnamed.jpg)
+      ctx.lineCap = 'round';
+      for (let i = 0; i < 420; i++) {
+        const gx = Math.random() * 1024;
+        const gy = Math.random() * 1024;
+        ctx.strokeStyle = i % 3 === 0 ? pal.tuftLight : pal.tuftDark;
+        ctx.lineWidth = 3.2;
+        for (let b = -1; b <= 1; b++) {
+          ctx.beginPath();
+          ctx.moveTo(gx, gy);
+          ctx.quadraticCurveTo(gx + b * 6, gy - 8, gx + b * 10, gy - 14);
+          ctx.stroke();
+        }
+      }
+
+      // 3. Tiny White & Yellow 5-Petal Wildflowers (Meadow only)
+      if (stageId === 'meadow') {
+        for (let f = 0; f < 85; f++) {
+          const fx = Math.random() * 1024;
+          const fy = Math.random() * 1024;
+          const petalCol = f % 3 === 0 ? '#fde047' : '#ffffff';
+          ctx.fillStyle = petalCol;
+          for (let p = 0; p < 5; p++) {
+            const a = (p / 5) * Math.PI * 2;
+            ctx.beginPath();
+            ctx.arc(fx + Math.cos(a) * 4.2, fy + Math.sin(a) * 4.2, 2.6, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.fillStyle = '#f97316';
+          ctx.beginPath();
+          ctx.arc(fx, fy, 2.2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
       const tex = new THREE.CanvasTexture(c);
       tex.wrapS = THREE.RepeatWrapping;
       tex.wrapT = THREE.RepeatWrapping;
-      tex.repeat.set(MEADOW_TEX_REPEAT, MEADOW_TEX_REPEAT);
+      tex.repeat.set(10, 10);
       return tex;
     };
 
@@ -3540,72 +3550,109 @@
 
     const bloonMat = new THREE.MeshStandardMaterial({
       color: 0xffffff,
-      roughness: 0.18,
-      metalness: 0.04,
-      side: THREE.FrontSide
+      roughness: 0.35,
+      metalness: 0.0,
+      side: THREE.DoubleSide,
+      alphaTest: 0.5
     });
 
     bloonMat.onBeforeCompile = (shader) => {
       shader.vertexShader = `
         attribute float aLivery;
         varying float vLivery;
-        varying vec3 vLocalPos;
+        varying vec2 vBloonUv;
         ${shader.vertexShader}
       `.replace(
         '#include <begin_vertex>',
         `
         #include <begin_vertex>
         vLivery = aLivery;
-        vLocalPos = position;
+        vBloonUv = uv;
         `
       );
 
       shader.fragmentShader = `
         varying float vLivery;
-        varying vec3 vLocalPos;
+        varying vec2 vBloonUv;
         ${shader.fragmentShader}
       `.replace(
         '#include <color_fragment>',
         `
         #include <color_fragment>
+        // 2D Bloons Blitz Vector Balloon Silhouette in UV Space (-1..1)
+        vec2 p = (vBloonUv - 0.5) * 2.0;
+        p.y -= 0.06;
+
+        // Classic plump BTD balloon egg/teardrop curve (wider top dome, tapered lower cheeks)
+        float pinch = p.y < 0.15 ? mix(1.0, 1.38, clamp((0.15 - p.y) / 0.95, 0.0, 1.0)) : 1.0;
+        vec2 bp = vec2(p.x * pinch / 0.78, (p.y - 0.06) / 0.78);
+        float bodyDist = length(bp) - 1.0;
+
+        // Cute bottom triangular tie-knot
+        vec2 kp = p - vec2(0.0, -0.76);
+        float knotDist = max(abs(kp.x) * 1.65 + kp.y * 0.85 - 0.14, abs(kp.y) - 0.085);
+        float d = min(bodyDist, knotDist);
+
+        // Discard pixels outside the 2D balloon silhouette
+        if (d > 0.0) discard;
+
+        // Base Livery Patterns (Zebra, Rainbow, Ceramic Cracks, Lead, Purple Rim, Frozen)
+        vec3 baseCol = diffuseColor.rgb;
         if (vLivery >= 0.9 && vLivery < 1.5) {
-          float stripe = step(0.5, fract((vLocalPos.y + 1.0) * 3.2 + vLocalPos.x * 1.4));
-          diffuseColor.rgb = mix(vec3(0.10, 0.11, 0.14), vec3(0.96, 0.98, 1.0), stripe);
+          float stripe = step(0.5, fract((p.y + 1.0) * 3.8 + p.x * 1.5));
+          baseCol = mix(vec3(0.12, 0.13, 0.16), vec3(0.97, 0.98, 1.0), stripe);
         } else if (vLivery >= 1.9 && vLivery < 2.5) {
-          float t = clamp((vLocalPos.y + 0.75) / 1.65, 0.0, 0.999) * 6.0;
+          float t = clamp((p.y + 0.72) / 1.48, 0.0, 0.999) * 6.0;
           int band = int(floor(t));
-          if (band == 5) diffuseColor.rgb = vec3(0.95, 0.12, 0.12);
-          else if (band == 4) diffuseColor.rgb = vec3(1.0, 0.55, 0.0);
-          else if (band == 3) diffuseColor.rgb = vec3(1.0, 0.88, 0.08);
-          else if (band == 2) diffuseColor.rgb = vec3(0.18, 0.82, 0.15);
-          else if (band == 1) diffuseColor.rgb = vec3(0.08, 0.55, 0.98);
-          else diffuseColor.rgb = vec3(0.62, 0.18, 0.92);
+          if (band == 5) baseCol = vec3(0.96, 0.14, 0.14);
+          else if (band == 4) baseCol = vec3(1.0, 0.56, 0.02);
+          else if (band == 3) baseCol = vec3(1.0, 0.88, 0.08);
+          else if (band == 2) baseCol = vec3(0.20, 0.84, 0.16);
+          else if (band == 1) baseCol = vec3(0.08, 0.58, 0.98);
+          else baseCol = vec3(0.64, 0.20, 0.94);
         } else if (vLivery >= 2.9 && vLivery < 3.95) {
           float dmgFrac = fract(vLivery);
-          float crackPattern = abs(sin(vLocalPos.x * 14.0 + sin(vLocalPos.y * 11.0) * 2.5)) * abs(cos(vLocalPos.y * 12.0 - vLocalPos.z * 9.0));
-          float threshold = dmgFrac * 0.28;
-          if (crackPattern < threshold) {
-            diffuseColor.rgb = vec3(0.18, 0.08, 0.02);
-          }
+          float crack = abs(sin(p.x * 15.0 + sin(p.y * 12.0) * 2.5)) * abs(cos(p.y * 13.0));
+          if (crack < dmgFrac * 0.30) baseCol = vec3(0.20, 0.09, 0.03);
         } else if (vLivery >= 3.95 && vLivery < 4.5) {
-          float seam = smoothstep(0.06, 0.0, abs(vLocalPos.y - 0.05));
-          diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.28, 0.32, 0.38), seam * 0.75);
+          float seam = smoothstep(0.05, 0.0, abs(p.y - 0.05));
+          baseCol = mix(baseCol, vec3(0.25, 0.29, 0.35), seam * 0.8);
         } else if (vLivery >= 4.9 && vLivery < 5.5) {
-          float rim = smoothstep(0.45, 0.72, abs(vLocalPos.x));
-          diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.35, 0.95, 1.0), rim * 0.55);
+          float purpleRim = smoothstep(-0.22, -0.09, bodyDist);
+          baseCol = mix(baseCol, vec3(0.30, 0.94, 1.0), purpleRim * 0.75);
         } else if (vLivery >= 5.9) {
-          diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.65, 0.92, 1.0), 0.7);
+          baseCol = mix(baseCol, vec3(0.68, 0.94, 1.0), 0.72);
         }
-        // BTD6 Glossy Curved Specular Highlight (Zero 3D Geometry Clipping!)
-        vec3 glintOffset = vLocalPos - vec3(-0.28, 0.36, 0.56);
-        float glintDist = length(glintOffset * vec3(1.15, 0.82, 1.35));
-        float glintSpot = smoothstep(0.26, 0.11, glintDist);
-        diffuseColor.rgb = mix(diffuseColor.rgb, vec3(1.0, 1.0, 1.0), glintSpot * 0.78);
+
+        // 2D Spherical Inner Shading (Bright upper-left core, rich lower-right crescent)
+        float shadeDist = length(bp - vec2(-0.26, 0.28));
+        vec3 litCol = mix(baseCol * 1.16, baseCol * 0.78, smoothstep(0.2, 1.35, shadeDist));
+
+        // Signature Bloons Blitz Curved White Glossy Kidney Highlight (Upper-Left)
+        vec2 hp1 = bp - vec2(-0.34, 0.34);
+        float ang = -0.52;
+        vec2 rhp = vec2(hp1.x * cos(ang) - hp1.y * sin(ang), hp1.x * sin(ang) + hp1.y * cos(ang));
+        float highlight1 = 1.0 - smoothstep(0.15, 0.20, length(rhp / vec2(0.75, 1.45)));
+
+        // Secondary small white shine dot below main highlight
+        float highlight2 = 1.0 - smoothstep(0.05, 0.08, length(bp - vec2(-0.46, 0.02)));
+        float totalShine = clamp(highlight1 + highlight2 * 0.85, 0.0, 1.0);
+        litCol = mix(litCol, vec3(1.0, 1.0, 1.0), totalShine * 0.92);
+
+        // Bold Dark Cartoon Outer Outline (#1a0b02)
+        float outlineMask = smoothstep(-0.11, -0.075, d);
+        diffuseColor.rgb = mix(litCol, vec3(0.09, 0.04, 0.01), outlineMask);
+        `
+      ).replace(
+        '#include <dithering_fragment>',
+        `
+        #include <dithering_fragment>
+        // Output crisp unlit 2D cartoon colors so 3D shadows never muddy the balloons!
+        gl_FragColor = vec4(diffuseColor.rgb, 1.0);
         `
       );
     };
-
-    const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOONS);
+const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOONS);
     bloonInstancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     bloonInstancedMesh.frustumCulled = false;
     scene.add(bloonInstancedMesh);
@@ -4640,7 +4687,7 @@
             soundFX.playCeramicOrLead(affix === 3);
             updateBloonVisualLivery(idx);
           }
-          spawnFloatingText(bx, 1.1, bz, `${Math.max(1, Math.round(dmg))}${isCrit ? ' CRIT!' : ''}`, isCrit ? 'crit' : (affix === 3 ? 'lead' : 'normal'));
+          spawnFloatingText(bx, 1.1, bz, `${Math.max(1, Math.round(dmg))}`, isCrit ? 'crit' : (affix === 3 ? 'lead' : 'normal'));
           return true;
         }
 
@@ -4723,7 +4770,7 @@
         }
       }
 
-      spawnFloatingText(bx, 1.1, bz, `${Math.max(1, Math.round(dmg))}${isCrit ? '!' : ''}`, isCrit ? 'crit' : 'normal');
+      spawnFloatingText(bx, 1.1, bz, `${Math.max(1, Math.round(dmg))}`, isCrit ? 'crit' : 'normal');
       return true;
     }
 
@@ -5982,8 +6029,8 @@
       renderer.setSize(w, h);
       camera.aspect = w / h;
       if (w < h) {
-        camera.fov = 52;
-        cameraOffset.set(0, 30, 22);
+        camera.fov = 46;
+        cameraOffset.set(0, 21.5, 15.5);
       } else {
         camera.fov = 44;
         cameraOffset.set(0, 23, 18);
@@ -6020,9 +6067,20 @@
 
       for (let i = 0; i < MAX_BLOPS; i++) {
         blopActive[i] = 0;
-        blopGlowMesh.setMatrixAt(i, dummyObj.matrix);
+        // Hide fuzzy 3D sphere glow; render crisp 5-point cartoon star + white inner star core (matches unnamed.jpg!)
+        dummyObj.position.set(blopX[i], 0.12, blopZ[i]);
+        dummyObj.rotation.set(-Math.PI / 2, 0, tSec * 1.5 + blopPhase[i]);
+        dummyObj.scale.set(cfgOrb.scale * pulse, cfgOrb.scale * pulse, 0.25);
+        dummyObj.updateMatrix();
         blopHaloMesh.setMatrixAt(i, dummyObj.matrix);
+        dummyObj.position.set(blopX[i], 0.16, blopZ[i]);
+        dummyObj.scale.set(cfgOrb.scale * pulse * 0.48, cfgOrb.scale * pulse * 0.48, 0.3);
+        dummyObj.updateMatrix();
         blopCoreMesh.setMatrixAt(i, dummyObj.matrix);
+        dummyObj.position.set(0, -999, 0);
+        dummyObj.scale.set(0.001, 0.001, 0.001);
+        dummyObj.updateMatrix();
+        blopGlowMesh.setMatrixAt(i, dummyObj.matrix);
       }
       blopGlowMesh.instanceMatrix.needsUpdate = true;
       blopHaloMesh.instanceMatrix.needsUpdate = true;
