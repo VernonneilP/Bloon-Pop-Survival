@@ -2902,7 +2902,7 @@
       }
 
       static createBloonGeometry() {
-        return new THREE.PlaneGeometry(1.18, 1.42, 1, 1);
+        return new THREE.PlaneGeometry(1.77, 2.13, 1, 1);
       }
 
       static createCrescentSlashGeometry() {
@@ -3739,7 +3739,7 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
     const queryBuffer = [];
 
     const MAX_BLOPS = 900;
-    const blopGlowGeo = new THREE.SphereGeometry(0.68, 12, 10);
+    const blopGlowGeo = new THREE.SphereGeometry(0.42, 14, 12);
     const blopGlowMat = new THREE.MeshBasicMaterial({
       color: 0xffffff,
       transparent: true,
@@ -3760,7 +3760,7 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
       else blopStarShape.lineTo(Math.cos(a) * r, Math.sin(a) * r);
     }
     blopStarShape.closePath();
-    const blopHaloGeo = new THREE.ExtrudeGeometry(blopStarShape, { depth: 0.12, bevelEnabled: true, bevelThickness: 0.03, bevelSize: 0.03, bevelSegments: 2 });
+    const blopHaloGeo = new THREE.SphereGeometry(0.28, 14, 12);
     blopHaloGeo.center();
     const blopHaloMat = new THREE.MeshBasicMaterial({
       color: 0xffffff,
@@ -3774,7 +3774,7 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
     blopHaloMesh.frustumCulled = false;
     scene.add(blopHaloMesh);
 
-    const blopCoreGeo = new THREE.SphereGeometry(0.18, 12, 10);
+    const blopCoreGeo = new THREE.SphereGeometry(0.16, 12, 10);
     const blopCoreMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
     const blopCoreMesh = new THREE.InstancedMesh(blopCoreGeo, blopCoreMat, MAX_BLOPS);
     blopCoreMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -6190,7 +6190,7 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
 
       for (let i = 0; i < 3; i++) {
         const a = (i / 3) * Math.PI * 2 + 0.4;
-        const r = 20 + Math.random() * 3;
+        const r = 46.0 + Math.random() * 12.0;
         spawnBloon('RED', Math.cos(a) * r, Math.sin(a) * r);
       }
     }

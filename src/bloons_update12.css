@@ -807,3 +807,20 @@
     box-shadow: 0 5px 0 #14532d, 0 0 18px rgba(34, 197, 94, 0.55) !important;
   }
 }
+
+
+/* ========================================================================
+   UPDATE 12.6: 0.6x HERO HEALTH BAR BELOW 2x HERO FEET (NEVER HIDES MONKEY)
+   ======================================================================== */
+#hero-feet-hud {
+  transform: translate(-50%, 18px) scale(0.60) !important;
+  transform-origin: top center !important;
+  pointer-events: none !important;
+  z-index: 15 !important;
+}
+
+/* Hide redundant LEAD POPPER / CAMO SIGHT text pills under feet to match clean Bloons Blitz reference */
+#hero-lead-badge,
+#hero-camo-badge {
+  display: none !important;
+}

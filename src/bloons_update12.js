@@ -2759,7 +2759,7 @@
 
         const offsetA = (idx / Math.max(1, totalRecruited)) * Math.PI * 2;
         const a = customOrbitAngle + offsetA;
-        const orbitRadius = 2.0;
+        const orbitRadius = 3.4;
         const tx = h.x + Math.cos(a) * orbitRadius;
         const tz = h.z + Math.sin(a) * orbitRadius;
         const bobY = Math.abs(Math.sin((gameState.heroWalkPhase || 0) + idx * 1.3)) * 0.12;
@@ -4786,8 +4786,9 @@
 // ============================================================================
 
 
-// BLOONS BLITZ 3D — STATIC WORLD GROUND (ZERO PARALLAX DRIFT), CRISP GRASS SCALE,
-// COMFORTABLE MOBILE ZOOM & 1-SCREEN MAIN MENU WITH VISIBLE START BUTTON
+
+// BLOONS BLITZ 3D — STATIC WORLD GROUND, 2x MONKEY/HERO SCALE, 1.5x BLOONS,
+// OFF-SCREEN BLOON SPAWNS, IN-CAMERA BOSS ENTRANCE ANIMATION & INTRICATE 3D SCENERY
 (function initStaticGroundAndHeroModal() {
   'use strict';
 
@@ -4799,7 +4800,7 @@
     }
 
     // ------------------------------------------------------------------------
-    // 1. ENFORCE COMFORTABLE MOBILE CAMERA ZOOM & COMPACT BLOON SWARM SPACING
+    // 1. COMFORTABLE CAMERA ZOOM
     // ------------------------------------------------------------------------
     function enforceComfortableZoom() {
       if (!G.camera || !G.renderer) return;
@@ -4824,8 +4825,215 @@
     window.addEventListener('resize', enforceComfortableZoom);
 
     // ------------------------------------------------------------------------
-    // 2. LOCK GROUND AT (0,0,0) WITH CRISP 72x72 TEXTURE SCALE ON 4x WORLD PLANE
-    //    (960m / 72 = 13.3m per 1024px tile -> small, crisp ankle-high grass tufts!)
+    // 2. INTRICATE 3D BLOONS BLITZ WORLD SCENERY (MATCHING unnamed.jpg!)
+    //    Replaces all simple tan discs & cubes with multi-part 3D landmarks
+    //    spread across a wide 160m arena (wraps only at > 78m off-camera!)
+    // ------------------------------------------------------------------------
+    const sceneryItems = [];
+    let sceneryBuilt = false;
+
+    function createRuneTexture(symbol) {
+      const c = document.createElement('canvas');
+      c.width = 128;
+      c.height = 128;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#7c8087';
+      ctx.fillRect(0, 0, 128, 128);
+      // Chiseled stone border & cracks
+      ctx.strokeStyle = '#4b4e54';
+      ctx.lineWidth = 6;
+      ctx.strokeRect(6, 6, 116, 116);
+      ctx.strokeStyle = '#383a3f';
+      ctx.lineWidth = 4;
+      ctx.font = 'bold 42px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#3f3024';
+      ctx.fillText(symbol || 'Δ ❖ ᛁ', 64, 64);
+      return new THREE.CanvasTexture(c);
+    }
+
+    function buildIntricateWorldScenery() {
+      if (sceneryBuilt) return;
+      sceneryBuilt = true;
+
+      // Hide all old simple tan discs, cylinders, and basic boxes in envPropsGroup / scene
+      if (G.envPropsGroup) {
+        G.envPropsGroup.visible = false;
+      }
+
+      const stoneLight = new THREE.MeshStandardMaterial({ color: 0x92969e, roughness: 0.82, flatShading: true });
+      const stoneMid   = new THREE.MeshStandardMaterial({ color: 0x767a82, roughness: 0.86, flatShading: true });
+      const stoneDark  = new THREE.MeshStandardMaterial({ color: 0x585b62, roughness: 0.90, flatShading: true });
+      const runeMat    = new THREE.MeshStandardMaterial({ map: createRuneTexture('Δ ᛁ ❖'), roughness: 0.85 });
+      const dirtMat    = new THREE.MeshStandardMaterial({ color: 0x5c4028, roughness: 0.95, flatShading: true });
+      const ropeMat    = new THREE.MeshStandardMaterial({ color: 0x6b4423, roughness: 0.9, flatShading: true });
+      const flagRedMat = new THREE.MeshStandardMaterial({ color: 0xd94826, roughness: 0.6, side: THREE.DoubleSide });
+      const flagGoldMat= new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.6, side: THREE.DoubleSide });
+      const fernDark   = new THREE.MeshStandardMaterial({ color: 0x2d6a1e, roughness: 0.75, flatShading: true });
+      const fernLight  = new THREE.MeshStandardMaterial({ color: 0x438a29, roughness: 0.72, flatShading: true });
+      const cobbleMat  = new THREE.MeshStandardMaterial({ color: 0xa19d93, roughness: 0.85, flatShading: true });
+
+      // A. Center Ancient Sunken Stone Well / Shrine Ring (Matches center of unnamed.jpg!)
+      const centerWell = new THREE.Group();
+      const numBlocks = 10;
+      for (let i = 0; i < numBlocks; i++) {
+        const a = (i / numBlocks) * Math.PI * 2;
+        const r = 3.2;
+        const blk = new THREE.Mesh(
+          new THREE.BoxGeometry(1.85, 0.42 + (i % 2) * 0.12, 1.15),
+          i % 2 === 0 ? stoneLight : stoneMid
+        );
+        blk.position.set(Math.cos(a) * r, 0.21, Math.sin(a) * r);
+        blk.rotation.set((i % 3 - 1) * 0.04, -a + Math.PI / 2, 0);
+        centerWell.add(blk);
+
+        // Inner recessed rim block
+        const innerBlk = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.22, 0.65), stoneDark);
+        innerBlk.position.set(Math.cos(a) * 2.25, 0.11, Math.sin(a) * 2.25);
+        innerBlk.rotation.y = -a + Math.PI / 2;
+        centerWell.add(innerBlk);
+      }
+      // Subtle recessed stone floor inside the shrine ring
+      const wellFloor = new THREE.Mesh(
+        new THREE.CircleGeometry(2.3, 16).rotateX(-Math.PI / 2),
+        new THREE.MeshBasicMaterial({ color: 0x52565e, transparent: true, opacity: 0.65 })
+      );
+      wellFloor.position.y = 0.02;
+      centerWell.add(wellFloor);
+      centerWell.position.set(0, 0, 0);
+      G.scene.add(centerWell);
+
+      // Helper builders for the 4 intricate prop types
+      function makeCarvedRuneMonolith() {
+        const grp = new THREE.Group();
+        // Earth mound base
+        const mound = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.9, 0.24, 8), dirtMat);
+        mound.position.y = 0.12;
+        grp.add(mound);
+
+        // Main chiseled slanted stone obelisk (3 tapered tiers + rune face)
+        const baseBlock = new THREE.Mesh(new THREE.BoxGeometry(1.7, 1.1, 1.25), stoneDark);
+        baseBlock.position.set(0, 0.62, 0);
+        baseBlock.rotation.set(0.08, 0.15, -0.06);
+        grp.add(baseBlock);
+
+        const midBlock = new THREE.Mesh(new THREE.BoxGeometry(1.45, 1.35, 1.05), runeMat);
+        midBlock.position.set(-0.06, 1.55, 0.04);
+        midBlock.rotation.set(0.10, 0.12, -0.08);
+        grp.add(midBlock);
+
+        const topCap = new THREE.Mesh(new THREE.ConeGeometry(0.95, 0.85, 4), stoneLight);
+        topCap.position.set(-0.12, 2.52, 0.08);
+        topCap.rotation.set(0.10, Math.PI / 4 + 0.12, -0.08);
+        grp.add(topCap);
+
+        // 3D Rope Binding + Hanging Triangular Pennant Flags (Matches unnamed.jpg!)
+        const ropeRing = new THREE.Mesh(new THREE.TorusGeometry(0.82, 0.07, 6, 16).rotateX(Math.PI / 2), ropeMat);
+        ropeRing.position.set(-0.05, 1.75, 0.04);
+        ropeRing.rotation.z = -0.08;
+        grp.add(ropeRing);
+
+        for (let f = 0; f < 4; f++) {
+          const fa = (f / 4) * Math.PI * 2 + 0.4;
+          const pennant = new THREE.Mesh(
+            new THREE.ConeGeometry(0.16, 0.42, 3).rotateX(Math.PI),
+            f % 2 === 0 ? flagRedMat : flagGoldMat
+          );
+          pennant.position.set(Math.cos(fa) * 0.82, 1.52, Math.sin(fa) * 0.82);
+          grp.add(pennant);
+        }
+
+        // Flanking mossy side rock + 4 cobble stepping stones
+        const sideRock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.68, 0), stoneMid);
+        sideRock.scale.set(1.2, 0.75, 0.95);
+        sideRock.position.set(1.25, 0.35, 0.45);
+        grp.add(sideRock);
+
+        for (let c = 0; c < 4; c++) {
+          const stn = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.38, 0.12, 7), cobbleMat);
+          stn.position.set(-1.2 - c * 0.65, 0.06, 0.6 + Math.sin(c) * 0.45);
+          stn.rotation.y = c * 0.8;
+          grp.add(stn);
+        }
+        return grp;
+      }
+
+      function makeSpikyFernRosetteCluster() {
+        const grp = new THREE.Group();
+        // 14 layered spiky fern/agave blades radiating out (Matches unnamed.jpg top-right!)
+        for (let i = 0; i < 14; i++) {
+          const tier = i < 8 ? 0 : 1;
+          const a = (i / (tier === 0 ? 8 : 6)) * Math.PI * 2 + tier * 0.4;
+          const blade = new THREE.Mesh(
+            new THREE.ConeGeometry(0.28, tier === 0 ? 1.45 : 1.15, 4),
+            i % 2 === 0 ? fernDark : fernLight
+          );
+          blade.scale.set(1.0, 1.0, 0.35);
+          const tilt = tier === 0 ? 0.92 : 0.52;
+          blade.position.set(Math.cos(a) * 0.55, 0.42, Math.sin(a) * 0.55);
+          blade.rotation.order = 'YXZ';
+          blade.rotation.y = a;
+          blade.rotation.x = tilt;
+          grp.add(blade);
+        }
+        // Accent boulders & flowers at base
+        for (let r = 0; r < 3; r++) {
+          const ra = (r / 3) * Math.PI * 2;
+          const pebble = new THREE.Mesh(new THREE.DodecahedronGeometry(0.38, 0), cobbleMat);
+          pebble.scale.set(1.1, 0.55, 0.9);
+          pebble.position.set(Math.cos(ra) * 0.95, 0.16, Math.sin(ra) * 0.95);
+          grp.add(pebble);
+        }
+        return grp;
+      }
+
+      function makeCobbleTrailAndRuins() {
+        const grp = new THREE.Group();
+        // Fallen carved stone block with rope + curved trail of 6 stepping stones (Matches unnamed.jpg!)
+        const fallen = new THREE.Mesh(new THREE.BoxGeometry(1.55, 0.72, 0.95), runeMat);
+        fallen.position.set(0, 0.36, 0);
+        fallen.rotation.set(0.05, 0.4, 0.12);
+        grp.add(fallen);
+
+        const rope = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.78, 1.02), ropeMat);
+        rope.position.set(0.2, 0.37, 0);
+        rope.rotation.set(0.05, 0.4, 0.12);
+        grp.add(rope);
+
+        for (let s = 1; s <= 6; s++) {
+          const cobble = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.34 + (s % 2) * 0.08, 0.40, 0.10, 7),
+            s % 2 === 0 ? cobbleMat : stoneLight
+          );
+          cobble.position.set(s * 0.88, 0.05, Math.sin(s * 0.75) * 0.65);
+          cobble.rotation.y = s * 1.1;
+          grp.add(cobble);
+        }
+        return grp;
+      }
+
+      // Spawn 56 intricate 3D landmarks across a wide 150m diameter so wrap (> 78m) is 100% off-camera!
+      for (let i = 0; i < 56; i++) {
+        const ring = Math.floor(i / 14); // 4 concentric rings from r=14m out to r=72m
+        const a = ((i % 14) / 14) * Math.PI * 2 + ring * 0.35;
+        const r = 14 + ring * 17.5 + (i % 3) * 3.2;
+
+        let prop;
+        if (i % 3 === 0) prop = makeCarvedRuneMonolith();
+        else if (i % 3 === 1) prop = makeSpikyFernRosetteCluster();
+        else prop = makeCobbleTrailAndRuins();
+
+        prop.position.set(Math.cos(a) * r, 0, Math.sin(a) * r);
+        prop.rotation.y = (i * 1.7) % (Math.PI * 2);
+        G.scene.add(prop);
+        sceneryItems.push(prop);
+      }
+    }
+    buildIntricateWorldScenery();
+
+    // ------------------------------------------------------------------------
+    // 3. LOCK GROUND AT (0,0,0) WITH CRISP 72x72 TEXTURE SCALE
     // ------------------------------------------------------------------------
     function lockStaticWorldGround() {
       const mesh = G.meadowMesh;
@@ -4833,11 +5041,11 @@
       const mat = mesh.material;
       const tex = mat ? mat.map : null;
 
-      mesh.scale.set(4, 4, 1); // 960m x 960m arena
+      mesh.scale.set(4, 4, 1);
       mesh.position.set(0, 0, 0);
 
       if (mat && mat.color && (!G.gameState.stageId || G.gameState.stageId === 'meadow')) {
-        mat.color.setHex(0xb5d69c); // Soft natural Bloons Blitz meadow tint (never neon!)
+        mat.color.setHex(0xb5d69c);
       }
 
       if (tex) {
@@ -4852,26 +5060,14 @@
         tex.offset.set = function() { this.x = 0; this.y = 0; return this; };
       }
 
-      // Hide any giant opaque green circle under Benjamin or flat Cylinder pancakes
-      G.scene.traverse(obj => {
-        if (obj.isMesh && obj !== mesh) {
-          const gType = obj.geometry ? obj.geometry.type : '';
-          if ((gType === 'CircleGeometry' || gType === 'RingGeometry') && obj.position.y < 0.25) {
-            const p = obj.geometry.parameters || {};
-            if ((p.radius && p.radius > 1.5) || (p.outerRadius && p.outerRadius > 1.5)) {
-              obj.visible = false;
-            }
-          }
-          if (gType === 'CylinderGeometry' && obj.position.y < 0.15) {
-            obj.visible = false;
-          }
-        }
-      });
+      if (G.envPropsGroup) {
+        G.envPropsGroup.visible = false;
+      }
     }
     lockStaticWorldGround();
 
     // ------------------------------------------------------------------------
-    // 3. DEDICATED HERO MODAL + 1-SCREEN MOBILE MAIN MENU (START BUTTON VISIBLE)
+    // 4. DEDICATED HERO MODAL + 1-SCREEN MOBILE MAIN MENU
     // ------------------------------------------------------------------------
     function setupDedicatedHeroPickerModal() {
       const firstMapCard = document.querySelector('.map-card');
@@ -4972,14 +5168,35 @@
     setupDedicatedHeroPickerModal();
 
     // ------------------------------------------------------------------------
-    // 4. WHITE HERO FOOT RING, SHIELD ICON & BEAST HANDLER 3D ANIMALS
+    // 5. 2x HERO FOOT RING, SHIELD ICON, BOSS SPAWN PORTAL & BEAST ANIMALS
     // ------------------------------------------------------------------------
     const heroWhiteRing = new THREE.Mesh(
-      new THREE.RingGeometry(0.68, 0.82, 32).rotateX(-Math.PI / 2),
+      new THREE.RingGeometry(1.18, 1.42, 36).rotateX(-Math.PI / 2),
       new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, transparent: true, opacity: 0.90 })
     );
     heroWhiteRing.position.y = 0.03;
     G.scene.add(heroWhiteRing);
+
+    // Boss Spawn Portal Reticle & Shockwave Ring (for in-camera Boss Entrance Animation!)
+    const bossPortalGroup = new THREE.Group();
+    const portalOuterRing = new THREE.Mesh(
+      new THREE.RingGeometry(2.6, 3.1, 36).rotateX(-Math.PI / 2),
+      new THREE.MeshBasicMaterial({ color: 0xff2a2a, side: THREE.DoubleSide, transparent: true, opacity: 0.85 })
+    );
+    const portalInnerRing = new THREE.Mesh(
+      new THREE.RingGeometry(1.2, 1.55, 24).rotateX(-Math.PI / 2),
+      new THREE.MeshBasicMaterial({ color: 0xfacc15, side: THREE.DoubleSide, transparent: true, opacity: 0.9 })
+    );
+    const portalShadowDisc = new THREE.Mesh(
+      new THREE.CircleGeometry(2.5, 32).rotateX(-Math.PI / 2),
+      new THREE.MeshBasicMaterial({ color: 0x1e0538, transparent: true, opacity: 0.55 })
+    );
+    portalShadowDisc.position.y = 0.02;
+    portalOuterRing.position.y = 0.04;
+    portalInnerRing.position.y = 0.05;
+    bossPortalGroup.add(portalShadowDisc, portalOuterRing, portalInnerRing);
+    bossPortalGroup.visible = false;
+    G.scene.add(bossPortalGroup);
 
     const feetHud = document.getElementById('hero-feet-hud');
     if (feetHud && !document.getElementById('hero-feet-shield-icon')) {
@@ -5013,6 +5230,7 @@
       const tail = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.75, 10).rotateX(-Math.PI / 2), stripeMat);
       tail.position.set(0, 0.48, -0.58);
       grp.add(tail);
+      grp.scale.setScalar(2.0);
       return grp;
     }
 
@@ -5028,6 +5246,7 @@
       rightWing.position.set(0.42, 0.04, 0);
       grp.add(rightWing);
       grp.userData = { leftWing, rightWing };
+      grp.scale.setScalar(2.0);
       return grp;
     }
 
@@ -5043,6 +5262,7 @@
       const snout = new THREE.Mesh(new THREE.ConeGeometry(0.38, 0.85, 12), sharkMat);
       snout.position.y = 0.35;
       grp.add(snout);
+      grp.scale.setScalar(2.0);
       return grp;
     }
 
@@ -5058,6 +5278,33 @@
 
     let raptorX = 0, raptorZ = 0, falconAngle = 0, sharkX = 0, sharkZ = 0;
 
+    // ------------------------------------------------------------------------
+    // 6. INTERCEPT spawnBloon SO FRESH WAVE BLOONS ALWAYS SPAWN OFF-CAMERA
+    // ------------------------------------------------------------------------
+    if (typeof G.spawnBloon === 'function' && !G._spawnBloonOffscreenPatched) {
+      G._spawnBloonOffscreenPatched = true;
+      const origSpawnBloon = G.spawnBloon;
+      G.spawnBloon = function(typeKey, x, z, vx = 0, vz = 0, affix = 0, parentType = null) {
+        const h = G.gameState && G.gameState.hero;
+        // If this is a fresh wave spawn (no parentType split & no burst velocity), push outside camera (>45m)!
+        if (h && !parentType && vx === 0 && vz === 0) {
+          const dx = x - h.x;
+          const dz = z - h.z;
+          const dist = Math.hypot(dx, dz);
+          if (dist < 44.0) {
+            const ang = Math.atan2(dz, dx);
+            const safeDist = 46.0 + Math.random() * 10.0;
+            x = h.x + Math.cos(ang) * safeDist;
+            z = h.z + Math.sin(ang) * safeDist;
+          }
+        }
+        return origSpawnBloon(typeKey, x, z, vx, vz, affix, parentType);
+      };
+    }
+
+    // ------------------------------------------------------------------------
+    // 7. MAIN PER-FRAME HOOK: 2x MONKEY SCALE, SCENERY WRAP (78m) & BOSS ENTRANCE
+    // ------------------------------------------------------------------------
     const prevUpdateSim = G.updateSimulation;
     G.updateSimulation = function(dt) {
       prevUpdateSim(dt);
@@ -5069,32 +5316,122 @@
       lockStaticWorldGround();
       heroWhiteRing.position.set(h.x, 0.03, h.z);
 
+      // A. Enforce 2.0x Scale on Hero Mesh & All 14 Squad Companion Meshes!
+      if (G.heroMesh) {
+        G.heroMesh.scale.set(2.0, 2.0, 2.0);
+      }
+      if (G.squadMeshes) {
+        Object.keys(G.squadMeshes).forEach(k => {
+          const m = G.squadMeshes[k];
+          const lvl = (st.squad && st.squad[k]) ? st.squad[k].level : 0;
+          if (m && lvl > 0) {
+            const tierMult = 1.0 + Math.min(4, lvl - 1) * 0.06;
+            m.scale.setScalar(2.0 * tierMult);
+          }
+        });
+      }
+
+      // B. Wrap our 56 intricate 3D scenery landmarks at 78m (well outside the camera view!)
+      for (let i = 0; i < sceneryItems.length; i++) {
+        const prop = sceneryItems[i];
+        const dx = prop.position.x - h.x;
+        const dz = prop.position.z - h.z;
+        const dist = Math.hypot(dx, dz);
+        if (dist > 78.0) {
+          const ang = Math.atan2(dz, dx) + Math.PI + (Math.random() - 0.5) * 0.45;
+          const newR = 68.0 + Math.random() * 8.0;
+          prop.position.set(h.x + Math.cos(ang) * newR, 0, h.z + Math.sin(ang) * newR);
+        }
+      }
+
       if (st.paused || st.gameOver || st.inStartMenu) return;
 
-      if (G.activeMOABs.length > 0) {
-        const mb = G.activeMOABs[0];
+      // C. Cool In-Camera Boss Spawn Animation (Sky-Drop + Portal Reticle + Shockwave!)
+      let activePortalBoss = null;
+      if (G.activeMOABs && G.activeMOABs.length > 0) {
+        for (let m = 0; m < G.activeMOABs.length; m++) {
+          const mb = G.activeMOABs[m];
+          if (!mb.mesh) continue;
+
+          if (!mb._bossEntranceInitialized) {
+            mb._bossEntranceInitialized = true;
+            mb._entranceTimer = 0;
+            mb._entranceDuration = 1.15;
+            // Relocate Boss inside camera view (12m-14m from Hero) so player sees the dramatic entrance!
+            const spawnAng = Math.atan2(mb.z - h.z, mb.x - h.x);
+            const inCamRadius = 12.5;
+            mb.x = h.x + Math.cos(spawnAng) * inCamRadius;
+            mb.z = h.z + Math.sin(spawnAng) * inCamRadius;
+            mb._spawnX = mb.x;
+            mb._spawnZ = mb.z;
+          }
+
+          if (mb._entranceTimer < mb._entranceDuration) {
+            mb._entranceTimer += dt;
+            const p = Math.min(1.0, mb._entranceTimer / mb._entranceDuration);
+            activePortalBoss = mb;
+
+            // Keep boss anchored over its landing reticle during sky-drop
+            mb.x = mb._spawnX;
+            mb.z = mb._spawnZ;
+
+            // Elastic sky-drop from Y=18m down to Y=1.8m
+            const easeOutBack = 1 + 2.2 * Math.pow(p - 1, 3) + 1.2 * Math.pow(p - 1, 2);
+            const dropY = THREE.MathUtils.lerp(18.0, 1.8, Math.min(1.0, p * 1.35));
+            const sScale = Math.max(0.1, Math.min(1.25, easeOutBack));
+            mb.mesh.position.set(mb.x, dropY, mb.z);
+            mb.mesh.scale.setScalar(sScale * 1.25);
+            mb.mesh.rotation.y += (1.0 - p) * dt * 14.0;
+
+            // Trigger landing shockwave burst when touching down at p >= 0.72
+            if (p >= 0.72 && !mb._landShockTriggered) {
+              mb._landShockTriggered = true;
+              if (typeof G.spawnFloatingText === 'function') {
+                G.spawnFloatingText(mb.x, 3.2, mb.z, '⚠️ BOSS ARRIVED!', 'crit');
+              }
+              if (G.soundFX && G.soundFX.playExplosion) {
+                G.soundFX.playExplosion(1.4);
+              }
+            }
+          } else {
+            mb.mesh.scale.setScalar(1.25);
+          }
+        }
+
+        const mb0 = G.activeMOABs[0];
         const ptr = document.getElementById('boss-screen-pointer');
-        if (ptr && Math.hypot(mb.x - h.x, mb.z - h.z) < 16.0) {
+        if (ptr && Math.hypot(mb0.x - h.x, mb0.z - h.z) < 20.0) {
           ptr.style.display = 'none';
         }
       }
 
+      if (activePortalBoss) {
+        bossPortalGroup.visible = true;
+        bossPortalGroup.position.set(activePortalBoss.x, 0.02, activePortalBoss.z);
+        const pulse = 1.0 + Math.sin(st.elapsedTime * 18.0) * 0.15;
+        portalOuterRing.scale.setScalar(pulse);
+        portalInnerRing.rotation.z += dt * 6.0;
+      } else {
+        bossPortalGroup.visible = false;
+      }
+
+      // D. Beast Handler 2x Animals
       const bhLvl = (st.squad && st.squad.beasthandler) ? st.squad.beasthandler.level : 0;
       const bhMesh = G.squadMeshes ? G.squadMeshes.beasthandler : null;
       if (bhLvl > 0 && bhMesh && bhMesh.visible) {
         raptorMesh.visible = true;
-        const target = G.findNearestEnemy(bhMesh.position.x, bhMesh.position.z, 18, true);
-        const destX = target ? target.x : (bhMesh.position.x + Math.cos(st.elapsedTime * 3) * 1.6);
-        const destZ = target ? target.z : (bhMesh.position.z + Math.sin(st.elapsedTime * 3) * 1.6);
+        const target = G.findNearestEnemy(bhMesh.position.x, bhMesh.position.z, 22, true);
+        const destX = target ? target.x : (bhMesh.position.x + Math.cos(st.elapsedTime * 3) * 2.4);
+        const destZ = target ? target.z : (bhMesh.position.z + Math.sin(st.elapsedTime * 3) * 2.4);
         raptorX = THREE.MathUtils.lerp(raptorX || bhMesh.position.x, destX, Math.min(1, dt * 8.5));
         raptorZ = THREE.MathUtils.lerp(raptorZ || bhMesh.position.z, destZ, Math.min(1, dt * 8.5));
-        raptorMesh.position.set(raptorX, Math.abs(Math.sin(st.elapsedTime * 16)) * 0.18, raptorZ);
+        raptorMesh.position.set(raptorX, Math.abs(Math.sin(st.elapsedTime * 16)) * 0.25, raptorZ);
         raptorMesh.rotation.y = Math.atan2(destX - raptorX, destZ - raptorZ);
 
         if (bhLvl >= 2) {
           falconMesh.visible = true;
           falconAngle += dt * 3.8;
-          falconMesh.position.set(h.x + Math.cos(falconAngle) * 3.6, 2.2 + Math.sin(falconAngle * 3) * 0.35, h.z + Math.sin(falconAngle * 2) * 2.8);
+          falconMesh.position.set(h.x + Math.cos(falconAngle) * 4.8, 3.2 + Math.sin(falconAngle * 3) * 0.4, h.z + Math.sin(falconAngle * 2) * 3.8);
           falconMesh.rotation.y = falconAngle + Math.PI / 2;
           if (falconMesh.userData.leftWing) {
             const flap = Math.sin(st.elapsedTime * 22) * 0.45;
@@ -5109,7 +5446,7 @@
           sharkMesh.visible = true;
           sharkX = THREE.MathUtils.lerp(sharkX || h.x, destX, Math.min(1, dt * 5.0));
           sharkZ = THREE.MathUtils.lerp(sharkZ || h.z, destZ, Math.min(1, dt * 5.0));
-          sharkMesh.position.set(sharkX, Math.sin(st.elapsedTime * 8) * 0.15, sharkZ);
+          sharkMesh.position.set(sharkX, Math.sin(st.elapsedTime * 8) * 0.2, sharkZ);
           sharkMesh.rotation.y += dt * 4.0;
         } else {
           sharkMesh.visible = false;
