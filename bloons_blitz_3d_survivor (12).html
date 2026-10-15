@@ -3596,6 +3596,11 @@
         } else if (vLivery >= 5.9) {
           diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.65, 0.92, 1.0), 0.7);
         }
+        // BTD6 Glossy Curved Specular Highlight (Zero 3D Geometry Clipping!)
+        vec3 glintOffset = vLocalPos - vec3(-0.28, 0.36, 0.56);
+        float glintDist = length(glintOffset * vec3(1.15, 0.82, 1.35));
+        float glintSpot = smoothstep(0.26, 0.11, glintDist);
+        diffuseColor.rgb = mix(diffuseColor.rgb, vec3(1.0, 1.0, 1.0), glintSpot * 0.78);
         `
       );
     };
@@ -3703,7 +3708,16 @@
     blopGlowMesh.frustumCulled = false;
     scene.add(blopGlowMesh);
 
-    const blopHaloGeo = new THREE.SphereGeometry(0.38, 14, 12);
+    const blopStarShape = new THREE.Shape();
+    for (let s = 0; s < 10; s++) {
+      const r = s % 2 === 0 ? 0.44 : 0.19;
+      const a = (s / 10) * Math.PI * 2 - Math.PI / 2;
+      if (s === 0) blopStarShape.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+      else blopStarShape.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+    }
+    blopStarShape.closePath();
+    const blopHaloGeo = new THREE.ExtrudeGeometry(blopStarShape, { depth: 0.12, bevelEnabled: true, bevelThickness: 0.03, bevelSize: 0.03, bevelSegments: 2 });
+    blopHaloGeo.center();
     const blopHaloMat = new THREE.MeshBasicMaterial({
       color: 0xffffff,
       transparent: true,
@@ -7251,7 +7265,7 @@
         const pulse = 1.0 + Math.sin(tSec * 6.5 + blopPhase[i]) * 0.16;
         const oy = 0.45 + Math.sin(tSec * 4.2 + blopPhase[i]) * 0.12;
         dummyObj.position.set(blopX[i], oy, blopZ[i]);
-        dummyObj.rotation.set(0, 0, 0);
+        dummyObj.rotation.set(-0.45, tSec * 3.2 + blopPhase[i], 0);
         dummyObj.scale.setScalar(cfgOrb.scale * pulse);
         dummyObj.updateMatrix();
         blopGlowMesh.setMatrixAt(i, dummyObj.matrix);

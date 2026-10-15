@@ -4637,3 +4637,200 @@
     bootUpdate12();
   }
 })();
+
+
+// ============================================================================
+// BLOONS BLITZ 3D — VISUAL CLEANUP & COMPENDIUM OVERHAUL PASS
+// ============================================================================
+(function initVisualCleanupPass() {
+  'use strict';
+
+  function bootPolish() {
+    const G = window.__GAME;
+    if (!G || !G.scene || !G.gameState) {
+      setTimeout(bootPolish, 60);
+      return;
+    }
+
+    // 1. Add Ground Drop Shadows to Hero & All 14 Companions
+    function attachDropShadow(mesh, radius = 0.62) {
+      if (!mesh || mesh.userData.hasDropShadow) return;
+      const shadow = new THREE.Mesh(
+        new THREE.CircleGeometry(radius, 18).rotateX(-Math.PI / 2),
+        new THREE.MeshBasicMaterial({ color: 0x071202, transparent: true, opacity: 0.45, depthWrite: false })
+      );
+      shadow.position.y = 0.02;
+      mesh.add(shadow);
+      mesh.userData.hasDropShadow = true;
+    }
+
+    setInterval(() => {
+      if (G.heroMesh) attachDropShadow(G.heroMesh, 0.68);
+      if (G.squadMeshes) {
+        Object.values(G.squadMeshes).forEach(m => attachDropShadow(m, 0.56));
+      }
+    }, 500);
+
+    // 2. Overhaul #my-build-modal: Real 3D Portraits (Zero Trophy Placeholders) + 2-Tab Compendium
+    function renderEnhancedMyBuildModal(activeTab = 'build') {
+      const modal = document.getElementById('my-build-modal');
+      if (!modal) return;
+      const panel = modal.querySelector('.btd-panel');
+      if (!panel) return;
+
+      const st = G.gameState;
+      const h = st.hero;
+      const cfg = G.HERO_CONFIGS[h.id] || G.HERO_CONFIGS.quincy;
+      const getSnap = (key) => {
+        const imgEl = document.querySelector(`.hero-card[data-hero="${key}"] img`);
+        if (imgEl && imgEl.src) return imgEl.src;
+        return '';
+      };
+
+      // Inject 2-Tab Navigation Header if not present
+      let tabBar = document.getElementById('u12-build-tabs');
+      if (!tabBar) {
+        tabBar = document.createElement('div');
+        tabBar.id = 'u12-build-tabs';
+        tabBar.className = 'flex items-center gap-2 mb-3';
+        const headerRow = panel.firstElementChild;
+        panel.insertBefore(tabBar, headerRow.nextSibling);
+
+        const compendiumView = document.createElement('div');
+        compendiumView.id = 'u12-compendium-view';
+        compendiumView.className = 'hidden flex-col gap-2.5 max-h-[62vh] overflow-y-auto pr-1 mb-4';
+        panel.insertBefore(compendiumView, document.getElementById('btn-resume-from-build'));
+      }
+
+      tabBar.innerHTML = `
+        <button id="tab-btn-current-build" class="flex-1 py-2 rounded-xl font-btd text-xs sm:text-sm text-white cursor-pointer transition ${activeTab === 'build' ? 'btd-btn-gold' : 'bg-stone-800 border-2 border-black text-stone-300'}">
+          🛡️ CURRENT RUN BUILD (MAX 3 SQUAD)
+        </button>
+        <button id="tab-btn-tree-compendium" class="flex-1 py-2 rounded-xl font-btd text-xs sm:text-sm text-white cursor-pointer transition ${activeTab === 'tree' ? 'btd-btn-gold' : 'bg-stone-800 border-2 border-black text-stone-300'}">
+          🌳 3-PATH UPGRADE COMPENDIUM (14 MONKEYS)
+        </button>
+      `;
+
+      const heroCard = document.getElementById('my-build-hero-card');
+      const squadGrid = document.getElementById('my-build-squad-grid');
+      const statsGrid = document.getElementById('my-build-stats-grid');
+      const compView = document.getElementById('u12-compendium-view');
+      const sectionHeaders = panel.querySelectorAll('h3');
+
+      if (activeTab === 'build') {
+        heroCard.classList.remove('hidden');
+        squadGrid.classList.remove('hidden');
+        statsGrid.classList.remove('hidden');
+        sectionHeaders.forEach(sh => sh.classList.remove('hidden'));
+        compView.classList.add('hidden');
+
+        const heroPortrait = getSnap(h.id);
+        heroCard.innerHTML = `
+          <div class="w-16 h-16 rounded-2xl bg-black/60 border-2 border-amber-400 flex items-center justify-center overflow-hidden shrink-0 shadow-lg">
+            ${heroPortrait ? `<img src="${heroPortrait}" class="w-full h-full object-contain">` : `<span class="text-3xl">${cfg.skillIcon || '👑'}</span>`}
+          </div>
+          <div class="flex-1 flex flex-col text-left">
+            <div class="flex items-center gap-2">
+              <h3 class="font-btd text-xl text-yellow-300">${cfg.name}</h3>
+              <span class="px-2.5 py-0.5 rounded-full bg-purple-600 border border-black font-btd-sm text-xs text-white">LVL ${h.level}</span>
+            </div>
+            <span class="text-xs font-bold text-amber-200 mb-1.5">${cfg.title}</span>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-stone-200 font-bold">
+              <div>❤️ HP: <strong class="text-emerald-400">${Math.round(h.hp)}/${h.maxHp}</strong></div>
+              <div>⚔️ DMG: <strong class="text-amber-300">${h.damage.toFixed(1)}</strong></div>
+              <div>🏹 RATE: <strong class="text-cyan-300">${h.fireRate.toFixed(2)}/s</strong></div>
+              <div>🎯 PIERCE: <strong class="text-indigo-300">${h.pierce}</strong></div>
+            </div>
+            <div class="mt-2 text-[10px] font-extrabold text-cyan-200">
+              Path 1 (Volley): T${h.volleyTier || 0}/5 • Path 2 (Elemental): T${h.weaponTier || 0}/5 • Path 3 (Special): T${h.explosiveTier || 0}/5
+            </div>
+          </div>
+        `;
+
+        const recruited = (st.recruitedOrder || []).slice(0, 3);
+        const countEl = document.getElementById('my-build-squad-count');
+        if (countEl) countEl.textContent = `(${recruited.length}/3 Slots Max)`;
+
+        squadGrid.innerHTML = '';
+        for (let slotIdx = 0; slotIdx < 3; slotIdx++) {
+          const key = recruited[slotIdx];
+          const card = document.createElement('div');
+          if (key && st.squad[key] && st.squad[key].level > 0) {
+            const comp = G.COMPANION_CATALOG.find(c => c.key === key);
+            const lvl = st.squad[key].level;
+            const slotImg = document.querySelector(`#active-slot-${slotIdx} img`);
+            const imgSrc = slotImg ? slotImg.src : '';
+            card.className = 'p-3 rounded-2xl bg-stone-900/95 border-2 border-cyan-400/60 flex flex-col items-center text-center shadow-md';
+            card.innerHTML = `
+              <div class="w-14 h-14 rounded-2xl bg-black/50 border-2 border-amber-400/50 flex items-center justify-center mb-1.5 overflow-hidden">
+                ${imgSrc ? `<img src="${imgSrc}" class="w-full h-full object-contain">` : `<span class="text-2xl">${comp ? comp.icon : '🐒'}</span>`}
+              </div>
+              <h4 class="font-btd text-sm text-yellow-300">${comp ? comp.shortName : key.toUpperCase()}</h4>
+              <span class="px-2.5 py-0.5 rounded-full bg-cyan-600 border border-black font-btd-sm text-[10px] text-white my-1">TIER ${lvl} / 5</span>
+              <span class="text-[10px] text-stone-200 font-bold">${comp && comp.titles ? (comp.titles[lvl - 1] || 'Tier 5 Paragon') : ''}</span>
+            `;
+          } else {
+            card.className = 'p-3 rounded-2xl bg-stone-900/50 border-2 border-stone-700/60 flex flex-col items-center justify-center text-center opacity-60 min-h-[130px]';
+            card.innerHTML = `
+              <span class="text-2xl text-stone-400 mb-1">➕</span>
+              <span class="font-btd text-xs text-stone-400">EMPTY SLOT ${slotIdx + 1}</span>
+              <span class="text-[10px] text-stone-500 font-bold mt-0.5">Level up to recruit</span>
+            `;
+          }
+          squadGrid.appendChild(card);
+        }
+      } else {
+        heroCard.classList.add('hidden');
+        squadGrid.classList.add('hidden');
+        statsGrid.classList.add('hidden');
+        sectionHeaders.forEach(sh => sh.classList.add('hidden'));
+        compView.classList.remove('hidden');
+        compView.classList.add('flex');
+
+        compView.innerHTML = G.COMPANION_CATALOG.map(comp => {
+          const curLvl = (st.squad[comp.key] && st.squad[comp.key].level) || 0;
+          const tiersHtml = [0, 1, 2, 3, 4].map(tIdx => {
+            const unlocked = curLvl >= (tIdx + 1);
+            const tTitle = (comp.titles && comp.titles[tIdx]) ? comp.titles[tIdx] : `Tier ${tIdx + 1}: Paragon ${comp.shortName}`;
+            return `
+              <div class="p-2 rounded-xl border ${unlocked ? 'bg-cyan-950/80 border-yellow-400 text-white' : 'bg-black/40 border-white/10 text-stone-400'} flex flex-col">
+                <span class="font-btd text-[10px] ${unlocked ? 'text-yellow-300' : 'text-stone-400'}">TIER ${tIdx + 1} ${unlocked ? '✓' : ''}</span>
+                <span class="font-bold text-[10px] leading-tight mt-0.5">${tTitle}</span>
+              </div>
+            `;
+          }).join('');
+
+          return `
+            <div class="p-3 rounded-2xl bg-stone-900/95 border-2 ${curLvl > 0 ? 'border-yellow-400' : 'border-stone-700'} flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <span class="font-btd text-sm text-yellow-300">${comp.shortName}</span>
+                <span class="px-2 py-0.5 rounded-full ${curLvl > 0 ? 'bg-emerald-600 text-white' : 'bg-stone-800 text-stone-400'} font-btd-sm text-[10px]">
+                  ${curLvl > 0 ? 'ACTIVE • TIER ' + curLvl : 'NOT RECRUITED'}
+                </span>
+              </div>
+              <div class="grid grid-cols-2 sm:grid-cols-5 gap-1.5">${tiersHtml}</div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('tab-btn-current-build').onclick = () => renderEnhancedMyBuildModal('build');
+      document.getElementById('tab-btn-tree-compendium').onclick = () => renderEnhancedMyBuildModal('tree');
+    }
+
+    const hudBuildBtn = document.getElementById('btn-hud-build');
+    if (hudBuildBtn) {
+      hudBuildBtn.addEventListener('click', () => setTimeout(() => renderEnhancedMyBuildModal('build'), 20));
+    }
+    const setBuildBtn = document.getElementById('btn-settings-my-build');
+    if (setBuildBtn) {
+      setBuildBtn.addEventListener('click', () => setTimeout(() => renderEnhancedMyBuildModal('build'), 20));
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootPolish);
+  } else {
+    bootPolish();
+  }
+})();
