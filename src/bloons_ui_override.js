@@ -1199,15 +1199,15 @@
       actionRow.innerHTML = `
         <button id="btn-blitz-banish" class="blitz-btn-action btn-blitz-banish">
           <span>🚫 Banish</span>
-          <span class="blitz-badge-cost">11/1</span>
+          <span class="blitz-badge-cost">(1)</span>
         </button>
         <button id="btn-blitz-refresh" class="blitz-btn-action btn-blitz-refresh">
           <span>🎲 Refresh</span>
-          <span class="blitz-badge-cost">11/1</span>
+          <span class="blitz-badge-cost">(1)</span>
         </button>
         <button id="btn-blitz-pin" class="blitz-btn-action btn-blitz-pin">
           <span>📌 Pin</span>
-          <span class="blitz-badge-cost">15/1</span>
+          <span class="blitz-badge-cost">(1)</span>
         </button>
       `;
 
@@ -1220,6 +1220,7 @@
       if (btnRefresh) {
         btnRefresh.addEventListener('click', (e) => {
           e.stopPropagation();
+          ensureSquadInitialized();
           if (typeof getAvailableUpgradeCards === 'function' && typeof gameState !== 'undefined') {
             const avail = getAvailableUpgradeCards(gameState);
             const shuffled = avail.sort(() => Math.random() - 0.5).slice(0, 3);
@@ -1907,6 +1908,69 @@
   }
 
   // ==========================================================================
+  // 9b. SQUAD STATE SAFETY & CRASH DEFENSE
+  // ==========================================================================
+  function ensureSquadInitialized(state) {
+    const target = state || (typeof gameState !== 'undefined' ? gameState : null);
+    if (!target) return;
+    if (!target.squad || typeof target.squad !== 'object') {
+      target.squad = {};
+    }
+    if (!Array.isArray(target.recruitedOrder)) {
+      target.recruitedOrder = [];
+    }
+
+    const companionKeys = [
+      'super', 'tack', 'boomer', 'ninja', 'sniper', 'wizard', 'dartling', 'mortar', 'ice',
+      'mermonkey', 'beasthandler', 'desperado', 'alchemist', 'druid'
+    ];
+
+    if (typeof COMPANION_CATALOG !== 'undefined' && Array.isArray(COMPANION_CATALOG)) {
+      COMPANION_CATALOG.forEach(c => {
+        if (c && c.key && !companionKeys.includes(c.key)) {
+          companionKeys.push(c.key);
+        }
+      });
+    }
+
+    companionKeys.forEach(k => {
+      if (!target.squad[k]) {
+        target.squad[k] = { level: 0, cooldown: 0, unlocked: false, tier: 0 };
+      } else {
+        if (typeof target.squad[k].level !== 'number') target.squad[k].level = 0;
+        if (typeof target.squad[k].cooldown !== 'number') target.squad[k].cooldown = 0;
+      }
+    });
+  }
+
+  function patchUpgradeSystemSafety() {
+    // Intercept getAvailableUpgradeCards so it never throws on missing companion/skill state
+    if (typeof getAvailableUpgradeCards === 'function') {
+      const _origGetAvailableUpgradeCards = getAvailableUpgradeCards;
+      getAvailableUpgradeCards = function(state) {
+        const st = state || (typeof gameState !== 'undefined' ? gameState : null);
+        ensureSquadInitialized(st);
+        try {
+          return _origGetAvailableUpgradeCards(st);
+        } catch (err) {
+          console.warn("Recovered from getAvailableUpgradeCards error:", err);
+          ensureSquadInitialized(st);
+          return _origGetAvailableUpgradeCards(st);
+        }
+      };
+    }
+
+    // Intercept openLevelUpModal so squad is guaranteed initialized before level-up runs
+    if (typeof openLevelUpModal === 'function') {
+      const _origOpenLevelUpModal = openLevelUpModal;
+      openLevelUpModal = function() {
+        ensureSquadInitialized();
+        return _origOpenLevelUpModal.apply(this, arguments);
+      };
+    }
+  }
+
+  // ==========================================================================
   // 10. LEVEL-UP MODAL MUTATION OBSERVER
   // ==========================================================================
   function setupModalObserver() {
@@ -1917,6 +1981,7 @@
       const isVisible = !modal.classList.contains('hidden') && modal.style.display !== 'none';
       if (isVisible && !modal.dataset.blitzStyled) {
         polyfillAssetForge();
+        ensureSquadInitialized();
         if (typeof getAvailableUpgradeCards === 'function' && typeof gameState !== 'undefined') {
           const avail = getAvailableUpgradeCards(gameState);
           let picked = [];
@@ -2069,28 +2134,207 @@
   const SETTINGS_KEY_V11 = 'bloons_blitz_settings_v11';
   let hasAutoOptimized = false;
 
-  function initSettingsPersistenceAndOptimizer() {
+  function getStoredSettings() {
     let settings = null;
     try {
       const raw = localStorage.getItem(SETTINGS_KEY_V11);
       if (raw) settings = JSON.parse(raw);
     } catch (e) {}
 
-    // First-launch default: 1x DPI & 60 FPS Native
+    // First-launch default: 1x Native V-Sync & 1x STD DPI
     if (!settings) {
       settings = {
-        dpi: 1.0,
-        fps: 60,
-        lowParticles: false,
-        iconStyle: '3d'
+        fpsMode: 'native',
+        dpi: 1,
+        dartlingAimMode: 'cursor',
+        joystickVisible: true,
+        sfxVolume: 85,
+        bgmVolume: 45,
+        iconStyle: '3d',
+        lowParticles: false
       };
       try {
         localStorage.setItem(SETTINGS_KEY_V11, JSON.stringify(settings));
       } catch (e) {}
     }
+    return settings;
+  }
 
+  function applySettings(settings, saveToStorage = true) {
+    if (!settings) return;
+
+    // 1. Frame Rate Limit Mode (native vs 2x vs 144 vs unlimited)
+    const fps = settings.fpsMode || 'native';
+    if (typeof fpsMode !== 'undefined') {
+      fpsMode = fps;
+    }
+    if (typeof recalculateTargetFPS === 'function') {
+      recalculateTargetFPS();
+    }
+
+    document.querySelectorAll('.fps-opt-btn').forEach(b => {
+      const bFps = b.getAttribute('data-fps');
+      if (bFps === fps) {
+        b.className = 'fps-opt-btn py-1.5 px-2.5 rounded-xl btd-btn-blue font-btd-sm text-xs text-white cursor-pointer';
+      } else {
+        b.className = 'fps-opt-btn py-1.5 px-2.5 rounded-xl bg-stone-800 border-2 border-black font-btd-sm text-xs text-amber-100 cursor-pointer';
+      }
+    });
+
+    // 2. Retina Hi-DPI Scale (1x STD vs 2x CRISP)
+    const dpi = parseInt(settings.dpi, 10) === 2 ? 2 : 1;
     if (typeof renderer !== 'undefined' && renderer && typeof renderer.setPixelRatio === 'function') {
-      renderer.setPixelRatio(settings.dpi || 1.0);
+      renderer.setPixelRatio(dpi === 2 ? Math.min(window.devicePixelRatio || 1, 2) : 1);
+    }
+    document.querySelectorAll('.dpi-opt-btn').forEach(b => {
+      const bDpi = parseInt(b.getAttribute('data-dpi'), 10) || 1;
+      if (bDpi === dpi) {
+        b.className = 'dpi-opt-btn py-1.5 px-2 rounded-xl btd-btn-blue font-btd-sm text-[11px] text-white cursor-pointer';
+      } else {
+        b.className = 'dpi-opt-btn py-1.5 px-2 rounded-xl bg-stone-800 border-2 border-black font-btd-sm text-[11px] text-amber-100 cursor-pointer';
+      }
+    });
+
+    // 3. Dartling / Touch Controls
+    if (typeof gameState !== 'undefined' && gameState) {
+      if (settings.dartlingAimMode) gameState.dartlingAimMode = settings.dartlingAimMode;
+      if (typeof settings.joystickVisible === 'boolean') gameState.joystickVisible = settings.joystickVisible;
+    }
+    const dartBtn = document.getElementById('btn-toggle-dartling-aim');
+    if (dartBtn && settings.dartlingAimMode) {
+      dartBtn.textContent = settings.dartlingAimMode === 'cursor' ? 'AIM: CURSOR' : 'AIM: HEADING';
+    }
+
+    const joyBtn = document.getElementById('btn-toggle-joy-vis');
+    if (joyBtn && typeof settings.joystickVisible === 'boolean') {
+      joyBtn.textContent = settings.joystickVisible ? 'JOYSTICK: SHOW' : 'JOYSTICK: HIDE';
+      const joyEl = document.getElementById('virtual-joystick-zone');
+      if (joyEl) {
+        if (!settings.joystickVisible) joyEl.classList.add('hidden');
+        else joyEl.classList.remove('hidden');
+      }
+    }
+
+    // 4. SFX & BGM Volume Sliders
+    if (typeof settings.sfxVolume === 'number') {
+      const sfxSlider = document.getElementById('slider-sfx-vol');
+      if (sfxSlider) {
+        sfxSlider.value = settings.sfxVolume;
+        const lbl = document.getElementById('sfx-vol-label');
+        if (lbl) lbl.textContent = `${settings.sfxVolume}%`;
+      }
+      if (typeof soundFX !== 'undefined') soundFX.sfxVolume = settings.sfxVolume / 100;
+    }
+
+    if (typeof settings.bgmVolume === 'number') {
+      const bgmSlider = document.getElementById('slider-bgm-vol');
+      if (bgmSlider) {
+        bgmSlider.value = settings.bgmVolume;
+        const lbl = document.getElementById('bgm-vol-label');
+        if (lbl) lbl.textContent = `${settings.bgmVolume}%`;
+      }
+      if (typeof soundFX !== 'undefined') soundFX.bgmVolume = settings.bgmVolume / 100;
+    }
+
+    if (saveToStorage) {
+      try {
+        localStorage.setItem(SETTINGS_KEY_V11, JSON.stringify(settings));
+      } catch (e) {}
+    }
+  }
+
+  function syncSettingsModalUI() {
+    const s = getStoredSettings();
+    applySettings(s, false);
+  }
+
+  function hookSettingsModalListeners() {
+    const settingsModal = document.getElementById('settings-modal');
+    if (!settingsModal || settingsModal.dataset.syncHooked) return;
+    settingsModal.dataset.syncHooked = 'true';
+
+    // Hook FPS buttons
+    document.querySelectorAll('.fps-opt-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const fps = btn.getAttribute('data-fps') || 'native';
+        const s = getStoredSettings();
+        s.fpsMode = fps;
+        applySettings(s, true);
+      });
+    });
+
+    // Hook DPI buttons
+    document.querySelectorAll('.dpi-opt-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const dpi = parseInt(btn.getAttribute('data-dpi'), 10) || 1;
+        const s = getStoredSettings();
+        s.dpi = dpi;
+        applySettings(s, true);
+      });
+    });
+
+    // Hook Dartling Aim
+    const dartBtn = document.getElementById('btn-toggle-dartling-aim');
+    if (dartBtn) {
+      dartBtn.addEventListener('click', () => {
+        const s = getStoredSettings();
+        s.dartlingAimMode = s.dartlingAimMode === 'cursor' ? 'heading' : 'cursor';
+        applySettings(s, true);
+      });
+    }
+
+    // Hook Joystick
+    const joyBtn = document.getElementById('btn-toggle-joy-vis');
+    if (joyBtn) {
+      joyBtn.addEventListener('click', () => {
+        const s = getStoredSettings();
+        s.joystickVisible = !s.joystickVisible;
+        applySettings(s, true);
+      });
+    }
+
+    // Hook SFX Slider
+    const sfxSlider = document.getElementById('slider-sfx-vol');
+    if (sfxSlider) {
+      sfxSlider.addEventListener('input', (e) => {
+        const s = getStoredSettings();
+        s.sfxVolume = parseInt(e.target.value, 10);
+        applySettings(s, true);
+      });
+    }
+
+    // Hook BGM Slider
+    const bgmSlider = document.getElementById('slider-bgm-vol');
+    if (bgmSlider) {
+      bgmSlider.addEventListener('input', (e) => {
+        const s = getStoredSettings();
+        s.bgmVolume = parseInt(e.target.value, 10);
+        applySettings(s, true);
+      });
+    }
+
+    // Observer to re-sync whenever opened
+    const obs = new MutationObserver(() => {
+      if (!settingsModal.classList.contains('hidden') && settingsModal.style.display !== 'none') {
+        syncSettingsModalUI();
+      }
+    });
+    obs.observe(settingsModal, { attributes: true, attributeFilter: ['class', 'style'] });
+  }
+
+  function initSettingsPersistenceAndOptimizer() {
+    const settings = getStoredSettings();
+    applySettings(settings, false);
+    hookSettingsModalListeners();
+
+    // Hook Pause & Settings modal openers
+    const startSettingsBtn = document.getElementById('btn-settings-start');
+    if (startSettingsBtn) {
+      startSettingsBtn.addEventListener('click', () => setTimeout(syncSettingsModalUI, 50));
+    }
+    const toggleSettingsBtn = document.getElementById('btn-settings-toggle');
+    if (toggleSettingsBtn) {
+      toggleSettingsBtn.addEventListener('click', () => setTimeout(syncSettingsModalUI, 50));
     }
 
     // Rolling FPS monitor (< 28 FPS for 3s triggers auto-optimizer)
@@ -2129,19 +2373,13 @@
 
   function triggerLowFpsAutoOptimize() {
     hasAutoOptimized = true;
-    if (typeof renderer !== 'undefined' && renderer && typeof renderer.setPixelRatio === 'function') {
-      renderer.setPixelRatio(1.0);
-    }
-    if (typeof targetFPS !== 'undefined') {
-      targetFPS = 60;
-    }
+    const s = getStoredSettings();
+    s.dpi = 1;
+    s.fpsMode = 'native';
+    s.lowParticles = true;
+    applySettings(s, true);
 
     showAutoOptimizerToast("⚡ Auto-Optimized to 1x DPI & 1x Refresh Rate for smooth FPS");
-
-    try {
-      const s = { dpi: 1.0, fps: 60, lowParticles: true };
-      localStorage.setItem(SETTINGS_KEY_V11, JSON.stringify(s));
-    } catch (e) {}
   }
 
   function showAutoOptimizerToast(msg) {
@@ -2368,6 +2606,7 @@
 
     polyfillAssetForge();
     patchPersistence();
+    patchUpgradeSystemSafety();
     setupModalObserver();
     runGlobalEmojiReplacement();
     renderMainMenuHeroPrices();
@@ -2377,6 +2616,18 @@
     setupEscapeKeyHandler();
     setupMatrixGreenTextObserver();
     initBenjaminWirelessHack();
+
+    ensureSquadInitialized();
+    setInterval(ensureSquadInitialized, 500);
+
+    const btnStart = document.getElementById('btn-start-run');
+    if (btnStart) {
+      btnStart.addEventListener('click', () => {
+        ensureSquadInitialized();
+        setTimeout(ensureSquadInitialized, 50);
+        setTimeout(ensureSquadInitialized, 200);
+      });
+    }
 
     // Hook store & shop save actions
     const btnBuyHero = document.getElementById('btn-confirm-unlock');
@@ -2396,7 +2647,33 @@
     }
 
     // Hash Test Automation Hooks
-    if (location.hash === '#test-mobile-menu') {
+    if (location.hash === '#test-real-levelup') {
+      setTimeout(() => {
+        const btnStartRun = document.getElementById('btn-start-run');
+        if (btnStartRun) btnStartRun.click();
+
+        setTimeout(() => {
+          ensureSquadInitialized();
+          if (typeof gameState !== 'undefined' && gameState && gameState.hero) {
+            gameState.hero.hp = 99999;
+            gameState.hero.xp = gameState.hero.xpToNext + 10;
+          }
+          if (typeof openLevelUpModal === 'function') {
+            openLevelUpModal();
+          }
+          window.__REAL_LEVELUP_TEST_READY = true;
+        }, 300);
+      }, 250);
+    } else if (location.hash === '#test-settings') {
+      setTimeout(() => {
+        const btnSettings = document.getElementById('btn-settings-start') || document.getElementById('btn-settings-toggle');
+        if (btnSettings) btnSettings.click();
+        setTimeout(() => {
+          syncSettingsModalUI();
+          window.__SETTINGS_TEST_READY = true;
+        }, 200);
+      }, 250);
+    } else if (location.hash === '#test-mobile-menu') {
       setTimeout(() => {
         runGlobalEmojiReplacement();
         renderMainMenuHeroPrices();
