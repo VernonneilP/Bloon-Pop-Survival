@@ -662,89 +662,16 @@
   transition: opacity 0.18s ease-out;
 }
 
-
-/* ========================================================================
-   UPDATE 12.3: MOBILE TOP HUD FITTING (ZERO RIGHT-EDGE CLIPPING) +
-   GREEN SHIELD ICON ON HERO FEET HP BAR + CRISP DAMAGE POPUP NUMBERS
-   ======================================================================== */
-.dmg-popup {
-  font-family: 'Luckiest Guy', cursive !important;
-  -webkit-text-stroke: 1.5px #000000 !important;
-  text-shadow: -1.5px -1.5px 0 #000, 1.5px -1.5px 0 #000, -1.5px 1.5px 0 #000, 1.5px 1.5px 0 #000, 0 2px 3px rgba(0,0,0,0.85) !important;
-}
-
-#hero-feet-shield-icon {
-  width: 18px;
-  height: 18px;
-  border-radius: 5px;
-  background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%);
-  border: 2px solid #052e16;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.6);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-  font-weight: 900;
-  font-size: 11px;
-  line-height: 1;
-  margin-left: 3px;
-}
-
+#hero-feet-shield-icon { width: 18px; height: 18px; border-radius: 5px; background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%); border: 2px solid #052e16; box-shadow: 0 2px 4px rgba(0,0,0,0.6); display: inline-flex; align-items: center; justify-content: center; color: #ffffff; font-weight: 900; font-size: 11px; line-height: 1; margin-left: 3px; }
 @media (max-width: 640px) {
-  header.fixed.top-0 {
-    padding-left: 6px !important;
-    padding-right: 6px !important;
-    padding-top: 6px !important;
-  }
-  header.fixed.top-0 > div:first-child {
-    gap: 4px !important;
-  }
-  /* Compact Level badge & XP bar on narrow mobile so right buttons never clip */
-  header.fixed.top-0 .w-12.h-12 {
-    width: 38px !important;
-    height: 38px !important;
-    border-radius: 10px !important;
-  }
-  #hud-level {
-    font-size: 1.05rem !important;
-  }
-  #hud-rank-title {
-    font-size: 0.65rem !important;
-    max-width: 88px !important;
-  }
-  #hud-xp-text {
-    font-size: 0.62rem !important;
-  }
-  header.fixed.top-0 .min-w-\[105px\] {
-    min-width: 68px !important;
-  }
-  /* Compact POPS pill & 3 top-right action buttons on mobile */
-  header.fixed.top-0 .min-w-\[104px\] {
-    min-width: 68px !important;
-    padding: 4px 7px !important;
-    border-radius: 12px !important;
-  }
-  #hud-pops {
-    font-size: 0.85rem !important;
-  }
-  #btn-hud-build,
-  #btn-settings-toggle,
-  #btn-audio-toggle {
-    width: 34px !important;
-    height: 34px !important;
-    min-width: 34px !important;
-    border-radius: 10px !important;
-    font-size: 0.95rem !important;
-  }
-  /* Compact MOAB Boss Banner on mobile portrait */
-  #moab-boss-banner {
-    padding: 4px 8px !important;
-  }
-  #moab-boss-title {
-    font-size: 0.72rem !important;
-    max-width: 210px !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
+  header.fixed.top-0 { padding-left: 6px !important; padding-right: 6px !important; padding-top: 6px !important; }
+  header.fixed.top-0 > div:first-child { gap: 4px !important; }
+  header.fixed.top-0 .w-12.h-12 { width: 38px !important; height: 38px !important; border-radius: 10px !important; }
+  #hud-level { font-size: 1.05rem !important; }
+  #hud-rank-title { font-size: 0.65rem !important; max-width: 88px !important; }
+  #hud-xp-text { font-size: 0.62rem !important; }
+  header.fixed.top-0 .min-w-\[105px\] { min-width: 68px !important; }
+  header.fixed.top-0 .min-w-\[104px\] { min-width: 68px !important; padding: 4px 7px !important; border-radius: 12px !important; }
+  #hud-pops { font-size: 0.85rem !important; }
+  #btn-hud-build, #btn-settings-toggle, #btn-audio-toggle { width: 34px !important; height: 34px !important; min-width: 34px !important; border-radius: 10px !important; font-size: 0.95rem !important; }
 }
