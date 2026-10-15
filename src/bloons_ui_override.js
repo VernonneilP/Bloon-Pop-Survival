@@ -794,7 +794,7 @@
       const canvas = document.createElement('canvas');
       canvas.width = 240;
       canvas.height = 220;
-      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true }); renderer.__isOffscreenThumb = true;
       renderer.setSize(240, 220);
       renderer.setClearColor(0x000000, 0);
 
@@ -874,7 +874,7 @@
       const canvas = document.createElement('canvas');
       canvas.width = 120;
       canvas.height = 120;
-      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true }); renderer.__isOffscreenThumb = true;
       renderer.setSize(120, 120);
       renderer.setClearColor(0x000000, 0);
 
@@ -954,7 +954,7 @@
       const canvas = document.createElement('canvas');
       canvas.width = 160;
       canvas.height = 160;
-      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true }); renderer.__isOffscreenThumb = true;
       renderer.setSize(160, 160);
       renderer.setClearColor(0x000000, 0);
 
@@ -1468,33 +1468,24 @@
 
   // Update Hero & Stage Cards on Title Screen with 3D Snapshots
   function polishTitleScreenCards() {
-    // Stage select cards
-    const stageMeadow = document.getElementById('stage-card-meadow');
-    if (stageMeadow) {
-      const icon = stageMeadow.querySelector('div');
-      if (icon) icon.innerHTML = BADGE_3D_SVGS['🌻'];
-    }
-    const stageFrozen = document.getElementById('stage-card-frozen');
-    if (stageFrozen) {
-      const icon = stageFrozen.querySelector('div');
-      if (icon) icon.innerHTML = BADGE_3D_SVGS['❄️'];
-    }
-    const stageCastle = document.getElementById('stage-card-castle');
-    if (stageCastle) {
-      const icon = stageCastle.querySelector('div');
-      if (icon) icon.innerHTML = BADGE_3D_SVGS['🏰'];
-    }
+    const stageIcons = { meadow: '🌻', frozen: '❄️', castle: '🏰' };
+    document.querySelectorAll('.map-card').forEach(card => {
+      const mId = card.getAttribute('data-map');
+      const iconBox = card.querySelector('.w-11.h-11') || card.querySelector('div');
+      if (iconBox && mId && BADGE_3D_SVGS[stageIcons[mId]]) {
+        iconBox.innerHTML = BADGE_3D_SVGS[stageIcons[mId]];
+      }
+    });
 
-    // Hero select cards
-    ['quincy', 'gwendolin', 'obyn', 'sauda', 'benjamin', 'supermonkey'].forEach(hId => {
-      const card = document.getElementById(`hero-card-${hId}`);
-      if (card) {
-        const iconDiv = card.querySelector('.w-11.h-11');
-        if (iconDiv) {
-          const snap = safeGet3DModelSnapshot(hId);
-          if (snap) {
-            iconDiv.innerHTML = `<img src="${snap}" alt="${hId}" class="w-full h-full object-contain filter drop-shadow(0 2px 4px rgba(0,0,0,0.5))">`;
-          }
+    document.querySelectorAll('.hero-card').forEach(card => {
+      const hId = card.getAttribute('data-hero');
+      if (!hId) return;
+      const iconDiv = card.querySelector('.hero-3d-portrait') || card.querySelector('.w-11.h-11');
+      if (iconDiv) {
+        iconDiv.className = 'hero-3d-portrait';
+        const snap = safeGet3DHeadSnapshot(hId) || safeGet3DModelSnapshot(hId);
+        if (snap) {
+          iconDiv.innerHTML = `<img src="${snap}" alt="${hId}" class="w-full h-full object-contain">`;
         }
       }
     });
@@ -1794,53 +1785,63 @@
       silas: 3000
     };
 
+    const EXTRA_HERO_META = {
+      rosalia: { role: 'TINKERER • JETPACK', roleBg: 'bg-orange-600', color: 'text-orange-300', desc: 'Jetpack tinkerer firing explosive cluster grenades & laser blasts!', skill: 'CLUSTER GRENADES', price: 3000 },
+      corvus:  { role: 'SPIRIT WALKER', roleBg: 'bg-indigo-600', color: 'text-indigo-300', desc: 'Haunted spirit master! Harvests bloon souls & drains layers.', skill: 'SOUL HARVEST', price: 3500 },
+      geraldo: { role: 'MYSTIC SHOPKEEPER', roleBg: 'bg-amber-700', color: 'text-amber-300', desc: 'Deploys spiked totems, arcane turrets & generates bonus cash!', skill: 'FERTILITY TOTEM', price: 4500 },
+      silas:   { role: 'FROST ARCHER', roleBg: 'bg-sky-600', color: 'text-sky-300', desc: 'Glacial ice bow! Freezes bloon swarms & shatters frozen targets.', skill: 'GLACIAL STORM', price: 3000 }
+    };
+
+    if (typeof HERO_UNLOCK_PRICES !== 'undefined') {
+      Object.keys(EXTRA_HERO_META).forEach(k => {
+        HERO_UNLOCK_PRICES[k] = EXTRA_HERO_META[k].price;
+      });
+    }
+
     const unlocked = (typeof persistentStats !== 'undefined' && persistentStats.unlockedHeroes)
       ? persistentStats.unlockedHeroes
       : ['quincy', 'gwendolin'];
 
     const currentSelected = (typeof selectedHeroId !== 'undefined') ? selectedHeroId : 'quincy';
 
-    // Inject missing new hero cards if not in DOM
     const firstCard = document.querySelector('.hero-card');
     const heroGrid = firstCard ? firstCard.parentElement : null;
     if (heroGrid) {
+      heroGrid.className = 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 w-full mb-3.5';
       ['rosalia', 'corvus', 'geraldo', 'silas'].forEach(newH => {
+        const meta = EXTRA_HERO_META[newH];
         if (!heroGrid.querySelector(`.hero-card[data-hero="${newH}"]`)) {
           const card = document.createElement('div');
           card.id = `hero-card-${newH}`;
-          card.className = 'hero-card relative p-2 sm:p-2.5 rounded-2xl flex flex-col items-center justify-between cursor-pointer transition-all bg-gradient-to-b from-stone-800 to-stone-900 border-2 border-stone-700/80 hover:border-yellow-400 hover:scale-[1.03] active:scale-95 shadow-lg select-none';
+          card.className = 'hero-card btd-panel rounded-2xl p-2.5 flex flex-col items-center text-center cursor-pointer';
           card.setAttribute('data-hero', newH);
           card.innerHTML = `
-            <div class="hero-price-tag"></div>
-            <div class="hero-3d-portrait w-12 h-12 sm:w-14 sm:h-14 my-1 flex items-center justify-center"></div>
-            <div class="font-btd text-xs text-white uppercase tracking-wider text-center">${newH}</div>
+            <span class="hero-price-tag px-2 py-0.5 rounded-full ${meta.roleBg} border border-black text-[9px] font-black text-white mb-1">🔒 ${meta.price.toLocaleString()}</span>
+            <div class="hero-3d-portrait"></div>
+            <h3 class="font-btd text-base ${meta.color}">${newH.toUpperCase()}</h3>
+            <p class="text-[10px] font-bold text-amber-100/90 mt-0.5 flex-1">${meta.desc}</p>
+            <div class="mt-1.5 w-full bg-black/40 rounded-lg px-1.5 py-0.5 text-[9px] font-extrabold ${meta.color} border border-white/10">
+              ${meta.skill}
+            </div>
           `;
           heroGrid.appendChild(card);
 
           card.addEventListener('click', () => {
-            const isUnl = (typeof persistentStats !== 'undefined' && persistentStats.unlockedHeroes && persistentStats.unlockedHeroes.includes(newH));
-            if (isUnl) {
-              if (typeof selectedHeroId !== 'undefined') selectedHeroId = newH;
-              if (typeof gameState !== 'undefined') gameState.heroId = newH;
-              saveMasterState();
-              renderMainMenuHeroPrices();
-            } else {
-              // Open unlock prompt
-              const cost = heroPrices[newH] || 3000;
-              const modalUnlock = document.getElementById('modal-hero-unlock');
-              if (modalUnlock) {
-                const nameEl = document.getElementById('unlock-hero-name');
-                const costEl = document.getElementById('unlock-hero-cost');
-                const balEl = document.getElementById('unlock-user-balance');
-                if (nameEl) nameEl.textContent = newH.toUpperCase();
-                if (costEl) costEl.textContent = `$${cost.toLocaleString()}`;
-                if (balEl && typeof persistentStats !== 'undefined') balEl.textContent = `$${(persistentStats.monkeyMoney || 0).toLocaleString()}`;
-                modalUnlock.dataset.pendingHero = newH;
-                modalUnlock.dataset.pendingCost = cost;
-                modalUnlock.classList.remove('hidden');
-                modalUnlock.classList.add('flex');
+            if (typeof soundFX !== 'undefined') soundFX.init();
+            if (!persistentStats.unlockedHeroes) persistentStats.unlockedHeroes = ['quincy', 'gwendolin'];
+            const isUnl = persistentStats.unlockedHeroes.includes(newH);
+            if (!isUnl) {
+              if (typeof openHeroUnlockModal === 'function') {
+                openHeroUnlockModal(newH, meta.price);
               }
+              return;
             }
+            document.querySelectorAll('.hero-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            if (typeof selectedHeroId !== 'undefined') selectedHeroId = newH;
+            if (typeof rebuildHeroMesh === 'function') rebuildHeroMesh(newH);
+            saveMasterState();
+            renderMainMenuHeroPrices();
           });
         }
       });
@@ -1857,7 +1858,6 @@
       const isUnlocked = unlocked.includes(hid);
       const isSelected = (hid === currentSelected);
 
-      // 1. Price Tag / Unlocked Tag Badge
       let tagEl = card.querySelector('.hero-price-tag') || card.querySelector('.hero-unlocked-tag') || card.querySelector('.px-2');
       if (!tagEl) {
         tagEl = document.createElement('div');
@@ -1875,12 +1875,11 @@
         }
       } else {
         tagEl.className = 'hero-price-tag';
-        tagEl.innerHTML = `<span class="badge-3d-icon w-3 h-3">${get3DIconSVG('lock')}</span> $${price.toLocaleString()}`;
+        tagEl.innerHTML = `<span class="badge-3d-icon w-3 h-3">${get3DIconSVG('lock')}</span> ${price.toLocaleString()}`;
         card.classList.add('opacity-75');
         card.classList.remove('selected');
       }
 
-      // 2. Large 3D Hero Portrait (Auto-fitted without giant eyeball zoom)
       let portraitContainer = card.querySelector('.hero-3d-portrait');
       if (!portraitContainer) {
         const oldBox = card.querySelector('div.w-11') || card.querySelector('div.text-2xl');
@@ -1897,7 +1896,6 @@
         }
       }
 
-      // 3. Hero Star Mastery Badge (★1 to ★10)
       if (isUnlocked && typeof persistentStats !== 'undefined') {
         const starLevel = (persistentStats.heroMastery && persistentStats.heroMastery[hid]) || 1;
         let starBadge = card.querySelector('.hero-star-badge');
@@ -1916,7 +1914,7 @@
             starBtn.className = 'btn-star-upgrade';
             card.appendChild(starBtn);
           }
-          starBtn.textContent = `★ Upgrade ($${upgradeCost})`;
+          starBtn.textContent = `★ Upgrade (${upgradeCost})`;
           starBtn.onclick = (e) => {
             e.stopPropagation();
             if ((persistentStats.monkeyMoney || 0) >= upgradeCost) {
@@ -2058,7 +2056,6 @@
   }
 
   function patchUpgradeSystemSafety() {
-    // Intercept getAvailableUpgradeCards so it never throws on missing companion/skill state
     if (typeof getAvailableUpgradeCards === 'function') {
       const _origGetAvailableUpgradeCards = getAvailableUpgradeCards;
       getAvailableUpgradeCards = function(state) {
@@ -2074,12 +2071,26 @@
       };
     }
 
-    // Intercept openLevelUpModal so squad is guaranteed initialized before level-up runs
     if (typeof openLevelUpModal === 'function') {
-      const _origOpenLevelUpModal = openLevelUpModal;
       openLevelUpModal = function() {
         ensureSquadInitialized();
-        return _origOpenLevelUpModal.apply(this, arguments);
+        if (typeof gameState !== 'undefined') gameState.paused = true;
+        if (typeof soundFX !== 'undefined' && soundFX.playLevelUpFanfare) soundFX.playLevelUpFanfare();
+        const modal = document.getElementById('levelup-modal');
+        if (!modal) return;
+        const avail = (typeof getAvailableUpgradeCards === 'function') ? getAvailableUpgradeCards(gameState) : [];
+        const heroCards = avail.filter(c => c.id && c.id.startsWith('hero_'));
+        const picked = [];
+        if (heroCards.length > 0) {
+          picked.push(heroCards[Math.floor(Math.random() * heroCards.length)]);
+        }
+        const remaining = avail.filter(c => !picked.includes(c)).sort(() => Math.random() - 0.5);
+        while (picked.length < 3 && remaining.length > 0) {
+          picked.push(remaining.pop());
+        }
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        applyBloonsBlitzUpgradeCards(modal, picked);
       };
     }
   }
@@ -2258,8 +2269,8 @@
     // First-launch default: 1x Native V-Sync & 1x STD DPI
     if (!settings) {
       settings = {
-        fpsMode: 'native',
-        dpi: 1,
+        fpsMode: '2x',
+        dpi: 2,
         dartlingAimMode: 'cursor',
         joystickVisible: true,
         sfxVolume: 85,
@@ -2687,14 +2698,14 @@
           gameState.hero.fireRate = (gameState.hero.fireRate || 1.0) * rateMult;
         }
 
-        // Periodic special bloon spawner (every 12s)
-        if (!gameState.paused && !gameState.gameOver && typeof spawnBloon === 'function') {
-          if (Math.random() < 0.20) {
+        // Periodic special bloon spawner (strictly Wave 16+ around hero perimeter)
+        if (!gameState.paused && !gameState.inStartMenu && !gameState.gameOver && (gameState.wave || 1) >= 16 && typeof spawnBloon === 'function') {
+          if (Math.random() < 0.15) {
             const specials = ['GLASS', 'DYNAMITE', 'DIAMOND', 'GOLDEN'];
             const chosen = specials[Math.floor(Math.random() * specials.length)];
             const a = Math.random() * Math.PI * 2;
-            const r = 9 + Math.random() * 6;
-            spawnBloon(chosen, Math.cos(a) * r, Math.sin(a) * r);
+            const r = 22 + Math.random() * 5;
+            spawnBloon(chosen, (gameState.hero.x || 0) + Math.cos(a) * r, (gameState.hero.z || 0) + Math.sin(a) * r);
           }
         }
       }
@@ -3125,7 +3136,7 @@
     if (typeof THREE !== 'undefined' && THREE.WebGLRenderer) {
       const _origRender = THREE.WebGLRenderer.prototype.render;
       THREE.WebGLRenderer.prototype.render = function(s, c) {
-        if (s && s.isScene) {
+        if (!this.__isOffscreenThumb && s && s.isScene && (typeof scene === 'undefined' || s === scene)) {
           try {
             ensureAllSquadMeshes(s);
             const now = performance.now();
@@ -3141,7 +3152,12 @@
     }
 
     // Post-process Bottom-Left Squad HUD & Ability Icon
+    let _lastSquadHudSig = '';
     function postProcessSquadHUD() {
+      if (typeof gameState === 'undefined' || !gameState) return;
+      const sig = (gameState.hero ? gameState.hero.id : '') + '|' + (gameState.recruitedOrder || []).map(k => k + ':' + (gameState.squad && gameState.squad[k] ? gameState.squad[k].level : 0)).join(',');
+      if (sig === _lastSquadHudSig) return;
+      _lastSquadHudSig = sig;
       if (typeof gameState === 'undefined' || !gameState) return;
 
       // 1. Squad Slots (active-slot-0, active-slot-1, active-slot-2)
@@ -3215,7 +3231,7 @@
     if (typeof THREE !== 'undefined' && THREE.WebGLRenderer && !THREE.WebGLRenderer.prototype.__origRender) {
       THREE.WebGLRenderer.prototype.__origRender = THREE.WebGLRenderer.prototype.render;
       THREE.WebGLRenderer.prototype.render = function(s, c) {
-        if (s && s.isScene && !window.__ACTIVE_GAME_SCENE__) {
+        if (!this.__isOffscreenThumb && s && s.isScene && !window.__ACTIVE_GAME_SCENE__) {
           if (s.background && s.background.isColor) {
             window.__ACTIVE_GAME_SCENE__ = s;
             window.__ACTIVE_GAME_CAMERA__ = c;
@@ -3242,6 +3258,26 @@
     ensureSquadInitialized();
     setInterval(ensureSquadInitialized, 500);
 
+    const btnDevReset = document.getElementById('btn-dev-reset');
+    if (btnDevReset) {
+      btnDevReset.addEventListener('click', (e) => {
+        e.stopPropagation();
+        window.__INTERNAL_MASTER_SAVE = true;
+        localStorage.removeItem(MASTER_SAVE_KEY_V11);
+        localStorage.removeItem(MASTER_SAVE_KEY);
+        localStorage.removeItem(BUILD10_SAVE_KEY);
+        localStorage.removeItem(SETTINGS_KEY_V11);
+        if (typeof persistentStats !== 'undefined') {
+          persistentStats.monkeyMoney = 0;
+          persistentStats.lifetimePops = 0;
+          persistentStats.unlockedHeroes = ['quincy', 'gwendolin'];
+          persistentStats.upgrades = { hp: 0, speed: 0, magnet: 0, damage: 0 };
+          persistentStats.heroMastery = {};
+          persistentStats.companionMastery = {};
+        }
+        location.reload();
+      }, true);
+    }
     const btnStart = document.getElementById('btn-start-run');
     if (btnStart) {
       btnStart.addEventListener('click', () => {

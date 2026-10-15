@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Bloons Blitz 3D — Monkey Hero Survivor</title>
+  <title>Bloons Blitz 3D (Build 12) — Monkey Hero Survivor</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Three.js r128 CDN -->
@@ -550,35 +550,6 @@
     </div>
   </div>
 
-    <!-- Custom In-Game Hero Unlock Modal (Eliminates Browser Alert Popups) -->
-  <div id="modal-hero-unlock" class="fixed inset-0 z-[80] bg-black/85 backdrop-blur-md hidden items-center justify-center p-4 select-none">
-    <div class="btd-panel rounded-3xl p-6 sm:p-8 max-w-sm w-full flex flex-col items-center text-center border-4 border-[#2a1306] shadow-2xl animate-[fadeIn_0.2s_ease-out]">
-      <div id="unlock-hero-icon" class="w-20 h-20 rounded-2xl bg-black/50 border-3 border-amber-400/60 p-2 flex items-center justify-center mb-3"></div>
-      <h2 id="unlock-hero-title" class="font-btd text-2xl text-yellow-300 mb-1">UNLOCK HERO</h2>
-      <p id="unlock-hero-desc" class="text-xs font-bold text-amber-100/90 mb-4">Recruit this powerful Monkey Hero permanently for your road trip team!</p>
-
-      <div class="w-full bg-black/40 rounded-2xl p-3.5 border-2 border-black/60 mb-5 flex flex-col gap-2">
-        <div class="flex justify-between text-xs font-extrabold text-amber-200">
-          <span>REQUIRED COST:</span>
-          <span id="unlock-hero-cost" class="font-btd text-yellow-300 text-sm">$0 MM</span>
-        </div>
-        <div class="flex justify-between text-xs font-extrabold text-amber-200">
-          <span>YOUR MONKEY MONEY:</span>
-          <span id="unlock-hero-balance" class="font-btd text-cyan-300 text-sm">$0 MM</span>
-        </div>
-      </div>
-
-      <div class="w-full flex gap-3">
-        <button id="btn-cancel-unlock" class="flex-1 py-3 rounded-2xl btd-panel font-btd text-sm text-stone-300 hover:text-white cursor-pointer transition hover:scale-105 active:scale-95">
-          CANCEL
-        </button>
-        <button id="btn-confirm-unlock" class="flex-1 py-3 rounded-2xl btd-btn-green font-btd text-sm text-white cursor-pointer transition hover:scale-105 active:scale-95 hover:scale-105 active:scale-95 transition-all duration-150 cursor-pointer shadow-lg">
-          UNLOCK NOW!
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- Permanent Monkey Knowledge Shop Modal -->
   <div id="shop-modal" class="fixed inset-0 z-[60] bg-black/80 backdrop-blur-md hidden items-center justify-center p-4 overflow-y-auto">
     <div class="btd-panel rounded-3xl p-5 sm:p-6 max-w-2xl w-full flex flex-col items-center border-4 border-black my-auto">
@@ -694,7 +665,10 @@
           <button data-wave="10" class="dev-wave-btn flex-1 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 border border-black font-btd-sm text-[10px] text-white cursor-pointer">W10</button>
           <button data-wave="20" class="dev-wave-btn flex-1 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 border border-black font-btd-sm text-[10px] text-white cursor-pointer">W20</button>
           <button data-wave="30" class="dev-wave-btn flex-1 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 border border-black font-btd-sm text-[10px] text-white cursor-pointer">W30</button>
-          <button data-wave="40" class="dev-wave-btn flex-1 py-1 rounded-lg bg-purple-800 hover:bg-purple-700 border border-black font-btd-sm text-[10px] text-yellow-200 cursor-pointer">W40 (B.A.D.)</button>
+          <button data-wave="40" class="dev-wave-btn flex-1 py-1 rounded-lg bg-purple-800 hover:bg-purple-700 border border-black font-btd-sm text-[10px] text-yellow-200 cursor-pointer">W40</button>
+          <button data-wave="60" class="dev-wave-btn flex-1 py-1 rounded-lg bg-sky-800 hover:bg-sky-700 border border-black font-btd-sm text-[10px] text-cyan-200 cursor-pointer">W60</button>
+          <button data-wave="80" class="dev-wave-btn flex-1 py-1 rounded-lg bg-amber-800 hover:bg-amber-700 border border-black font-btd-sm text-[10px] text-amber-200 cursor-pointer">W80</button>
+          <button data-wave="100" class="dev-wave-btn flex-1 py-1 rounded-lg bg-rose-900 hover:bg-rose-800 border border-black font-btd-sm text-[10px] text-rose-200 cursor-pointer">W100</button>
         </div>
       </div>
 
@@ -3644,7 +3618,7 @@
     bloonGlintInstancedMesh.frustumCulled = false;
     // scene.add(bloonGlintInstancedMesh);
 
-    const camoBadgeGeo = new THREE.DodecahedronGeometry(0.46, 0);
+    const camoBadgeGeo = new THREE.CircleGeometry(0.34, 12);
     camoBadgeGeo.scale(1.15, 0.65, 0.55);
     const camoBadgeMat = new THREE.MeshBasicMaterial({ color: 0x14532d, transparent: true, opacity: 0.78 });
     const camoInstancedMesh = new THREE.InstancedMesh(camoBadgeGeo, camoBadgeMat, MAX_BLOONS);
@@ -4631,7 +4605,8 @@
         return false;
       }
 
-      let remainingDmg = Math.max(1, Math.round(dmg));
+      const waveScale = (typeof window.__GET_WAVE_HP_MULT === 'function') ? window.__GET_WAVE_HP_MULT() : 1;
+      let remainingDmg = Math.max(0.2, dmg);
       const bx = bloonX[idx];
       const bz = bloonZ[idx];
 
@@ -4651,7 +4626,7 @@
             soundFX.playCeramicOrLead(affix === 3);
             updateBloonVisualLivery(idx);
           }
-          spawnFloatingText(bx, 1.1, bz, affix === 3 ? 'CLANG!' : (isCrit ? 'CRIT!' : 'POP!'), isCrit ? 'crit' : 'normal');
+          spawnFloatingText(bx, 1.1, bz, `${Math.max(1, Math.round(dmg))}${isCrit ? ' CRIT!' : ''}`, isCrit ? 'crit' : (affix === 3 ? 'lead' : 'normal'));
           return true;
         }
 
@@ -4680,7 +4655,8 @@
         soundFX.playPop(isCrit, def.id, gameState.popStreakCount);
         spawnComicPop(bx, 0.9, bz, 0xffffff, def.scale * 1.15);
 
-        if (def.children.length === 0 || Math.random() < 0.45 || def.blopType > 0) {
+        // Only drop Blop XP when a bloon fully pops (or 12% chance on upper layers) so Wave 40 Ceramics don't spam 15x free XP at Level 1!
+        if (def.children.length === 0 || Math.random() < 0.12) {
           spawnBlopOrb(bx, bz, def.xp, def.blopType);
         }
 
@@ -4689,8 +4665,8 @@
           const nextDef = BLOON_TYPES[nextType];
           const mult = affix === 3 ? 2 : 1;
           bloonTypeKey[idx] = nextType;
-          bloonHP[idx] = nextDef.hp * mult;
-          bloonMaxHP[idx] = nextDef.hp * mult;
+          bloonHP[idx] = nextDef.hp * mult * waveScale;
+          bloonMaxHP[idx] = nextDef.hp * mult * waveScale;
           bloonScale[idx] = nextDef.scale;
           bloonPopBounce[idx] = 0.48;
           updateBloonVisualLivery(idx);
@@ -4699,8 +4675,8 @@
           const firstDef = BLOON_TYPES[firstChild];
           const mult = affix === 3 ? 2 : 1;
           bloonTypeKey[idx] = firstChild;
-          bloonHP[idx] = firstDef.hp * mult;
-          bloonMaxHP[idx] = firstDef.hp * mult;
+          bloonHP[idx] = firstDef.hp * mult * waveScale;
+          bloonMaxHP[idx] = firstDef.hp * mult * waveScale;
           bloonScale[idx] = firstDef.scale;
           bloonPopBounce[idx] = 0.5;
           updateBloonVisualLivery(idx);
@@ -4733,7 +4709,7 @@
         }
       }
 
-      spawnFloatingText(bx, 1.1, bz, isCrit ? 'CRIT POP!' : 'POP!', isCrit ? 'crit' : 'normal');
+      spawnFloatingText(bx, 1.1, bz, `${Math.max(1, Math.round(dmg))}${isCrit ? '!' : ''}`, isCrit ? 'crit' : 'normal');
       return true;
     }
 
@@ -4848,7 +4824,10 @@
           });
         }
         spawnFloatingText(h.x, 2.0, h.z, 'LEAPING SWORD!', 'crit');
-      } else if (h.id === 'benjamin') {
+      } else if (['corvus', 'silas', 'rosalia', 'geraldo'].includes(h.id)) {
+          // Handled by Update 12 Bespoke Hero Attack Engine (Zero Quincy Arrow Cloning!)
+          h.fireCooldown = 1.0 / h.fireRate;
+        } else if (h.id === 'benjamin') {
         gameState.overclockTimer = 6.0;
         h.hp = Math.min(h.maxHp, h.hp + 25);
         spatialGrid.queryRadius(h.x, h.z, 16, queryBuffer);
@@ -5480,7 +5459,7 @@
         <div class="flex-1 flex flex-col text-left">
           <div class="flex items-center gap-2">
             <h3 class="font-btd text-xl text-yellow-300">${cfg.name}</h3>
-            <span class="px-2 py-0.5 rounded-full bg-purple-600/80 border border-black text-[10px] font-black text-white">LVL ${gameState.heroLevel}</span>
+            <span class="px-2 py-0.5 rounded-full bg-purple-600/80 border border-black text-[10px] font-black text-white">LVL ${h.level}</span>
           </div>
           <span class="text-xs font-bold text-amber-200 mb-1.5">${cfg.title}</span>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-stone-300">
@@ -5866,7 +5845,7 @@
             }
           });
         }
-      } else if (h.id === 'supermonkey') {
+      } else if (h.id === 'supermonkey' || h.id === 'rosalia') {
         if (ud.laserGoggles) {
           ud.laserGoggles.visible = h.weaponTier >= 1;
         }
@@ -7452,7 +7431,88 @@
       if (hzCalibrated && targetFPS > detectedMonitorHz + 5) {
         setTimeout(() => stepFrame(performance.now()), 1000 / targetFPS);
       } else {
-        requestAnimationFrame(stepFrame);
+        
+    window.__GAME = {
+      get scene() { return scene; },
+      get camera() { return camera; },
+      get renderer() { return renderer; },
+      get gameState() { return gameState; },
+      get persistentStats() { return persistentStats; },
+      get HERO_CONFIGS() { return HERO_CONFIGS; },
+      get HERO_UNLOCK_PRICES() { return HERO_UNLOCK_PRICES; },
+      get COMPANION_CATALOG() { return COMPANION_CATALOG; },
+      get BLOON_TYPES() { return BLOON_TYPES; },
+      get BLIMP_TYPES() { return BLIMP_TYPES; },
+      get STAGE_CONFIGS() { return STAGE_CONFIGS; },
+      get squadMeshes() { return squadMeshes; },
+      get heroMesh() { return heroMesh; },
+      get activeMOABs() { return activeMOABs; },
+      get spatialGrid() { return spatialGrid; },
+      get queryBuffer() { return queryBuffer; },
+      get bloonActive() { return bloonActive; },
+      get bloonX() { return bloonX; },
+      get bloonZ() { return bloonZ; },
+      get bloonVX() { return bloonVX; },
+      get bloonVZ() { return bloonVZ; },
+      get bloonHP() { return bloonHP; },
+      get bloonMaxHP() { return bloonMaxHP; },
+      get bloonScale() { return bloonScale; },
+      get bloonTypeKey() { return bloonTypeKey; },
+      get bloonAffix() { return bloonAffix; },
+      get bloonFreezeTimer() { return bloonFreezeTimer; },
+      get bloonBleedTimer() { return bloonBleedTimer; },
+      get blopActive() { return blopActive; },
+      get blopX() { return blopX; },
+      get blopZ() { return blopZ; },
+      get projActive() { return projActive; },
+      get projX() { return projX; },
+      get projZ() { return projZ; },
+      get projVX() { return projVX; },
+      get projVZ() { return projVZ; },
+      get projScale() { return projScale; },
+      get projInstancedMesh() { return projInstancedMesh; },
+      get MAX_BLOONS() { return MAX_BLOONS; },
+      get MAX_BLOPS() { return MAX_BLOPS; },
+      get MAX_PROJECTILES() { return MAX_PROJECTILES; },
+      get selectedHeroId() { return selectedHeroId; },
+      set selectedHeroId(v) { selectedHeroId = v; },
+      get selectedStageId() { return selectedStageId; },
+      set selectedStageId(v) { selectedStageId = v; },
+      get fpsMode() { return fpsMode; },
+      set fpsMode(v) { fpsMode = v; recalculateTargetFPS(); },
+      ProceduralAssetForge,
+      soundFX,
+      damageBloon,
+      damageMOAB,
+      spawnBloon,
+      spawnAirshipBoss,
+      spawnProjectile,
+      spawnCrescentSlash,
+      spawnGroundHazard,
+      spawnExplosionVFX,
+      spawnComicPop,
+      spawnFloatingText,
+      triggerScreenShake,
+      findNearestEnemy,
+      rebuildHeroMesh,
+      updateHeroVisuals,
+      updateCompanionVisuals,
+      updateHUD,
+      savePersistentStats,
+      syncMoneyLabels,
+      resetGame,
+      triggerGameOver,
+      openHeroUnlockModal,
+      togglePauseSettingsModal,
+      get openLevelUpModal() { return openLevelUpModal; },
+      set openLevelUpModal(fn) { openLevelUpModal = fn; },
+      get getAvailableUpgradeCards() { return getAvailableUpgradeCards; },
+      set getAvailableUpgradeCards(fn) { getAvailableUpgradeCards = fn; },
+      get updateSimulation() { return updateSimulation; },
+      set updateSimulation(fn) { updateSimulation = fn; }
+    };
+
+    requestAnimationFrame(stepFrame);
       }
     }
 
@@ -7460,7 +7520,7 @@
   </script>
 
   <!-- Non-Destructive Bloons Blitz UI Overrides -->
-  <link rel="stylesheet" href="src/bloons_ui_override.css">
-  <script src="src/bloons_ui_override.js"></script>
+  <link rel="stylesheet" href="src/bloons_update12.css">
+  <script src="src/bloons_update12.js"></script>
 </body>
 </html>
