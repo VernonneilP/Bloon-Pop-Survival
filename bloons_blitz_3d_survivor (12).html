@@ -3372,7 +3372,7 @@
       const ctx = c.getContext('2d');
 
       const palettes = {
-        meadow: { base: '#65b032', patchA: '#5ea62c', patchB: '#6cb638', tuftDark: '#49871d', tuftMid: '#539623', flowerA: '#ffffff', flowerB: '#bae6fd', flowerC: '#fde047' },
+        meadow: { base: '#488c1f', patchA: '#41801a', patchB: '#4f9624', tuftDark: '#2f6310', tuftMid: '#387314', flowerA: '#ffffff', flowerB: '#bae6fd', flowerC: '#fde047' },
         frozen: { base: '#4a8db7', patchA: '#4283ac', patchB: '#5396c0', tuftDark: '#2f668a', tuftMid: '#38759c', flowerA: '#e0f2fe', flowerB: '#bae6fd', flowerC: '#ffffff' },
         castle: { base: '#353b49', patchA: '#2f3542', patchB: '#3b4252', tuftDark: '#20242d', tuftMid: '#282d38', flowerA: '#94a3b8', flowerB: '#64748b', flowerC: '#cbd5e1' }
       };
@@ -6103,20 +6103,9 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
 
       for (let i = 0; i < MAX_BLOPS; i++) {
         blopActive[i] = 0;
-        // Hide fuzzy 3D sphere glow; render crisp 5-point cartoon star + white inner star core (matches unnamed.jpg!)
-        dummyObj.position.set(blopX[i], 0.12, blopZ[i]);
-        dummyObj.rotation.set(-Math.PI / 2, 0, tSec * 1.5 + blopPhase[i]);
-        dummyObj.scale.set(cfgOrb.scale * pulse, cfgOrb.scale * pulse, 0.25);
-        dummyObj.updateMatrix();
-        blopHaloMesh.setMatrixAt(i, dummyObj.matrix);
-        dummyObj.position.set(blopX[i], 0.16, blopZ[i]);
-        dummyObj.scale.set(cfgOrb.scale * pulse * 0.48, cfgOrb.scale * pulse * 0.48, 0.3);
-        dummyObj.updateMatrix();
-        blopCoreMesh.setMatrixAt(i, dummyObj.matrix);
-        dummyObj.position.set(0, -999, 0);
-        dummyObj.scale.set(0.001, 0.001, 0.001);
-        dummyObj.updateMatrix();
         blopGlowMesh.setMatrixAt(i, dummyObj.matrix);
+        blopHaloMesh.setMatrixAt(i, dummyObj.matrix);
+        blopCoreMesh.setMatrixAt(i, dummyObj.matrix);
       }
       blopGlowMesh.instanceMatrix.needsUpdate = true;
       blopHaloMesh.instanceMatrix.needsUpdate = true;
