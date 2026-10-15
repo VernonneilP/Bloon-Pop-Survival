@@ -6434,69 +6434,137 @@
     devShowcaseGroup.visible = false;
     G.scene.add(devShowcaseGroup);
 
-    function create2DCartoonBloonShowcaseSprite(hexCol, stripeMode) {
+    function create2DCartoonBloonShowcaseSprite(hexCol, stripeMode, itemKey) {
+      const S = 256;
       const c = document.createElement('canvas');
-      c.width = 256;
-      c.height = 300;
+      c.width = S;
+      c.height = S;
       const ctx = c.getContext('2d');
+      const imgData = ctx.createImageData(S, S);
+      const data = imgData.data;
 
-      const colStr = '#' + ('000000' + hexCol.toString(16)).slice(-6);
-      ctx.save();
-      ctx.translate(128, 132);
-      ctx.beginPath();
-      ctx.scale(0.88, 1.05);
-      ctx.arc(0, 0, 96, 0, Math.PI * 2);
-      ctx.restore();
+      const rBase = ((hexCol >> 16) & 255) / 255;
+      const gBase = ((hexCol >> 8) & 255) / 255;
+      const bBase = (hexCol & 255) / 255;
+      const k = String(itemKey || '').toUpperCase();
 
-      if (stripeMode === 'zebra') {
-        ctx.save();
-        ctx.clip();
-        for (let y = 0; y < 300; y += 28) {
-          ctx.fillStyle = (y / 28) % 2 === 0 ? '#18181b' : '#f8fafc';
-          ctx.fillRect(0, y, 256, 28);
+      const clamp = function(v, lo, hi) { return v < lo ? lo : (v > hi ? hi : v); };
+      const smoothstep = function(e0, e1, x) {
+        const t = clamp((x - e0) / (e1 - e0), 0.0, 1.0);
+        return t * t * (3.0 - 2.0 * t);
+      };
+      const mix = function(a, b, t) { return a + (b - a) * t; };
+
+      // Evaluate the EXACT GLSL fragment shader math from bloonMat on every pixel!
+      for (let py = 0; py < S; py++) {
+        const vUvY = 1.0 - (py / (S - 1));
+        for (let px = 0; px < S; px++) {
+          const vUvX = px / (S - 1);
+          const pX = (vUvX - 0.5) * 2.0;
+          const pY = (vUvY - 0.5) * 2.0 - 0.06;
+
+          const pinch = pY < 0.15 ? mix(1.0, 1.38, clamp((0.15 - pY) / 0.95, 0.0, 1.0)) : 1.0;
+          const bpX = (pX * pinch) / 0.78;
+          const bpY = (pY - 0.06) / 0.78;
+          const bodyDist = Math.hypot(bpX, bpY) - 1.0;
+
+          const kpX = pX;
+          const kpY = pY + 0.76;
+          const knotDist = Math.max(Math.abs(kpX) * 1.65 + kpY * 0.85 - 0.14, Math.abs(kpY) - 0.085);
+          const d = Math.min(bodyDist, knotDist);
+
+          if (d > 0.0) continue;
+
+          let br = rBase, bg = gBase, bb = bBase;
+
+          if (stripeMode === 'zebra' || k === 'ZEBRA') {
+            const fractVal = ((pY + 1.0) * 3.8 + pX * 1.5) - Math.floor((pY + 1.0) * 3.8 + pX * 1.5);
+            const st = fractVal >= 0.5 ? 1.0 : 0.0;
+            br = mix(0.12, 0.97, st);
+            bg = mix(0.13, 0.98, st);
+            bb = mix(0.16, 1.00, st);
+          } else if (stripeMode === 'rainbow' || k === 'RAINBOW') {
+            const tBand = Math.floor(clamp((pY + 0.72) / 1.48, 0.0, 0.999) * 6.0);
+            if (tBand === 5)      { br = 0.96; bg = 0.14; bb = 0.14; }
+            else if (tBand === 4) { br = 1.00; bg = 0.56; bb = 0.02; }
+            else if (tBand === 3) { br = 1.00; bg = 0.88; bb = 0.08; }
+            else if (tBand === 2) { br = 0.20; bg = 0.84; bb = 0.16; }
+            else if (tBand === 1) { br = 0.08; bg = 0.58; bb = 0.98; }
+            else                  { br = 0.64; bg = 0.20; bb = 0.94; }
+          } else if (k === 'CERAMIC') {
+            const crack = Math.abs(Math.sin(pX * 12.0 + Math.sin(pY * 10.0) * 2.2)) * Math.abs(Math.cos(pY * 11.0));
+            if (crack < 0.08) { br = 0.28; bg = 0.13; bb = 0.04; }
+          } else if (k === 'LEAD') {
+            const seam = smoothstep(0.055, 0.0, Math.abs(pY - 0.05));
+            br = mix(br, 0.22, seam * 0.85);
+            bg = mix(bg, 0.26, seam * 0.85);
+            bb = mix(bb, 0.32, seam * 0.85);
+          } else if (k === 'PURPLE') {
+            const purpleRim = smoothstep(-0.22, -0.09, bodyDist);
+            br = mix(br, 0.30, purpleRim * 0.78);
+            bg = mix(bg, 0.94, purpleRim * 0.78);
+            bb = mix(bb, 1.00, purpleRim * 0.78);
+          } else if (k === 'GLASS' || k === 'DIAMOND') {
+            const facet = Math.abs(Math.sin(bpX * 6.0) * Math.cos(bpY * 6.0));
+            br = mix(br, 0.88, facet * 0.55);
+            bg = mix(bg, 0.98, facet * 0.55);
+            bb = mix(bb, 1.00, facet * 0.55);
+          }
+
+          const shadeDist = Math.hypot(bpX + 0.26, bpY - 0.28);
+          const sFactor = smoothstep(0.2, 1.35, shadeDist);
+          let lr = mix(br * 1.15, br * 0.78, sFactor);
+          let lg = mix(bg * 1.15, bg * 0.78, sFactor);
+          let lb = mix(bb * 1.15, bb * 0.78, sFactor);
+
+          const hp1X = bpX + 0.34;
+          const hp1Y = bpY - 0.34;
+          const ang = -0.52;
+          const rhpX = (hp1X * Math.cos(ang) - hp1Y * Math.sin(ang)) / 0.75;
+          const rhpY = (hp1X * Math.sin(ang) + hp1Y * Math.cos(ang)) / 1.45;
+          const highlight1 = 1.0 - smoothstep(0.15, 0.20, Math.hypot(rhpX, rhpY));
+          const highlight2 = 1.0 - smoothstep(0.05, 0.08, Math.hypot(bpX + 0.46, bpY - 0.02));
+          const totalShine = clamp(highlight1 + highlight2 * 0.85, 0.0, 1.0);
+
+          lr = mix(lr, 1.0, totalShine * 0.92);
+          lg = mix(lg, 1.0, totalShine * 0.92);
+          lb = mix(lb, 1.0, totalShine * 0.92);
+
+          const outlineMask = smoothstep(-0.11, -0.075, d);
+          const fr = mix(lr, 0.09, outlineMask);
+          const fg = mix(lg, 0.04, outlineMask);
+          const fb = mix(lb, 0.01, outlineMask);
+
+          const idx = (py * S + px) * 4;
+          data[idx]     = Math.round(clamp(fr, 0, 1) * 255);
+          data[idx + 1] = Math.round(clamp(fg, 0, 1) * 255);
+          data[idx + 2] = Math.round(clamp(fb, 0, 1) * 255);
+          data[idx + 3] = 255;
         }
-        ctx.restore();
-      } else if (stripeMode === 'rainbow') {
-        ctx.save();
-        ctx.clip();
-        const rCols = ['#ef4444', '#f97316', '#facc15', '#22c55e', '#3b82f6', '#9333ea'];
-        for (let r = 0; r < 6; r++) {
-          ctx.fillStyle = rCols[r];
-          ctx.fillRect(0, 30 + r * 34, 256, 35);
-        }
-        ctx.restore();
-      } else {
-        ctx.fillStyle = colStr;
-        ctx.fill();
       }
-
-      ctx.lineWidth = 10;
-      ctx.strokeStyle = '#1a0d00';
-      ctx.stroke();
-
-      // Glossy top-left white curved shine highlight
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-      ctx.beginPath();
-      ctx.ellipse(92, 86, 16, 34, -0.45, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Bottom Tie Knot
-      ctx.fillStyle = colStr;
-      ctx.strokeStyle = '#1a0d00';
-      ctx.lineWidth = 8;
-      ctx.beginPath();
-      ctx.moveTo(114, 232);
-      ctx.lineTo(142, 232);
-      ctx.lineTo(135, 248);
-      ctx.lineTo(121, 248);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
+      ctx.putImageData(imgData, 0, 0);
 
       const tex = new THREE.CanvasTexture(c);
-      const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
-      sp.scale.set(2.1, 2.5, 1);
-      return sp;
+      tex.needsUpdate = true;
+
+      const grp = new THREE.Group();
+      const quad = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.77, 2.13),
+        new THREE.MeshBasicMaterial({ map: tex, transparent: true, alphaTest: 0.5, side: THREE.DoubleSide })
+      );
+      quad.position.y = 1.32;
+      quad.name = 'dev_bloon_quad';
+      grp.add(quad);
+
+      // Soft dark oval drop shadow on pedestal matching real in-game bloon shadow
+      const shadow = new THREE.Mesh(
+        new THREE.CircleGeometry(0.55, 20).rotateX(-Math.PI / 2),
+        new THREE.MeshBasicMaterial({ color: 0x0a1803, transparent: true, opacity: 0.35 })
+      );
+      shadow.position.y = 0.27;
+      grp.add(shadow);
+
+      return grp;
     }
 
     function createLabelSprite(title, sub) {
@@ -6591,8 +6659,8 @@
 
         let displayMesh;
         if (item.kind === 'bloon') {
-          displayMesh = create2DCartoonBloonShowcaseSprite(item.col, item.stripe);
-          displayMesh.position.y = 1.85;
+          displayMesh = create2DCartoonBloonShowcaseSprite(item.col, item.stripe, item.key);
+          displayMesh.position.y = 0.0;
         } else {
           displayMesh = buildAuthentic3DAirshipOrBoss(item.key);
           displayMesh.position.y = 0.65;
@@ -6697,6 +6765,8 @@
 
     window.exitDevShowcaseWorld = function() {
       window.__IN_DEV_SHOWCASE = false;
+      if (G.bloonInstancedMesh) G.bloonInstancedMesh.visible = true;
+      if (G.bloonOutlineInstancedMesh) G.bloonOutlineInstancedMesh.visible = true;
       devShowcaseGroup.visible = false;
       const waila = document.getElementById('dev-waila-hud');
       if (waila) waila.classList.remove('active');
@@ -6737,6 +6807,16 @@
       updateAllHeroAndCompanionEvolutions();
 
       if (window.__IN_DEV_SHOWCASE) {
+        // Clear any wild wave bloons that prevSim(dt) tried to spawn & hide instanced wave meshes!
+        if (G.bloonActive) {
+          for (let i = 0; i < G.bloonActive.length; i++) G.bloonActive[i] = 0;
+        }
+        if (G.bloonInstancedMesh) G.bloonInstancedMesh.visible = false;
+        if (G.bloonOutlineInstancedMesh) G.bloonOutlineInstancedMesh.visible = false;
+        if (G.activeMOABs && G.activeMOABs.length > 0) {
+          G.activeMOABs.forEach(function(m) { if (m.mesh) G.scene.remove(m.mesh); });
+          G.activeMOABs.length = 0;
+        }
         const bossHud = document.getElementById('boss-hud-container');
         if (bossHud) bossHud.classList.add('hidden');
         const ptr = document.getElementById('boss-screen-pointer');
@@ -6746,6 +6826,13 @@
         let minDist = 999;
         for (let i = 0; i < devExhibits.length; i++) {
           const ex = devExhibits[i];
+          if (ex.mesh && ex.kind === 'bloon' && G.camera) {
+            const qMesh = ex.mesh.getObjectByName('dev_bloon_quad');
+            if (qMesh) {
+              qMesh.quaternion.copy(G.camera.quaternion);
+              qMesh.position.y = 1.35 + Math.sin(st.elapsedTime * 3.5 + i * 0.7) * 0.08;
+            }
+          }
           if (ex.mesh && ex.kind === 'moab' && window.__DEV_SPIN_MODELS) {
             ex.mesh.rotation.y += dt * 0.65;
             if (ex.mesh.userData && ex.mesh.userData.propellers) {
