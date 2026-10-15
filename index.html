@@ -7495,6 +7495,8 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
         
     window.__GAME = {
       get scene() { return scene; },
+      get projectiles() { return typeof projectiles !== 'undefined' ? projectiles : []; },
+      get spawnProjectile() { return typeof spawnProjectile !== 'undefined' ? spawnProjectile : null; },
       get meadowMesh() { return typeof meadowMesh !== 'undefined' ? meadowMesh : null; },
       get groundMat() { return (typeof meadowMesh !== 'undefined' && meadowMesh) ? meadowMesh.material : null; },
       get envPropsGroup() { return typeof envPropsGroup !== 'undefined' ? envPropsGroup : null; },
@@ -7588,5 +7590,6 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
   <!-- Non-Destructive Bloons Blitz UI Overrides -->
   <link rel="stylesheet" href="src/bloons_update12.css">
   <script src="src/bloons_update12.js"></script>
+  <script src="src/bloons_build13_engine.js"></script>
 </body>
 </html>

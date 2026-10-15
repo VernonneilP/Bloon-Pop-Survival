@@ -826,21 +826,52 @@
 }
 
 
+
+
 /* ========================================================================
-   UPDATE 13.0: REASONABLE DESKTOP MODAL WIDTHS (MAX 760PX ON PC)
+   UPDATE 13.0: ALL PC MODALS WIDTH LIMIT (740PX) + WAILA DEV WORLD HUD
    ======================================================================== */
 @media (min-width: 769px) {
   #start-modal > div,
+  #settings-modal > div,
   #pause-modal > div,
   #build-modal > div,
+  #compendium-modal > div,
   #shop-modal > div,
   #barracks-modal > div,
   #hero-picker-modal > div,
-  #gameover-modal > div {
+  #gameover-modal > div,
+  #unlock-modal > div,
+  .fixed.inset-0 > .btd-panel {
     max-width: 740px !important;
     width: min(90vw, 740px) !important;
     margin-left: auto !important;
     margin-right: auto !important;
-    padding: 20px 24px !important;
+    padding: 18px 24px !important;
   }
+}
+
+/* WAILA (What Am I Looking At) Top-Center Inspector Card for Dev Showcase World */
+#dev-waila-hud {
+  position: fixed;
+  top: 68px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  background: linear-gradient(180deg, rgba(20, 28, 46, 0.96) 0%, rgba(11, 15, 25, 0.98) 100%);
+  border: 3px solid #38bdf8;
+  box-shadow: 0 6px 0 #082f49, 0 10px 28px rgba(0, 0, 0, 0.75);
+  border-radius: 18px;
+  padding: 10px 18px;
+  min-width: 320px;
+  max-width: min(94vw, 620px);
+  color: #f8fafc;
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: auto;
+}
+
+#dev-waila-hud.active {
+  display: flex !important;
 }
