@@ -218,6 +218,18 @@
     else if (type === 'ice') suitColor = 0x0284c7;
     else if (type === 'mortar') suitColor = 0x3f6212;
     else if (type === 'super') suitColor = 0x055ce8;
+    else if (type === 'dartling') suitColor = 0x365314;
+    else if (type === 'glue') suitColor = 0xca8a04;
+    else if (type === 'bomb') suitColor = 0x334155;
+    else if (type === 'mermonkey') suitColor = 0x0d9488;
+    else if (type === 'beasthandler') suitColor = 0x65a30d;
+    else if (type === 'desperado') suitColor = 0x78350f;
+    else if (type === 'alchemist') suitColor = 0x059669;
+    else if (type === 'druid') suitColor = 0x15803d;
+    else if (type === 'rosalia') suitColor = 0xf97316;
+    else if (type === 'corvus') suitColor = 0x312e81;
+    else if (type === 'geraldo') suitColor = 0x92400e;
+    else if (type === 'silas') suitColor = 0x0284c7;
     const suitMat = new THREE.MeshStandardMaterial({ color: suitColor, roughness: 0.4 });
 
     // 1. Head Group
@@ -402,6 +414,88 @@
         spike.rotation.z = -Math.cos(a) * 0.4;
         headGroup.add(spike);
       }
+    } else if (type === 'super') {
+      const miniCape = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.65, 0.85),
+        new THREE.MeshStandardMaterial({ color: 0xdc2626, side: THREE.DoubleSide })
+      );
+      miniCape.position.set(0, 0.65, -0.32);
+      miniCape.rotation.x = 0.35;
+      root.add(miniCape);
+      const belt = new THREE.Mesh(new THREE.TorusGeometry(0.48, 0.05, 6, 20).rotateX(Math.PI / 2), goldMat);
+      belt.position.set(0, 0.42, 0);
+      root.add(belt);
+    } else if (type === 'dartling') {
+      // Dartling Gunner: Soldier Monkey with Army Helmet & 6-Barrel Gatling Gun
+      const helmet = new THREE.Mesh(
+        new THREE.SphereGeometry(0.55, 18, 14, 0, Math.PI * 2, 0, Math.PI * 0.52),
+        new THREE.MeshStandardMaterial({ color: 0x365314, roughness: 0.55 })
+      );
+      helmet.position.set(0, 0.16, 0);
+      headGroup.add(helmet);
+
+      const rim = new THREE.Mesh(new THREE.TorusGeometry(0.54, 0.04, 6, 20).rotateX(Math.PI / 2), darkMetalMat);
+      rim.position.set(0, 0.16, 0);
+      headGroup.add(rim);
+
+      const starBadge = new THREE.Mesh(new THREE.CircleGeometry(0.08, 5), goldMat);
+      starBadge.position.set(0, 0.32, 0.52);
+      headGroup.add(starBadge);
+
+      const gatlingGroup = new THREE.Group();
+      gatlingGroup.position.set(0.18, 0.72, 0.35);
+      gatlingGroup.rotation.set(-0.22, 0.1, 0);
+
+      const gunChassis = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.18, 0.20, 0.52, 14).rotateX(Math.PI / 2),
+        darkMetalMat
+      );
+      gatlingGroup.add(gunChassis);
+
+      const ammoDrum = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.16, 0.16, 0.18, 12).rotateZ(Math.PI / 2),
+        new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.8, roughness: 0.3 })
+      );
+      ammoDrum.position.set(-0.25, 0, 0);
+      gatlingGroup.add(ammoDrum);
+
+      const ammoBelt = new THREE.Mesh(
+        new THREE.BoxGeometry(0.14, 0.08, 0.18),
+        goldMat
+      );
+      ammoBelt.position.set(-0.16, 0, 0.06);
+      gatlingGroup.add(ammoBelt);
+
+      const barrelGroup = new THREE.Group();
+      barrelGroup.position.set(0, 0, 0.26);
+      for (let b = 0; b < 6; b++) {
+        const a = (b / 6) * Math.PI * 2;
+        const barrel = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.03, 0.03, 0.85, 8).rotateX(Math.PI / 2),
+          new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.9, roughness: 0.15 })
+        );
+        barrel.position.set(Math.cos(a) * 0.11, Math.sin(a) * 0.11, 0.42);
+        barrelGroup.add(barrel);
+      }
+      const muzzleClamp = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.025, 6, 16), darkMetalMat);
+      muzzleClamp.position.set(0, 0, 0.82);
+      barrelGroup.add(muzzleClamp);
+
+      gatlingGroup.add(barrelGroup);
+      root.add(gatlingGroup);
+      root.userData.barrelGroup = barrelGroup;
+    } else if (type === 'glue') {
+      const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.7, 10), new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.4 }));
+      tank.position.set(0, 0.82, -0.32);
+      root.add(tank);
+      const hose = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.12, 0.6), new THREE.MeshStandardMaterial({ color: 0x84cc16 }));
+      hose.position.set(0.42, 0.78, 0.32);
+      root.add(hose);
+    } else if (type === 'bomb') {
+      const cannon = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.26, 0.9, 14), darkMetalMat);
+      cannon.position.set(-0.55, 0.55, 0.25);
+      cannon.rotation.x = 0.45;
+      root.add(cannon);
     } else if (type === 'dart') {
       const dart = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.55, 8).rotateX(Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xdc2626 }));
       dart.position.set(0.48, 0.85, 0.32);
@@ -575,9 +669,27 @@
     ProceduralAssetForge.createIceMesh = () => createFullMonkeyMesh('ice');
     ProceduralAssetForge.createIceSpire = () => createFullMonkeyMesh('ice');
     ProceduralAssetForge.createDartMesh = () => createFullMonkeyMesh('dart');
-    ProceduralAssetForge.createDartlingMesh = () => createFullMonkeyMesh('sniper');
-    ProceduralAssetForge.createGlueMesh = () => createFullMonkeyMesh('wizard');
-    ProceduralAssetForge.createSuperMesh = () => (ProceduralAssetForge.createMonkeyHero ? ProceduralAssetForge.createMonkeyHero('supermonkey') : createFullMonkeyMesh('super'));
+    ProceduralAssetForge.createDartlingMesh = () => createFullMonkeyMesh('dartling');
+    ProceduralAssetForge.createGlueMesh = () => createFullMonkeyMesh('glue');
+    ProceduralAssetForge.createSuperMesh = () => createFullMonkeyMesh('super');
+
+    // General companion mesh generator
+    ProceduralAssetForge.createCompanionMesh = function(type) {
+      return createFullMonkeyMesh(type);
+    };
+
+    // Hero mesh generator for all 10 heroes
+    const _origCreateMonkeyHero = ProceduralAssetForge.createMonkeyHero;
+    ProceduralAssetForge.createMonkeyHero = function(heroId = 'quincy') {
+      const hid = String(heroId).toLowerCase();
+      if (['rosalia', 'corvus', 'geraldo', 'silas'].includes(hid)) {
+        return createFullMonkeyMesh(hid);
+      }
+      try {
+        if (_origCreateMonkeyHero) return _origCreateMonkeyHero.call(ProceduralAssetForge, heroId);
+      } catch (e) {}
+      return createFullMonkeyMesh(hid);
+    };
 
     // New Companions
     ProceduralAssetForge.createMermonkeyMesh = () => createFullMonkeyMesh('mermonkey');
@@ -597,7 +709,7 @@
       const capName = 'create' + hId.charAt(0).toUpperCase() + hId.slice(1) + 'Mesh';
       if (!ProceduralAssetForge[capName]) {
         ProceduralAssetForge[capName] = function() {
-          return ProceduralAssetForge.createMonkeyHero ? ProceduralAssetForge.createMonkeyHero(hId) : createFullMonkeyMesh(hId);
+          return ProceduralAssetForge.createMonkeyHero(hId);
         };
       }
     });
@@ -713,6 +825,7 @@
       else if (lk.includes('tack')) mesh = createFullMonkeyMesh('tack');
       else if (lk.includes('mortar') || lk.includes('bomb')) mesh = createFullMonkeyMesh('mortar');
       else if (lk.includes('ice')) mesh = createFullMonkeyMesh('ice');
+      else if (lk.includes('dartling')) mesh = createFullMonkeyMesh('dartling');
       else if (lk.includes('dart')) mesh = createFullMonkeyMesh('dart');
       else if (lk.includes('mermonkey')) mesh = createFullMonkeyMesh('mermonkey');
       else if (lk.includes('beasthandler') || lk.includes('beast')) mesh = createFullMonkeyMesh('beasthandler');
@@ -791,6 +904,7 @@
       else if (lk.includes('tack')) mesh = createFullMonkeyMesh('tack');
       else if (lk.includes('mortar') || lk.includes('bomb')) mesh = createFullMonkeyMesh('mortar');
       else if (lk.includes('ice')) mesh = createFullMonkeyMesh('ice');
+      else if (lk.includes('dartling')) mesh = createFullMonkeyMesh('dartling');
       else if (lk.includes('dart')) mesh = createFullMonkeyMesh('dart');
       else if (lk.includes('mermonkey')) mesh = createFullMonkeyMesh('mermonkey');
       else if (lk.includes('beasthandler') || lk.includes('beast')) mesh = createFullMonkeyMesh('beasthandler');
@@ -2588,7 +2702,514 @@
   }
 
   // ==========================================================================
-  // 14. INITIALIZATION & TEST AUTOMATION HOOKS
+  // 14. 3D ARENA COMPANION & HERO COMBAT ENGINE (ALL 14 COMPANIONS & 10 HEROES)
+  // ==========================================================================
+  function setupSquadAndHero3DCombatEngine() {
+    const COMPANION_KEYS_14 = [
+      'super', 'tack', 'boomer', 'ninja', 'sniper', 'wizard', 'dartling', 'mortar', 'ice',
+      'mermonkey', 'beasthandler', 'desperado', 'alchemist', 'druid'
+    ];
+
+    const squadMeshesCustom = {};
+    let customOrbitAngle = 0;
+    let lastSimTimestamp = performance.now();
+    let alchemistBrewTimer = 0;
+    let desperadoCritCounter = 0;
+    let mermonkeyWhirlpoolTimer = 0;
+
+    function ensureAllSquadMeshes(scene) {
+      if (!scene || typeof gameState === 'undefined' || !gameState) return;
+
+      const targetSquad = (typeof squadMeshes !== 'undefined') ? squadMeshes : squadMeshesCustom;
+
+      COMPANION_KEYS_14.forEach(key => {
+        let mesh = targetSquad[key];
+        // If mesh is missing, or if dartling is the old primitive disembodied barrel without full monkey rig
+        if (!mesh || (key === 'dartling' && !mesh.userData.isFull3DMonkeyRig)) {
+          if (mesh && mesh.parent) mesh.parent.remove(mesh);
+          mesh = createFullMonkeyMesh(key);
+          mesh.userData.isFull3DMonkeyRig = true;
+          mesh.visible = false;
+          targetSquad[key] = mesh;
+          scene.add(mesh);
+        } else if (!mesh.parent) {
+          scene.add(mesh);
+        }
+      });
+    }
+
+    // Intercept active hero skill
+    if (typeof triggerHeroSkill === 'function') {
+      const _origTriggerHeroSkill = triggerHeroSkill;
+      triggerHeroSkill = function() {
+        if (typeof gameState === 'undefined' || !gameState || gameState.paused || gameState.gameOver) return;
+        const h = gameState.hero;
+        if (!h || h.abilityCooldown > 0) return;
+        const hid = (h.id || '').toLowerCase();
+
+        if (hid === 'rosalia') {
+          h.abilityCooldown = h.abilityCooldownMax;
+          if (typeof soundFX !== 'undefined' && soundFX.playExplosion) soundFX.playExplosion(1.4);
+          if (typeof triggerScreenShake === 'function') triggerScreenShake(0.25, 0.35);
+
+          // Cluster Missile Barrage: 10 heavy cluster explosions
+          for (let i = 0; i < 10; i++) {
+            const a = (i / 10) * Math.PI * 2;
+            const dist = 5.5 + (i % 2) * 4.5;
+            const tx = h.x + Math.sin(a) * dist;
+            const tz = h.z + Math.cos(a) * dist;
+            if (typeof spawnExplosionVFX === 'function') spawnExplosionVFX(tx, tz, 4.8);
+            if (typeof spawnComicPop === 'function') spawnComicPop(tx, 0.5, tz, 0xf97316, 2.2);
+            if (typeof spatialGrid !== 'undefined' && typeof queryBuffer !== 'undefined' && typeof damageBloon === 'function') {
+              spatialGrid.queryRadius(tx, tz, 5.0, queryBuffer);
+              for (let q = 0; q < queryBuffer.length; q++) {
+                damageBloon(queryBuffer[q], h.damage * 4.5, true, true, Math.sin(a), Math.cos(a), 3.0, false);
+              }
+            }
+          }
+          if (typeof activeMOABs !== 'undefined' && Array.isArray(activeMOABs)) {
+            activeMOABs.forEach(mb => {
+              if (Math.hypot(mb.x - h.x, mb.z - h.z) <= 18) {
+                mb.stunTimer = 1.2;
+                if (typeof damageMOAB === 'function') damageMOAB(0, h.damage * 25, true);
+              }
+            });
+          }
+          if (typeof spawnFloatingText === 'function') spawnFloatingText(h.x, 2.2, h.z, 'CLUSTER BARRAGE!', 'crit');
+          return;
+        } else if (hid === 'corvus') {
+          h.abilityCooldown = h.abilityCooldownMax;
+          if (typeof soundFX !== 'undefined' && soundFX.playExplosion) soundFX.playExplosion(1.2);
+          if (typeof triggerScreenShake === 'function') triggerScreenShake(0.2, 0.3);
+
+          // Soul Harvest: Spectral vortex ring
+          const harvestRadius = 15.0;
+          if (typeof spawnComicPop === 'function') spawnComicPop(h.x, 0.5, h.z, 0x8b5cf6, 4.5);
+          h.hp = Math.min(h.maxHp, h.hp + 35);
+          let soulsHarvested = 0;
+          if (typeof spatialGrid !== 'undefined' && typeof queryBuffer !== 'undefined' && typeof damageBloon === 'function') {
+            spatialGrid.queryRadius(h.x, h.z, harvestRadius, queryBuffer);
+            for (let q = 0; q < queryBuffer.length; q++) {
+              const bIdx = queryBuffer[q];
+              if (typeof bloonActive !== 'undefined' && bloonActive[bIdx] === 1) {
+                soulsHarvested++;
+                damageBloon(bIdx, h.damage * 5.0, true, true, 0, 0, 1.2, false);
+              }
+            }
+          }
+          if (typeof activeMOABs !== 'undefined' && Array.isArray(activeMOABs)) {
+            activeMOABs.forEach(mb => {
+              if (Math.hypot(mb.x - h.x, mb.z - h.z) <= harvestRadius) {
+                if (typeof damageMOAB === 'function') damageMOAB(0, h.damage * 28, true);
+              }
+            });
+          }
+          if (typeof spawnFloatingText === 'function') spawnFloatingText(h.x, 2.2, h.z, `SOUL HARVEST! (+${soulsHarvested})`, 'heal');
+          return;
+        } else if (hid === 'geraldo') {
+          h.abilityCooldown = h.abilityCooldownMax;
+          if (typeof soundFX !== 'undefined' && soundFX.playExplosion) soundFX.playExplosion(1.0);
+          if (typeof spawnGroundHazard === 'function') spawnGroundHazard(h.x, h.z, 'bramble', h.damage * 3.5, true);
+          if (typeof spawnExplosionVFX === 'function') spawnExplosionVFX(h.x, h.z, 6.0);
+          const mmReward = Math.round(35 * ((typeof stageCfg !== 'undefined' && stageCfg.moneyMult) ? stageCfg.moneyMult : 1));
+          if (typeof persistentStats !== 'undefined') {
+            persistentStats.monkeyMoney = (persistentStats.monkeyMoney || 0) + mmReward;
+            if (typeof savePersistentStats === 'function') savePersistentStats();
+          }
+          if (typeof syncMoneyLabels === 'function') syncMoneyLabels();
+          if (typeof spawnFloatingText === 'function') spawnFloatingText(h.x, 2.2, h.z, `FERTILITY TOTEM! +$${mmReward}`, 'heal');
+          return;
+        } else if (hid === 'silas') {
+          h.abilityCooldown = h.abilityCooldownMax;
+          if (typeof soundFX !== 'undefined' && soundFX.playExplosion) soundFX.playExplosion(1.3);
+          if (typeof triggerScreenShake === 'function') triggerScreenShake(0.25, 0.4);
+
+          // Glacial Blizzard: Screen-wide freeze
+          if (typeof spawnComicPop === 'function') spawnComicPop(h.x, 0.5, h.z, 0x38bdf8, 6.0);
+          if (typeof bloonActive !== 'undefined' && typeof bloonX !== 'undefined' && typeof bloonZ !== 'undefined' && typeof bloonFreezeTimer !== 'undefined') {
+            for (let i = 0; i < (typeof MAX_BLOONS !== 'undefined' ? MAX_BLOONS : 1000); i++) {
+              if (bloonActive[i] === 1 && Math.hypot(bloonX[i] - h.x, bloonZ[i] - h.z) <= 32) {
+                bloonFreezeTimer[i] = 4.0;
+                if (typeof damageBloon === 'function') damageBloon(i, h.damage * 4.0, true, true, 0, 0, 0.1, false);
+              }
+            }
+          }
+          if (typeof activeMOABs !== 'undefined' && Array.isArray(activeMOABs)) {
+            activeMOABs.forEach(mb => {
+              mb.stunTimer = 2.0;
+              if (typeof damageMOAB === 'function') damageMOAB(0, h.damage * 30, true);
+            });
+          }
+          if (typeof spawnFloatingText === 'function') spawnFloatingText(h.x, 2.2, h.z, 'GLACIAL BLIZZARD!', 'crit');
+          return;
+        }
+
+        _origTriggerHeroSkill();
+      };
+    }
+
+    // Step Frame simulation loop for companions and heroes
+    function stepSquadAndHeroSimulation(dt, scene) {
+      if (!scene || typeof gameState === 'undefined' || !gameState) return;
+      if (gameState.paused || gameState.gameOver || gameState.inStartMenu) return;
+      const h = gameState.hero;
+      if (!h) return;
+
+      const targetSquad = (typeof squadMeshes !== 'undefined') ? squadMeshes : squadMeshesCustom;
+      const benSquadSpeedMult = (h.id === 'benjamin' ? 1.25 + (h.explosiveTier || 0) * 0.12 : 1.0) * (gameState.overclockTimer > 0 ? 1.4 : 1.0);
+      const heroCanDetectCamo = h.canSeeCamo || (h.id === 'quincy' && h.level >= 3) || (gameState.squad && ((gameState.squad.ninja && gameState.squad.ninja.level > 0) || (gameState.squad.wizard && gameState.squad.wizard.level >= 3) || (gameState.squad.ice && gameState.squad.ice.level >= 3)));
+
+      customOrbitAngle += dt * 1.15;
+
+      const recruited = (gameState.recruitedOrder || []).filter(k => gameState.squad && gameState.squad[k] && gameState.squad[k].level > 0);
+      const totalRecruited = recruited.length;
+
+      // 1. Position all recruited companions in an evenly spaced tactical escort formation
+      recruited.forEach((k, idx) => {
+        const mesh = targetSquad[k];
+        if (!mesh) return;
+        mesh.visible = true;
+
+        const offsetA = (idx / Math.max(1, totalRecruited)) * Math.PI * 2;
+        const a = customOrbitAngle + offsetA;
+        const orbitRadius = 3.1;
+        const tx = h.x + Math.cos(a) * orbitRadius;
+        const tz = h.z + Math.sin(a) * orbitRadius;
+        const bobY = Math.abs(Math.sin((gameState.heroWalkPhase || 0) + idx * 1.3)) * 0.12;
+
+        mesh.position.set(tx, bobY, tz);
+
+        // Gatling barrel rotation if Dartling
+        if (k === 'dartling' && mesh.userData && mesh.userData.barrelGroup) {
+          mesh.userData.barrelGroup.rotation.z += dt * 16;
+        }
+      });
+
+      // 2. Hide any unrecruited companions
+      COMPANION_KEYS_14.forEach(k => {
+        if (!recruited.includes(k) && targetSquad[k]) {
+          targetSquad[k].visible = false;
+        }
+      });
+
+      // 3. Combat Loop for the 5 Expansion Companions
+
+      // (A) MERMONKEY
+      if (gameState.squad && gameState.squad.mermonkey && gameState.squad.mermonkey.level > 0) {
+        const comp = gameState.squad.mermonkey;
+        const mesh = targetSquad.mermonkey;
+        if (mesh) {
+          comp.cooldown = (comp.cooldown || 0) - dt * benSquadSpeedMult;
+          if (comp.cooldown <= 0) {
+            comp.cooldown = Math.max(0.38, 1.15 - (comp.level - 1) * 0.20);
+            const target = (typeof findNearestEnemy === 'function') ? findNearestEnemy(mesh.position.x, mesh.position.z, 24, true) : null;
+            if (target) {
+              const aimA = Math.atan2(target.x - mesh.position.x, target.z - mesh.position.z);
+              mesh.rotation.y = aimA;
+              const count = comp.level >= 3 ? 3 : 1;
+              const pierce = 3 + comp.level * 2;
+              const dmg = 2.0 + comp.level * 0.8;
+              if (typeof spawnProjectile === 'function') {
+                for (let i = 0; i < count; i++) {
+                  const spread = count === 1 ? 0 : (i - (count - 1) * 0.5) * 0.18;
+                  const finalA = aimA + spread;
+                  spawnProjectile({
+                    x: mesh.position.x, z: mesh.position.z,
+                    vx: Math.sin(finalA) * 24, vz: Math.cos(finalA) * 24,
+                    life: 1.1, pierce: pierce, damage: dmg,
+                    scale: 1.35, colorHex: 0x06b6d4, canPopLead: true,
+                    isEnergy: true
+                  });
+                }
+              }
+              if (typeof soundFX !== 'undefined' && soundFX.playPop) soundFX.playPop(false, 'BLUE', 1);
+
+              // Whirlpool ring under bloon clusters (Level 2+)
+              if (comp.level >= 2) {
+                mermonkeyWhirlpoolTimer -= dt;
+                if (mermonkeyWhirlpoolTimer <= 0) {
+                  mermonkeyWhirlpoolTimer = 2.4;
+                  if (typeof spawnComicPop === 'function') spawnComicPop(target.x, 0.4, target.z, 0x06b6d4, 3.2);
+                  if (typeof spatialGrid !== 'undefined' && typeof queryBuffer !== 'undefined' && typeof damageBloon === 'function') {
+                    spatialGrid.queryRadius(target.x, target.z, 4.5, queryBuffer);
+                    for (let q = 0; q < queryBuffer.length; q++) {
+                      const bIdx = queryBuffer[q];
+                      if (typeof bloonFreezeTimer !== 'undefined') bloonFreezeTimer[bIdx] = 0.6;
+                      damageBloon(bIdx, comp.level * 1.5, true, false, 0, 0, 0.2, true);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // (B) ALCHEMIST
+      if (gameState.squad && gameState.squad.alchemist && gameState.squad.alchemist.level > 0) {
+        const comp = gameState.squad.alchemist;
+        const mesh = targetSquad.alchemist;
+        if (mesh) {
+          comp.cooldown = (comp.cooldown || 0) - dt * benSquadSpeedMult;
+          if (comp.cooldown <= 0) {
+            comp.cooldown = Math.max(0.75, 1.85 - (comp.level - 1) * 0.32);
+            const target = (typeof findNearestEnemy === 'function') ? findNearestEnemy(mesh.position.x, mesh.position.z, 22, true) : null;
+            if (target) {
+              const aimA = Math.atan2(target.x - mesh.position.x, target.z - mesh.position.z);
+              mesh.rotation.y = aimA;
+              if (typeof soundFX !== 'undefined' && soundFX.playExplosion) soundFX.playExplosion(0.85);
+              if (typeof spawnExplosionVFX === 'function') spawnExplosionVFX(target.x, target.z, 3.8);
+              if (typeof spawnComicPop === 'function') spawnComicPop(target.x, 0.6, target.z, 0x10b981, 2.0);
+              if (typeof spawnGroundHazard === 'function') spawnGroundHazard(target.x, target.z, 'fire', comp.level * 2.2, true);
+
+              if (typeof spatialGrid !== 'undefined' && typeof queryBuffer !== 'undefined' && typeof damageBloon === 'function') {
+                spatialGrid.queryRadius(target.x, target.z, 4.0, queryBuffer);
+                for (let q = 0; q < queryBuffer.length; q++) {
+                  damageBloon(queryBuffer[q], comp.level * 3.5, true, true, 0, 0, 1.0, false);
+                }
+              }
+              if (typeof activeMOABs !== 'undefined' && Array.isArray(activeMOABs)) {
+                activeMOABs.forEach(mb => {
+                  if (Math.hypot(mb.x - target.x, mb.z - target.z) <= 5.5) {
+                    if (typeof damageMOAB === 'function') damageMOAB(0, comp.level * 18, true);
+                  }
+                });
+              }
+            }
+          }
+
+          // Berserker Brew Aura (Level 3+)
+          if (comp.level >= 3) {
+            alchemistBrewTimer -= dt;
+            if (alchemistBrewTimer <= 0) {
+              alchemistBrewTimer = 5.0;
+              gameState.overclockTimer = Math.max(gameState.overclockTimer || 0, 4.0);
+              if (typeof spawnComicPop === 'function') spawnComicPop(h.x, 0.5, h.z, 0xf97316, 2.5);
+              if (typeof spawnFloatingText === 'function') spawnFloatingText(h.x, 2.0, h.z, 'BERSERKER BREW! +35% SPD', 'heal');
+            }
+          }
+        }
+      }
+
+      // (C) BEAST HANDLER
+      if (gameState.squad && gameState.squad.beasthandler && gameState.squad.beasthandler.level > 0) {
+        const comp = gameState.squad.beasthandler;
+        const mesh = targetSquad.beasthandler;
+        if (mesh) {
+          comp.cooldown = (comp.cooldown || 0) - dt * benSquadSpeedMult;
+          if (comp.cooldown <= 0) {
+            comp.cooldown = Math.max(0.65, 1.6 - (comp.level - 1) * 0.25);
+            let targetX = 0, targetZ = 0, hasTarget = false, isMoab = false;
+            if (typeof activeMOABs !== 'undefined' && activeMOABs.length > 0) {
+              targetX = activeMOABs[0].x;
+              targetZ = activeMOABs[0].z;
+              hasTarget = true;
+              isMoab = true;
+              activeMOABs[0].stunTimer = 0.8;
+              if (typeof damageMOAB === 'function') damageMOAB(0, comp.level * 24, true);
+            } else if (typeof findNearestEnemy === 'function') {
+              const enemy = findNearestEnemy(mesh.position.x, mesh.position.z, 22, true);
+              if (enemy) {
+                targetX = enemy.x;
+                targetZ = enemy.z;
+                hasTarget = true;
+              }
+            }
+            if (hasTarget) {
+              const aimA = Math.atan2(targetX - mesh.position.x, targetZ - mesh.position.z);
+              mesh.rotation.y = aimA;
+              if (typeof spawnCrescentSlash === 'function') {
+                spawnCrescentSlash({
+                  x: targetX, z: targetZ, vx: 0, vz: 0,
+                  angle: Math.random() * Math.PI, life: 0.28, scale: 1.5,
+                  pierce: 8, damage: comp.level * 4.5, canPopLead: true, colorHex: 0x84cc16
+                });
+              }
+              if (typeof spawnComicPop === 'function') spawnComicPop(targetX, 0.8, targetZ, 0x84cc16, 1.6);
+              if (typeof soundFX !== 'undefined' && soundFX.playPop) soundFX.playPop(true, 'RED', 2);
+              if (typeof spatialGrid !== 'undefined' && typeof queryBuffer !== 'undefined' && typeof damageBloon === 'function') {
+                spatialGrid.queryRadius(targetX, targetZ, 3.2, queryBuffer);
+                for (let q = 0; q < queryBuffer.length; q++) {
+                  const bIdx = queryBuffer[q];
+                  if (typeof bloonBleedTimer !== 'undefined') bloonBleedTimer[bIdx] = 4.5;
+                  damageBloon(bIdx, comp.level * 3.0, true, true, 0, 0, 1.2, false);
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // (D) DESPERADO
+      if (gameState.squad && gameState.squad.desperado && gameState.squad.desperado.level > 0) {
+        const comp = gameState.squad.desperado;
+        const mesh = targetSquad.desperado;
+        if (mesh) {
+          comp.cooldown = (comp.cooldown || 0) - dt * benSquadSpeedMult;
+          if (comp.cooldown <= 0) {
+            comp.cooldown = Math.max(0.28, 0.65 - (comp.level - 1) * 0.1);
+            const target = (typeof findNearestEnemy === 'function') ? findNearestEnemy(mesh.position.x, mesh.position.z, 26, true) : null;
+            if (target) {
+              const aimA = Math.atan2(target.x - mesh.position.x, target.z - mesh.position.z);
+              mesh.rotation.y = aimA;
+              desperadoCritCounter++;
+              const isCrit = (desperadoCritCounter % 3 === 0);
+              const dmg = isCrit ? (comp.level * 12) : (comp.level * 4.5);
+
+              if (typeof soundFX !== 'undefined' && soundFX.playSniperShot) soundFX.playSniperShot();
+              if (typeof spawnComicPop === 'function') {
+                spawnComicPop(mesh.position.x + Math.sin(aimA) * 0.8, 0.8, mesh.position.z + Math.cos(aimA) * 0.8, 0xfacc15, 0.7);
+                spawnComicPop(target.x, 1.0, target.z, isCrit ? 0xef4444 : 0xffffff, isCrit ? 1.4 : 0.9);
+              }
+              if (typeof spawnSniperBulletTracer === 'function') {
+                spawnSniperBulletTracer(mesh.position.x, 0.8, mesh.position.z, target.x, 1.0, target.z);
+              }
+              if (target.isMoab) {
+                if (typeof damageMOAB === 'function') damageMOAB(0, dmg * 2, true);
+              } else if (typeof damageBloon === 'function') {
+                damageBloon(target.index, dmg, true, isCrit, Math.sin(aimA), Math.cos(aimA), 2.5, false);
+              }
+              if (typeof spawnFloatingText === 'function') {
+                spawnFloatingText(target.x, 1.8, target.z, isCrit ? `CRACK! ${dmg}` : `${dmg}`, isCrit ? 'crit' : 'normal');
+              }
+            }
+          }
+        }
+      }
+
+      // (E) DRUID
+      if (gameState.squad && gameState.squad.druid && gameState.squad.druid.level > 0) {
+        const comp = gameState.squad.druid;
+        const mesh = targetSquad.druid;
+        if (mesh) {
+          comp.cooldown = (comp.cooldown || 0) - dt * benSquadSpeedMult;
+          if (comp.cooldown <= 0) {
+            comp.cooldown = Math.max(0.42, 1.2 - (comp.level - 1) * 0.18);
+            const target = (typeof findNearestEnemy === 'function') ? findNearestEnemy(mesh.position.x, mesh.position.z, 22, true) : null;
+            if (target) {
+              const aimA = Math.atan2(target.x - mesh.position.x, target.z - mesh.position.z);
+              mesh.rotation.y = aimA;
+              // 1. Thorn Spread (fan of 5 wooden thorns)
+              if (typeof spawnProjectile === 'function') {
+                for (let s = 0; s < 5; s++) {
+                  const thornA = aimA + (s - 2) * 0.12;
+                  spawnProjectile({
+                    x: mesh.position.x, z: mesh.position.z,
+                    vx: Math.sin(thornA) * 22, vz: Math.cos(thornA) * 22,
+                    life: 1.0, pierce: 2 + comp.level, damage: 1.5 + comp.level * 0.5,
+                    scale: 1.1, colorHex: 0x78350f, canPopLead: comp.level >= 3
+                  });
+                }
+              }
+
+              // 2. Chain-Lightning Bolts (Level 2+)
+              if (comp.level >= 2 && typeof spatialGrid !== 'undefined' && typeof queryBuffer !== 'undefined' && typeof damageBloon === 'function') {
+                spatialGrid.queryRadius(target.x, target.z, 8.0, queryBuffer);
+                const maxZaps = Math.min(6, queryBuffer.length);
+                for (let z = 0; z < maxZaps; z++) {
+                  const bIdx = queryBuffer[z];
+                  if (typeof bloonActive !== 'undefined' && bloonActive[bIdx] === 1) {
+                    if (typeof spawnComicPop === 'function') spawnComicPop(bloonX[bIdx], 1.0, bloonZ[bIdx], 0x22d3ee, 1.2);
+                    damageBloon(bIdx, comp.level * 2.5, true, false, 0, 0, 0.5, true);
+                  }
+                }
+                if (typeof soundFX !== 'undefined' && soundFX.playPop) soundFX.playPop(false, 'WHITE', 1);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Hook WebGLRenderer render for frame simulation and HUD post-processing
+    if (typeof THREE !== 'undefined' && THREE.WebGLRenderer) {
+      const _origRender = THREE.WebGLRenderer.prototype.render;
+      THREE.WebGLRenderer.prototype.render = function(s, c) {
+        if (s && s.isScene) {
+          try {
+            ensureAllSquadMeshes(s);
+            const now = performance.now();
+            const dt = Math.min(0.05, Math.max(0.001, (now - lastSimTimestamp) / 1000));
+            lastSimTimestamp = now;
+            stepSquadAndHeroSimulation(dt, s);
+          } catch (e) {
+            console.warn("Combat hook simulation tick caught:", e);
+          }
+        }
+        return _origRender.apply(this, arguments);
+      };
+    }
+
+    // Post-process Bottom-Left Squad HUD & Ability Icon
+    function postProcessSquadHUD() {
+      if (typeof gameState === 'undefined' || !gameState) return;
+
+      // 1. Squad Slots (active-slot-0, active-slot-1, active-slot-2)
+      for (let s = 0; s < 3; s++) {
+        const slotEl = document.getElementById(`active-slot-${s}`);
+        if (!slotEl) continue;
+        const compKey = gameState.recruitedOrder ? gameState.recruitedOrder[s] : null;
+        if (compKey && gameState.squad && gameState.squad[compKey] && gameState.squad[compKey].level > 0) {
+          const lvl = gameState.squad[compKey].level;
+          const def = (typeof COMPANION_CATALOG !== 'undefined') ? COMPANION_CATALOG.find(c => c.key === compKey) : null;
+          const sName = def ? def.shortName : compKey.toUpperCase();
+          const portraitImg = safeGet3DHeadSnapshot(compKey) || safeGet3DModelSnapshot(compKey);
+
+          slotEl.className = 'w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-stone-900/95 border-2 border-yellow-400 shadow-lg flex flex-col items-center justify-center transition-all overflow-hidden';
+          slotEl.innerHTML = `
+            <div class="relative w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center shrink-0">
+              <img src="${portraitImg}" class="squad-slot-3d-img" alt="${compKey}">
+            </div>
+            <span class="font-btd-sm text-[9px] text-amber-300 mt-0.5 font-bold tracking-tight">${sName} T${lvl}</span>
+          `;
+        } else {
+          slotEl.className = 'w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-stone-900/80 border-2 border-stone-700 flex flex-col items-center justify-center opacity-55 transition-all';
+          slotEl.innerHTML = `
+            <svg class="w-5 h-5 text-stone-400 mb-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+            </svg>
+            <span class="font-btd-sm text-[8px] text-stone-400 font-bold">SLOT ${s + 1}</span>
+          `;
+        }
+      }
+
+      // 2. Ability Button Icon (#ability-icon)
+      const abIcon = document.getElementById('ability-icon');
+      if (abIcon && gameState.hero && gameState.hero.id) {
+        const hid = gameState.hero.id;
+        const heroSnap = safeGet3DModelSnapshot(hid);
+        if (heroSnap && (!abIcon.firstChild || abIcon.firstChild.tagName !== 'IMG' || abIcon.dataset.hero !== hid)) {
+          abIcon.dataset.hero = hid;
+          abIcon.innerHTML = `<img src="${heroSnap}" class="ability-icon-3d" alt="${hid}">`;
+        }
+      }
+
+      // 3. Inspect Build Button (#btn-hud-build)
+      const btnBuild = document.getElementById('btn-hud-build');
+      if (btnBuild && btnBuild.textContent && btnBuild.textContent.includes('📜')) {
+        btnBuild.innerHTML = `
+          <svg class="w-6 h-6 text-yellow-300 hover:text-white" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+          </svg>
+        `;
+      }
+    }
+
+    // Intercept updateHUD to post-process 3D icons
+    if (typeof updateHUD === 'function') {
+      const _origUpdateHUD = updateHUD;
+      updateHUD = function() {
+        _origUpdateHUD();
+        try {
+          postProcessSquadHUD();
+        } catch (e) {}
+      };
+    }
+    setInterval(postProcessSquadHUD, 200);
+  }
+
+  // ==========================================================================
+  // 15. INITIALIZATION & TEST AUTOMATION HOOKS
   // ==========================================================================
   function init() {
     if (typeof THREE !== 'undefined' && THREE.WebGLRenderer && !THREE.WebGLRenderer.prototype.__origRender) {
@@ -2616,6 +3237,7 @@
     setupEscapeKeyHandler();
     setupMatrixGreenTextObserver();
     initBenjaminWirelessHack();
+    setupSquadAndHero3DCombatEngine();
 
     ensureSquadInitialized();
     setInterval(ensureSquadInitialized, 500);
