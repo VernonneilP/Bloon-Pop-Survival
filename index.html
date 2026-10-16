@@ -6363,6 +6363,7 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
 
       // 4. Hero Primary Attacks
       const heroCanDetectCamo = h.canSeeCamo || (h.id === 'quincy' && h.level >= 3) || gameState.squad.ninja.level > 0 || gameState.squad.wizard.level >= 3 || gameState.squad.ice.level >= 3;
+      window.__B13_CTX = 'hero';
       h.fireCooldown -= dt * (gameState.overclockTimer > 0 ? 1.5 : 1.0);
 
       if (h.fireCooldown <= 0) {
@@ -6457,6 +6458,7 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
         hd.rightArmGroup.rotation.x = THREE.MathUtils.lerp(hd.rightArmGroup.rotation.x, -1.35, dt * 12);
       }
 
+      window.__B13_CTX = null;
       for (let i = 0; i < MAX_SLASHES; i++) {
         if (slashActive[i] === 0) continue;
         slashLife[i] -= dt;
@@ -6532,6 +6534,7 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
       squadOrbitAngle += dt * 1.15;
       const benSquadSpeedMult = (h.id === 'benjamin' ? 1.25 + h.explosiveTier * 0.12 : 1.0) * (gameState.overclockTimer > 0 ? 1.4 : 1.0);
 
+      window.__B13_CTX = 'super';
       if (gameState.squad.super.level > 0) {
         const sup = gameState.squad.super;
         const sx = h.x + Math.cos(squadOrbitAngle) * 3.1;
@@ -6559,6 +6562,7 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
         }
       }
 
+      window.__B13_CTX = 'tack';
       if (gameState.squad.tack.level > 0) {
         const tk = gameState.squad.tack;
         const tx = h.x + Math.cos(squadOrbitAngle + (Math.PI * 2) / 7) * 2.9;
@@ -6581,6 +6585,7 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
         }
       }
 
+      window.__B13_CTX = 'boomer';
       if (gameState.squad.boomer.level > 0) {
         const bm = gameState.squad.boomer;
         const bx = h.x + Math.cos(squadOrbitAngle + (Math.PI * 4) / 7) * 3.2;
@@ -6603,6 +6608,7 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
         }
       }
 
+      window.__B13_CTX = 'ninja';
       if (gameState.squad.ninja.level > 0) {
         const nj = gameState.squad.ninja;
         const nx = h.x + Math.cos(squadOrbitAngle + (Math.PI * 6) / 7) * 3.1;
@@ -6628,6 +6634,7 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
         }
       }
 
+      window.__B13_CTX = 'sniper';
       if (gameState.squad.sniper.level > 0) {
         const sn = gameState.squad.sniper;
         const sx = h.x + Math.cos(squadOrbitAngle + (Math.PI * 8) / 7) * 2.8;
@@ -6680,6 +6687,7 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
         }
       }
 
+      window.__B13_CTX = 'wizard';
       if (gameState.squad.wizard.level > 0) {
         const wiz = gameState.squad.wizard;
         const wx = h.x + Math.cos(squadOrbitAngle + (Math.PI * 10) / 7) * 3.4;
@@ -6717,6 +6725,7 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
         }
       }
 
+      window.__B13_CTX = 'dartling';
       if (gameState.squad.dartling.level > 0) {
         const dart = gameState.squad.dartling;
         const dxPos = h.x + Math.cos(squadOrbitAngle + (Math.PI * 12) / 7) * 3.2;
@@ -6742,6 +6751,7 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
         }
       }
 
+      window.__B13_CTX = 'mortar';
       if (gameState.squad.mortar.level > 0) {
         const mort = gameState.squad.mortar;
         const mxPos = h.x + Math.cos(squadOrbitAngle + Math.PI * 0.5) * 3.5;
@@ -6780,6 +6790,7 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
         }
       }
 
+      window.__B13_CTX = 'ice';
       if (gameState.squad.ice.level > 0) {
         const ice = gameState.squad.ice;
         const ixPos = h.x + Math.cos(squadOrbitAngle + Math.PI * 1.5) * 3.2;
@@ -6876,6 +6887,7 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
         }
       }
 
+      window.__B13_CTX = null;
       for (let i = 0; i < MAX_PROJECTILES; i++) {
         if (projActive[i] === 0) continue;
         projLife[i] -= dt;
@@ -7492,7 +7504,11 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
       if (hzCalibrated && targetFPS > detectedMonitorHz + 5) {
         setTimeout(() => stepFrame(performance.now()), 1000 / targetFPS);
       } else {
-        
+        requestAnimationFrame(stepFrame);
+      }
+    }
+
+    // Bridge created ONCE (was being rebuilt inside stepFrame every frame)
     window.__GAME = {
       get scene() { return scene; },
       get projectiles() { return typeof projectiles !== 'undefined' ? projectiles : []; },
@@ -7583,10 +7599,6 @@ const bloonInstancedMesh = new THREE.InstancedMesh(bloonGeo, bloonMat, MAX_BLOON
       get updateSimulation() { return updateSimulation; },
       set updateSimulation(fn) { updateSimulation = fn; }
     };
-
-    requestAnimationFrame(stepFrame);
-      }
-    }
 
     requestAnimationFrame(stepFrame);
   </script>
